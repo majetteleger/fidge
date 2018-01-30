@@ -1,0 +1,145 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1a44d4a91cfb8d4e844e48f246a1b25, type: 3}
+  m_Name: 2-Revealed Level 2
+  m_EditorClassIdentifier: 
+  Scripted: 0
+  AllowedEndNodeBypasses: 0
+  Desription: 
+  Author: Marc-Antoine
+  ExpectedTime: 5
+  ExpectedMoves: 15
+  TraversalScript: 020000000200000001000000020000000300000002000000
+  Shifted: 0
+  Index: 37
+  NumberOfSolutions: 20
+  MinimumMoves: 18
+  MinimumMovesWithFlag: 22
+  StartNode: {x: 2, y: 4}
+  EndNode: {x: 4, y: 8}
+  Elements:
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - (P)(H)
+  - (N)
+  - (P)(H)
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)
+  - (N)
+  - (P)(V)(S)(DU)
+  - 
+  - (P)(V)(W)
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - 
+  - (N)
+  - (P)(H)
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - (TSR)
+  - (N)R(LK)(CB)(TSR)
+  - (P)(V)(TSR)
+  - (N)R(K)(CR)(TSR)
+  - (TSR)
+  - 
+  - 
+  - 
+  - 
+  - (N)(TSR)
+  - (P)(V)(TSR)
+  - (N)(LK)(CR)(TSR)
+  - (P)(V)(TSR)
+  - (N)(TSR)
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)(C)(TSR)
+  - (N)(TSR)
+  - (P)(H)(W)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - 
+  - 
+  - 
+  - 
+  - (N)(TSR)
+  - (P)(V)(L)(CR)(TSR)
+  - (N)(TSR)
+  - (P)(V)(TSR)
+  - (N)(TSR)
+  - 
+  - 
+  - 
+  - 
+  - (TSR)
+  - (N)(F)(TSR)
+  - (P)(V)(L)(CG)(TSR)
+  - (N)(LK)(CR)(TSR)
+  - (TSR)
+  - 
+  - 
+  - 
+  - 
+  - (N)(K)(CG)
+  - (P)(H)
+  - (N)(LK)(CB)
+  - (P)(H)
+  - (N)(K)(CG)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 

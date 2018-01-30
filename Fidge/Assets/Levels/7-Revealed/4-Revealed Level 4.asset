@@ -1,0 +1,145 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1a44d4a91cfb8d4e844e48f246a1b25, type: 3}
+  m_Name: 4-Revealed Level 4
+  m_EditorClassIdentifier: 
+  Scripted: 0
+  AllowedEndNodeBypasses: 0
+  Desription: 
+  Author: Marc-Antoine
+  ExpectedTime: 5
+  ExpectedMoves: 15
+  TraversalScript: 020000000200000001000000020000000300000002000000
+  Shifted: 0
+  Index: 39
+  NumberOfSolutions: 1020
+  MinimumMoves: 24
+  MinimumMovesWithFlag: 32
+  StartNode: {x: 4, y: 6}
+  EndNode: {x: 8, y: 10}
+  Elements:
+  - (N)(TSR)
+  - (P)(H)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)(K)(CB)(TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(H)(W)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)(F)(TSR)
+  - (P)(H)(C)(TSR)
+  - (N)(TSR)
+  - (P)(V)(W)(TSR)
+  - (TSR)
+  - (P)(V)(S)(DU)(TSR)
+  - (N)(LK)(CR)(TSR)
+  - (P)(V)(TSR)
+  - (TSR)
+  - (P)(V)(C)(TSR)
+  - (N)(TSR)
+  - (P)(V)(C)(TSR)
+  - (N)(TSR)
+  - (P)(H)(W)(TSR)
+  - (N)(TSR)
+  - (P)(V)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(H)(C)(TSR)
+  - (N)(LK)(CG)(TSR)
+  - (P)(V)(TSR)
+  - (TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(V)(S)(DD)(TSR)
+  - (N)(K)(CR)(TSR)
+  - (P)(H)(C)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)
+  - (P)(H)(W)(TSR)
+  - (N)(TSR)
+  - (P)(H)(TSR)
+  - (N)(TSR)
+  - (P)(V)(S)(DD)(TSR)
+  - (TSR)
+  - (P)(V)(TSR)R
+  - 
+  - (P)(V)
+  - (N)
+  - (TSR)
+  - (TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(H)(S)(DR)(TSR)
+  - (N)
+  - (P)(H)
+  - (N)
+  - (P)(H)
+  - (N)
+  - (P)(H)(S)(DL)(TSR)
+  - (N)(LK)(CG)(TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)
+  - (P)(V)
+  - 
+  - (P)(V)(L)(CR)(TSR)
+  - (TSR)
+  - (P)(V)(C)(TSR)
+  - (TSR)
+  - (P)(V)(W)(TSR)
+  - (N)(LK)(CC)(TSR)
+  - (P)(H)(TSR)
+  - (N)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(H)(L)(CB)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(H)(TSR)
+  - (N)(TSR)
+  - (P)(V)(S)(DD)(TSR)
+  - (N)(LK)(CR)(TSR)
+  - (P)(H)(S)(DR)(TSR)
+  - (N)(TSR)
+  - (P)(V)(L)(CM)(TSR)
+  - (N)(TSR)
+  - (P)(V)(W)(TSR)
+  - (N)(LK)(CC)(TSR)
+  - (P)(H)(TSR)
+  - (N)(TSR)
+  - (P)(H)(TSR)
+  - (N)(TSR)
+  - (P)(V)(TSR)
+  - (N)(TSR)
+  - (P)(V)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (TSR)
+  - (P)(V)(TSR)
+  - (N)(TSR)
+  - (P)(H)(C)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(H)(S)(DR)(TSR)
+  - (N)(TSR)
+  - (TSR)
+  - (N)(K)(CM)(TSR)
+  - (TSR)
+  - (N)(TSR)
+  - (P)(H)(TSR)
+  - (N)(TSR)

@@ -1,0 +1,136 @@
+
+- Tasks -
+
+- Credits screen
+
+- SOUND
+	- Button Click
+	- Panel change/show
+	- Traversal input
+	- Go
+	- Player move
+	- Level failed
+	- Level cleared
+	- Interactions with the obstacles
+		- Slide
+		- Crack
+		- Wall
+		- Lock
+		- Covered
+	- Interactions with the collectables
+		- Key
+		- Flag
+		- Link
+	- Menu music
+	- Level music
+- VISUAL EFFECTS / ANIMATION
+	- Button Click
+	- Panel change/show
+	- Traversal input
+	- Go
+	- Player move
+	- Level failed
+	- Level cleared
+	- Interactions with the obstacles
+		- Slide
+		- Crack
+		- Wall
+		- Lock
+		- Covered
+	- Interactions with the collectables
+		- Key
+		- Flag
+		- Link
+- GRAPHICS
+	- Obstacles
+		- Slide
+		- Crack
+		- Wall
+		- Lock
+		- Covered
+		- Revealed
+	- Collectables
+		- Key
+		- Flag
+		- Link
+	- Node
+	- Start node
+	- End node
+	- Path
+	- Menu buttons
+	- UI panels layout
+		- Main menu
+		- Level selection
+		- Option
+		- Credits
+		- In-game
+		- Popup
+	- Traversal input
+	- Level buttons
+	- Level objectives/score/description
+	- Level previews (?)
+	- Level timer
+	- Level move counter
+	- Level collectables display
+
+
+
+....................
+
+x Bugs x
+
+x Level solver : Link levels might not have correct solutions (e.g. Link Level 2)
+	Print out the solutions to make sure they're right
+x Level solver : Revealed Level 3 can't find a solution
+	Does it just take too long?
+
+
+....................
+
++ Possible Features +
+
++ Hint (consumable) (pings where you currently are in the traversal)
++ Crossing path
++ Multiple end nodes / possible traversal but only one optimal one
++ Cracks and walls with more than 1 health
++ Triggers that toggle paths on or off
++ Enemies with predictable patterns that you need to avoid
+	+ Back and forth a set number of nodes
+	+ Move in a square, a set number of nodes each direction
+	+ Straight line & turn 180 degrees when they can't move straight ahead
+	+ Straight line & turn 90 degrees when they can't move straight ahead
++ Endless / Scrolling / Procedurally generated mode (Have to get to checkpoints to advance)
++ In-game level editor
+
+
+....................
+
+? Questions ?
+
+? How are levels actually unlocked?
+? Should tutorials be playable? (the first one?)
+? Try some other input methods
+? Timer and moves as score, not objectives
+? Do Locks destroy keys?
+? Think about monetization
+	Free?
+	Fixed price?
+	Donation based?
+	Microtransactions?
+		Goodies (hints)?
+		Level unlock?
+	Ads? 
+		Banner? 
+		Optional videos for goodies? 
+		Videos every n levels?
+	Free first n levels, pay for the rest?
+
+
+
+....................
+
+= Editor & Structure
+
+= More shortcuts (with help toggle that lists them)
+= Polish job on right-click menus and content adding
+= More generic LevelElement & Content
