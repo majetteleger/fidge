@@ -12,15 +12,17 @@ MonoBehaviour:
   m_Name: 4- Basic 4
   m_EditorClassIdentifier: 
   Scripted: 0
+  AllowedEndNodeBypasses: 0
   Desription: 
   Author: 
   ExpectedTime: 0
   ExpectedMoves: 0
   TraversalScript: 
   Shifted: 0
-  Index: 0
-  NumberOfSolutions: -1
-  MinimumNumberOfMoves: -1
+  Index: 78
+  NumberOfSolutions: 1611
+  MinimumMoves: 4
+  MinimumMovesWithFlag: 12
   StartNode: {x: 0, y: 6}
   EndNode: {x: 8, y: 6}
   Elements:
