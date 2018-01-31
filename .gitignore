@@ -34,3 +34,4 @@ sysinfo.txt
 *.unitypackage
 Fidge/Library/
 Fidge/Temp/
+Fidge/ProjectSettings/ProjectVersion.txt
