@@ -15,11 +15,11 @@ MonoBehaviour:
   AllowedEndNodeBypasses: 0
   Desription: 
   Author: 
-  ExpectedTime: 0
-  ExpectedMoves: 0
+  ExpectedTime: 2
+  ExpectedMoves: 4
   TraversalScript: 
   Shifted: 0
-  Index: 75
+  Index: 67
   NumberOfSolutions: 5
   MinimumMoves: 3
   MinimumMovesWithFlag: 19

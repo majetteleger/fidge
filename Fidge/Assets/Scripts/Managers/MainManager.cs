@@ -92,8 +92,9 @@ public class MainManager : MonoBehaviour
             
             return medals;
         }
-        set 
-        { 
+        set
+        {
+            DirtyMedals = true;
             medals = value; 
         }
     }

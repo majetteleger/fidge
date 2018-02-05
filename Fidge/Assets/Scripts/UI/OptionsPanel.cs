@@ -22,6 +22,8 @@ public class OptionsPanel : Panel
 
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
+
+        MainManager.Instance.DirtyMedals = true;
     }
 
     public void UI_UnlockAllLevels()
@@ -30,6 +32,8 @@ public class OptionsPanel : Panel
         {
             PlayerPrefs.SetString("Level" + i, "111");
         }
+
+        MainManager.Instance.DirtyMedals = true;
     }
 
     public void UI_Back()

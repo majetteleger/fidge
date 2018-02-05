@@ -1,8 +1,6 @@
 
 - Tasks -
 
-- New level selection screen (with tutorial button for sections, level previews, medals collected in level, medals needed to unlock level, total collected medals)
-
 - SOUND
 	- Button Click
 	- Panel change/show
