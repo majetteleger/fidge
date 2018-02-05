@@ -17,13 +17,16 @@ public class TraversalManager : MonoBehaviour
         NONE
     }
 
-    public float TraversalExecutionDelay;
+    public float MinTraversalSpeed;
+    public float MaxTraversalSpeed;
+    public float TraversalSpeedStep;
     public float ScriptedTraversalPlanningDelay;
 
     public bool IsPlanningTraversal { get; set; }
 
     private int _currentTraversalMoves;
     private float _currentTraversalTime;
+    private float _traversalSpeed;
     private List<TraversalMove> _traversalMoves;
     private Node _currentTraversalNode;
     private Coroutine _traversal;
@@ -143,9 +146,11 @@ public class TraversalManager : MonoBehaviour
 
     private IEnumerator ExecuteTraversal()
     {
+        _traversalSpeed = MaxTraversalSpeed;
+
         if (MainManager.Instance.ActiveLevel.Scripted)
         {
-            yield return new WaitForSeconds(TraversalExecutionDelay);
+            yield return new WaitForSeconds(_traversalSpeed);
         }
 
         _currentTraversalNode = MainManager.Instance.ActiveLevel.StartNode;
@@ -188,21 +193,23 @@ public class TraversalManager : MonoBehaviour
 
             if (nextPath == null || nextNode == null)
             {
-                StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, _currentTraversalNode.transform.position + direction / 2, TraversalExecutionDelay));
-                yield return new WaitForSeconds(TraversalExecutionDelay * 2);
+                AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Bad);
+
+                StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, _currentTraversalNode.transform.position + direction / 2, MaxTraversalSpeed));
+                yield return new WaitForSeconds(MaxTraversalSpeed * 2);
 
                 Fail();
                 yield break;
             }
             
-            StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, TraversalExecutionDelay));
-            yield return new WaitForSeconds(TraversalExecutionDelay);
+            StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, _traversalSpeed));
+            yield return new WaitForSeconds(_traversalSpeed);
 
             MainManager.Instance.Player.transform.SetParent(nextNode.transform, true);
 
             var content = nextNode.GetComponentInChildren<Content>();
 
-            if (content != null)
+            if (content != null && content.transform.parent == nextNode.transform)
             {
                 content.Contact();
             }
@@ -221,8 +228,8 @@ public class TraversalManager : MonoBehaviour
                     {
                         nextNode = links[j].transform.parent.GetComponent<Node>();
 
-                        StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, TraversalExecutionDelay));
-                        yield return new WaitForSeconds(TraversalExecutionDelay);
+                        StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, _traversalSpeed));
+                        yield return new WaitForSeconds(_traversalSpeed);
 
                         MainManager.Instance.Player.transform.SetParent(nextNode.transform, true);
 
@@ -234,7 +241,7 @@ public class TraversalManager : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(TraversalExecutionDelay);
+        yield return new WaitForSeconds(_traversalSpeed);
 
         CheckForCompletion();
     }
@@ -252,6 +259,11 @@ public class TraversalManager : MonoBehaviour
         }
 
         MainManager.Instance.Player.transform.position = targetPosition;
+
+        if (_traversalSpeed > MinTraversalSpeed)
+        {
+            _traversalSpeed -= TraversalSpeedStep;
+        }
     }
 
     private IEnumerator DoSimulateTraversalPlanning(TraversalMove[] traversalScript)
@@ -276,7 +288,7 @@ public class TraversalManager : MonoBehaviour
                     break;
             }
 
-            yield return new WaitForSeconds(TraversalExecutionDelay);
+            yield return new WaitForSeconds(_traversalSpeed);
         }
         
         SimulateButtonPress(InGamePanel.instance.GoButton);
@@ -304,7 +316,7 @@ public class TraversalManager : MonoBehaviour
 
     private void Fail()
     {
-        PopupPanel.instance.ShowLost(MainManager.Instance.ActiveLevel.Index);
+        PopupPanel.instance.ShowLost(MainManager.Instance.Levels[MainManager.Instance.ActiveLevel.Index].Level);
 
         Destroy(MainManager.Instance.ActiveLevel.gameObject);
     }
@@ -329,7 +341,7 @@ public class TraversalManager : MonoBehaviour
         
         MainManager.Instance.ActiveLevel.Save(timeMedal, movesMedal, flagMedal);
 
-        PopupPanel.instance.ShowWon(MainManager.Instance.LastLoadedLevelIndex);
+        PopupPanel.instance.ShowWon(MainManager.Instance.ActiveLevel.Index >= 0 ? MainManager.Instance.Levels[MainManager.Instance.ActiveLevel.Index].Level : null);
         
         Destroy(MainManager.Instance.ActiveLevel.gameObject);
     }

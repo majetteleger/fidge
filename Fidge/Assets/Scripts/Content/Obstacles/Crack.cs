@@ -25,6 +25,8 @@ public class Crack : Obstacle
 
     public override void HandleResolution()
     {
+        //base.HandleResolution();
+
         if (_currentHealth <= 0)
         {
             Destroy(Path.gameObject);

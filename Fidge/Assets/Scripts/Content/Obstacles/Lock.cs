@@ -41,6 +41,8 @@ public class Lock : Obstacle
 
     public override void HandleResolution()
     {
+        base.HandleResolution();
+
         var playerCollectables = MainManager.Instance.Player.GetCollectables();
 
         for (var i = 0; i < playerCollectables.Length; i++)

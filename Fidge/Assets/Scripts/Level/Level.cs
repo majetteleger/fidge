@@ -124,6 +124,8 @@ public class Level : MonoBehaviour
         var newValue = new string(currentValue);
 
         _savedValue = newValue;
+
+        MainManager.Instance.DirtyMedals = true;
     }
 
     public void Initiliaze(EditableLevel editableLevel)

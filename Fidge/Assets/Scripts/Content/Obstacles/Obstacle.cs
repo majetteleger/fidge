@@ -2,9 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Obstacle : Content
+public class Obstacle : Content
 {
-    public abstract Node Resolve(Node currentTraversalNode, Node nextTraversalNode, TraversalManager.TraversalMove direction);
+    public virtual Node Resolve(Node currentTraversalNode, Node nextTraversalNode, TraversalManager.TraversalMove direction)
+    {
+        return null;
+    }
 
-    public abstract void HandleResolution();
+    public virtual void HandleResolution()
+    {
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Good);
+    }
 }

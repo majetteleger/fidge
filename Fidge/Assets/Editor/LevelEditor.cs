@@ -17,9 +17,10 @@ public class LevelEditor : Editor
         Left
     }
 
-    private bool _showLevelInfo = true;
-
     public static List<HypotheticalSolution> Solutions;
+
+    private bool _showInfo = true;
+    private bool _showSolution = true;
 
     private EditableLevel _editableLevel;
     public EditableLevel EditableLevel
@@ -53,12 +54,11 @@ public class LevelEditor : Editor
         const float levelHeight = EditableLevel.KHeight * EditableLevel.KNodeSize;
 
         //const float editingAreaOffset = 50f;
-        const float topOffsetWithoutInfo = 155f;
-        const float topOffsetWithInfo = 340f;
+        const float topOffset = 135;
         const float leftOffset = 65f;
 
         //var containerRect = new Rect((Screen.width - levelWidth) / 2, (Screen.height - levelHeight) / 2 + editingAreaOffset, levelWidth, levelHeight);
-        var containerRect = new Rect(leftOffset, (_showLevelInfo ? topOffsetWithInfo : topOffsetWithoutInfo), levelWidth, levelHeight);
+        var containerRect = new Rect(leftOffset, topOffset, levelWidth, levelHeight);
 
         var slidePrefab = EditableLevel.LevelPrefab.GetComponent<Level>().SlidePrefab.GetComponent<Slide>();
 
@@ -71,14 +71,41 @@ public class LevelEditor : Editor
             if (GUILayout.Button("Delete Instance")) { DeleteInstance(); }
             if (GUILayout.Button("Clear")) { ClearLevel(); }
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.Space();
-        
-        _showLevelInfo = EditorGUILayout.Foldout(_showLevelInfo, "Level information");
 
-        if (_showLevelInfo)
+        DrawContainerRect(containerRect);
+
+        if (GUI.Button(new Rect(levelWidth / 2 + leftOffset - buttonWidth / 2f, topOffset - (buttonHeight + buttonOffset), buttonWidth, buttonHeight),
+            slidePrefab.UpSprite.texture))
+        {
+            ShiftLevel(ShiftDirection.Up);
+        }
+        
+        if (GUI.Button(new Rect(levelWidth / 2 + leftOffset - buttonWidth / 2f, topOffset + levelHeight + buttonOffset, buttonWidth, buttonHeight),
+            slidePrefab.DownSprite.texture))
+        {
+            ShiftLevel(ShiftDirection.Down);
+        }
+
+        if (GUI.Button(new Rect(leftOffset - (buttonHeight + buttonOffset), levelHeight / 2f - buttonWidth / 2f + topOffset, buttonHeight, buttonWidth),
+            slidePrefab.LeftSprite.texture))
+        {
+            ShiftLevel(ShiftDirection.Left);
+        }
+
+        if (GUI.Button(new Rect(leftOffset + levelWidth + buttonOffset, levelHeight / 2f - buttonWidth / 2f + topOffset, buttonHeight, buttonWidth),
+            slidePrefab.RightSprite.texture))
+        {
+            ShiftLevel(ShiftDirection.Right);
+        }
+
+        GUILayout.Space(levelHeight + buttonHeight * 2 + buttonOffset * 2 + 30);
+
+        _showInfo = EditorGUILayout.Foldout(_showInfo, "Information");
+
+        if (_showInfo)
         {
             EditableLevel.Scripted = GUILayout.Toggle(EditableLevel.Scripted, "Scripted");
-            
+
             if (EditableLevel.Scripted)
             {
                 var traversalScriptProperty = serializedObject.FindProperty("TraversalScript");
@@ -88,8 +115,27 @@ public class LevelEditor : Editor
             }
             else
             {
-                EditorGUILayout.Space();
+                EditableLevel.ExpectedTime = EditorGUILayout.IntField("Expected Time", EditableLevel.ExpectedTime);
+                EditableLevel.ExpectedMoves = EditorGUILayout.IntField("Expected Moves", EditableLevel.ExpectedMoves);
+                if (GUILayout.Button(string.Format("Apply suggested values (Time: {0}, Moves: {1})", GetSuggestedTime(), GetSuggestedMoves()))) { ApplySuggestedExpectedValues(); }
+            }
 
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel("Description");
+            EditableLevel.Desription = EditorGUILayout.TextArea(EditableLevel.Desription, GUILayout.MinHeight(30));
+            EditorGUILayout.EndHorizontal();
+
+            EditableLevel.Author = EditorGUILayout.TextField("Author", EditableLevel.Author);
+
+            EditorGUILayout.Space();
+        }
+
+        if (!EditableLevel.Scripted)
+        {
+            _showSolution = EditorGUILayout.Foldout(_showSolution, "Solution");
+
+            if (_showSolution)
+            {
                 EditableLevel.AllowedEndNodeBypasses = EditorGUILayout.IntField("Allowed End Node Bypasses", EditableLevel.AllowedEndNodeBypasses);
 
                 if (GUILayout.Button("Compute possible solution(s)")) { ComputeSolution(); }
@@ -106,52 +152,11 @@ public class LevelEditor : Editor
                         EditableLevel.NumberOfSolutions > 0 ? "Minimum moves: " + EditableLevel.MinimumMoves : string.Empty,
                         EditableLevel.NumberOfSolutions > 0 && EditableLevel.MinimumMovesWithFlag > 0 && EditableLevel.MinimumMovesWithFlag < 200 ? ". With flag(s): " + EditableLevel.MinimumMovesWithFlag : ". Flag Unreachable");
                 }
-                
+
                 EditorGUILayout.LabelField(solutionString);
-                EditorGUILayout.Space();
-
-                EditableLevel.ExpectedTime = EditorGUILayout.IntField("Expected Time", EditableLevel.ExpectedTime);
-                EditableLevel.ExpectedMoves = EditorGUILayout.IntField("Expected Move", EditableLevel.ExpectedMoves);
             }
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Description");
-            EditableLevel.Desription = EditorGUILayout.TextArea(EditableLevel.Desription, GUILayout.MinHeight(30));
-            EditorGUILayout.EndHorizontal();
-
-            EditableLevel.Author = EditorGUILayout.TextField("Author", EditableLevel.Author);
-        }
-        
-        DrawContainerRect(containerRect);
-
-        if (//GUI.Button(new Rect(Screen.width / 2f - buttonWidth / 2f, (Screen.height - levelHeight) / 2f + editingAreaOffset - (buttonHeight + buttonOffset), buttonWidth, buttonHeight),
-            GUI.Button(new Rect(levelWidth / 2 + leftOffset - buttonWidth / 2f, (_showLevelInfo ? topOffsetWithInfo : topOffsetWithoutInfo) - (buttonHeight + buttonOffset), buttonWidth, buttonHeight),
-            slidePrefab.UpSprite.texture))
-        {
-            ShiftLevel(ShiftDirection.Up);
-        }
-        
-        if (//GUI.Button(new Rect(Screen.width / 2f - buttonWidth / 2f, (Screen.height + levelHeight) / 2f + editingAreaOffset + buttonOffset, buttonWidth, buttonHeight),
-            GUI.Button(new Rect(levelWidth / 2 + leftOffset - buttonWidth / 2f, (_showLevelInfo ? topOffsetWithInfo : topOffsetWithoutInfo) + levelHeight + buttonOffset, buttonWidth, buttonHeight),
-            slidePrefab.DownSprite.texture))
-        {
-            ShiftLevel(ShiftDirection.Down);
         }
 
-        if (//GUI.Button(new Rect((Screen.width - levelWidth) / 2f - (buttonHeight + buttonOffset), Screen.height / 2f + buttonWidth / 2f, buttonHeight, buttonWidth),
-            GUI.Button(new Rect(leftOffset - (buttonHeight + buttonOffset), levelHeight / 2f - buttonWidth / 2f + (_showLevelInfo ? topOffsetWithInfo : topOffsetWithoutInfo), buttonHeight, buttonWidth),
-            slidePrefab.LeftSprite.texture))
-        {
-            ShiftLevel(ShiftDirection.Left);
-        }
-
-        if (//GUI.Button(new Rect((Screen.width + levelWidth) / 2f + buttonOffset, Screen.height / 2f + buttonWidth / 2f, buttonHeight, buttonWidth),
-            GUI.Button(new Rect(leftOffset + levelWidth + buttonOffset, levelHeight / 2f - buttonWidth / 2f + (_showLevelInfo ? topOffsetWithInfo : topOffsetWithoutInfo), buttonHeight, buttonWidth),
-            slidePrefab.RightSprite.texture))
-        {
-            ShiftLevel(ShiftDirection.Right);
-        }
-        
         if (GUI.changed)
         {
             EditorUtility.SetDirty(EditableLevel);
@@ -787,6 +792,36 @@ public class LevelEditor : Editor
         EditableLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
     }
 
+    private string GetSuggestedTime()
+    {
+        if (EditableLevel.MinimumMoves < 0)
+        {
+            return "?";
+        }
+
+        return GetSuggestedTimeValue().ToString();
+    }
+
+    private string GetSuggestedMoves()
+    {
+        if (EditableLevel.MinimumMoves < 0)
+        {
+            return "?";
+        }
+
+        return GetSuggestedMovesValue().ToString();
+    }
+
+    private int GetSuggestedTimeValue()
+    {
+        return Mathf.CeilToInt(EditableLevel.MinimumMoves * 0.5f);
+    }
+
+    private int GetSuggestedMovesValue()
+    {
+        return EditableLevel.MinimumMoves + 1;
+    }
+
     #region Undo-able functions
 
     private void ShiftLevel(ShiftDirection direction)
@@ -1049,6 +1084,19 @@ public class LevelEditor : Editor
 
         EditableLevel.StartNode = Vector2.zero;
         EditableLevel.EndNode = Vector2.zero;
+    }
+
+    private void ApplySuggestedExpectedValues()
+    {
+        if (EditableLevel.ExpectedMoves < 0)
+        {
+            ComputeSolution();
+        }
+
+        Undo.RecordObject(EditableLevel, "ApplySuggestedExpectedValues");
+
+        EditableLevel.ExpectedMoves = GetSuggestedMovesValue();
+        EditableLevel.ExpectedTime = GetSuggestedTimeValue();
     }
     
     #endregion

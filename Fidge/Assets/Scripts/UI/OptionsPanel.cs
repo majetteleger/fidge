@@ -18,6 +18,8 @@ public class OptionsPanel : Panel
 
     public void UI_ResetProgress()
     {
+        MainManager.Instance.Medals = 0;
+
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
     }

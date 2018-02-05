@@ -32,19 +32,35 @@ public class LevelSelectionPanel : Panel
 
         foreach (var levelSection in MainManager.Instance.Sections)
         {
-            var sectionTitle = Instantiate(LevelSectionTitlePefab, LevelButtonContainer).GetComponentInChildren<Text>();
-            sectionTitle.text = levelSection.Title;
+            var sectionTitle = Instantiate(LevelSectionTitlePefab, LevelButtonContainer);
+            sectionTitle.GetComponentInChildren<Text>().text = levelSection.Title;
 
+            var sectionTutorial = levelSection.Tutorial;
+            var tutorialButton = sectionTitle.GetComponentInChildren<Button>();
+
+            if (sectionTutorial != null)
+            {
+                tutorialButton.GetComponent<CanvasGroup>().alpha = 1;
+                tutorialButton.onClick.AddListener(() => {
+                    PopupPanel.instance.ShowConfirm(sectionTutorial);
+                });
+            }
+            else
+            {
+                tutorialButton.GetComponent<CanvasGroup>().alpha = 0;
+                tutorialButton.onClick.RemoveAllListeners();
+            }
+            
             var section = Instantiate(LevelSectionPefab, LevelButtonContainer).transform;
 
             for (var i = 0; i < levelSection.Levels.Length; i++)
             {
-                var levelIndex = tempLevelIndex;
+                var level = levelSection.Levels[i];
 
                 var button = Instantiate(LevelButtonPefab, section).GetComponent<Button>();
-                button.GetComponentInChildren<Text>().text = (levelIndex + 1).ToString();
+                button.GetComponentInChildren<Text>().text = (level.Index + 1).ToString();
                 button.onClick.AddListener(() => {
-                    PopupPanel.instance.ShowConfirm(levelIndex);
+                    PopupPanel.instance.ShowConfirm(level);
                 });
 
                 _levelButtons[tempLevelIndex] = button;
@@ -59,6 +75,7 @@ public class LevelSelectionPanel : Panel
     public override void Show()
     {
         UpdateLevelButtons();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(LevelButtonContainer.GetComponent<RectTransform>());
 
         base.Show();
     }
@@ -67,8 +84,7 @@ public class LevelSelectionPanel : Panel
     {
         for (var i = 0; i < _levelButtons.Length; i++)
         {
-            var previousLevelSavedValue = i > 0 ? Level.GetSavedValue(i - 1) : null;
-            _levelButtons[i].interactable = previousLevelSavedValue == null || previousLevelSavedValue.IndexOf('1') != -1;
+            _levelButtons[i].interactable = MainManager.Instance.Medals >= Mathf.CeilToInt(i * MainManager.Instance.LevelUnlockMultiplier);
         }
     }
 

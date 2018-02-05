@@ -15,8 +15,8 @@ MonoBehaviour:
   AllowedEndNodeBypasses: 0
   Desription: 
   Author: Marc-Antoine
-  ExpectedTime: 5
-  ExpectedMoves: 15
+  ExpectedTime: 9
+  ExpectedMoves: 13
   TraversalScript: 000000000000000000000000
   Shifted: 0
   Index: 19

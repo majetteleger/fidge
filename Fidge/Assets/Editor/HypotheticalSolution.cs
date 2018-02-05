@@ -147,15 +147,14 @@ public class HypotheticalSolution
                         if (currentLinkColor == otherLinkColor)
                         {
                             currentPosition = newPosition;
-                            Movements.Add(TraversalManager.TraversalMove.NONE);
-                            goto bla;
+                            goto linked;
                         }
                     }
                 }
             }
         }
 
-        bla :
+        linked:
 
         if (EndNode == currentPosition)
         {

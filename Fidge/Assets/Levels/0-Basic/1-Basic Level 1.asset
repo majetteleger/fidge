@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Name: 1-Basic Level 1
   m_EditorClassIdentifier: 
   Scripted: 0
+  AllowedEndNodeBypasses: 0
   Desription: 
   Author: Marc-Antoine
-  ExpectedTime: 5
-  ExpectedMoves: 15
+  ExpectedTime: 3
+  ExpectedMoves: 5
   TraversalScript: 
   Shifted: 0
   Index: 1

@@ -13,9 +13,9 @@ public class InGamePanel : Panel
     public CanvasGroup ObjectiveBars;
     public CanvasGroup TraversalInput;
     public Image TimerImage;
-    public Text TimerText;
+    //public Text TimerText;
     public Image MovesImage;
-    public Text MovesText;
+    //public Text MovesText;
     public Button ResetButton;
     public Button UpButton;
     public Button RightButton;
@@ -89,7 +89,7 @@ public class InGamePanel : Panel
         var normalizedValue = remainingValue / MainManager.Instance.ActiveLevel.ExpectedTime;
         
         TimerImage.fillAmount = normalizedValue;
-        TimerText.text = Mathf.RoundToInt(remainingValue).ToString();
+        //TimerText.text = Mathf.RoundToInt(remainingValue).ToString();
     }
 
     public void UpdateMoves(int value = 0)
@@ -104,7 +104,7 @@ public class InGamePanel : Panel
         var normalizedValue = (float)remainingValue / MainManager.Instance.ActiveLevel.ExpectedMoves;
         
         MovesImage.fillAmount = normalizedValue;
-        MovesText.text = remainingValue.ToString();
+        //MovesText.text = remainingValue.ToString();
     }
 
     public void UpdateCollectables(Collectable[] collectables)

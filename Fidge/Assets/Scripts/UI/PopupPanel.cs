@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,7 +24,7 @@ public class PopupPanel : Panel
     public string WonMessage;
     public string LostMessage;
 
-    private int _levelToLoad;
+    private EditableLevel _levelToLoad;
 
     void Awake()
     {
@@ -33,17 +34,17 @@ public class PopupPanel : Panel
         }
     }
 
-    public void ShowConfirm(int levelIndex)
+    public void ShowConfirm(EditableLevel level)
     {
-        _levelToLoad = levelIndex;
+        _levelToLoad = level;
         
-        Message.text = MainManager.Instance.Levels[levelIndex].name.Substring(2);
+        Message.text = level.name.Substring(2);
 
-        var scripted = MainManager.Instance.Levels[levelIndex].Scripted;
+        var scripted = level.Scripted;
 
         Medals.SetActive(!scripted);
 
-        var levelSavedValue = Level.GetSavedValue(levelIndex);
+        var levelSavedValue = Level.GetSavedValue(level.Index);
 
         if (!scripted)
         {
@@ -63,15 +64,15 @@ public class PopupPanel : Panel
         Show();
     }
 
-    public void ShowWon(int levelIndex)
+    public void ShowWon(EditableLevel level)
     {
-        var scripted = MainManager.Instance.Levels[levelIndex].Scripted;
+        var scripted = level == null || level.Scripted;
 
         Message.text = scripted ? TutorialMessage : WonMessage;
 
         Medals.SetActive(!scripted);
 
-        var levelSavedValue = Level.GetSavedValue(levelIndex);
+        var levelSavedValue = level != null ? Level.GetSavedValue(level.Index) : string.Empty;
 
         if (!scripted)
         {
@@ -84,16 +85,16 @@ public class PopupPanel : Panel
         RetryButton.gameObject.SetActive(!scripted);
         ReplayButton.gameObject.SetActive(scripted);
         NextButton.gameObject.SetActive(!scripted && !string.IsNullOrEmpty(levelSavedValue) && levelSavedValue.IndexOf('1') != -1);
-        ContinueButton.gameObject.SetActive(scripted);
+        //ContinueButton.gameObject.SetActive(scripted);
         ConfirmButton.gameObject.SetActive(false);
         PlayButton.gameObject.SetActive(false);
 
         Show();
     }
 
-    public void ShowLost(int levelIndex)
+    public void ShowLost(EditableLevel level)
     {
-        var scripted = MainManager.Instance.Levels[levelIndex].Scripted;
+        var scripted = level.Scripted;
 
         Message.text = scripted ? TutorialMessage : LostMessage;
 

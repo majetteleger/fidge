@@ -1,7 +1,7 @@
 
 - Tasks -
 
-- Credits screen
+- New level selection screen (with tutorial button for sections, level previews, medals collected in level, medals needed to unlock level, total collected medals)
 
 - SOUND
 	- Button Click
@@ -90,6 +90,8 @@ x Level solver : Revealed Level 3 can't find a solution
 + Possible Features +
 
 + Hint (consumable) (pings where you currently are in the traversal)
++ In-game level editor
+
 + Crossing path
 + Multiple end nodes / possible traversal but only one optimal one
 + Cracks and walls with more than 1 health
@@ -100,17 +102,13 @@ x Level solver : Revealed Level 3 can't find a solution
 	+ Straight line & turn 180 degrees when they can't move straight ahead
 	+ Straight line & turn 90 degrees when they can't move straight ahead
 + Endless / Scrolling / Procedurally generated mode (Have to get to checkpoints to advance)
-+ In-game level editor
 
 
 ....................
 
 ? Questions ?
 
-? How are levels actually unlocked?
-? Should tutorials be playable? (the first one?)
 ? Try some other input methods
-? Timer and moves as score, not objectives
 ? Do Locks destroy keys?
 ? Think about monetization
 	Free?

@@ -23,6 +23,6 @@ public class Slide : Obstacle
 
     public override void HandleResolution()
     {
-        return;
+        //base.HandleResolution();
     }
 }

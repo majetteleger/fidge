@@ -28,7 +28,9 @@ public class Wall : Obstacle
 
     public override void HandleResolution()
     {
-        if(_currentHealth <= 0)
+        base.HandleResolution();
+
+        if (_currentHealth <= 0)
         {
             Destroy(gameObject);
         }

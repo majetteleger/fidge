@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Name: 0-Basic Tutorial
   m_EditorClassIdentifier: 
   Scripted: 1
+  AllowedEndNodeBypasses: 0
   Desription: 
   Author: Marc-Antoine
   ExpectedTime: 5
@@ -20,7 +21,8 @@ MonoBehaviour:
   Shifted: 0
   Index: 0
   NumberOfSolutions: -1
-  MinimumNumberOfMoves: -1
+  MinimumMoves: -1
+  MinimumMovesWithFlag: -1
   StartNode: {x: 4, y: 8}
   EndNode: {x: 4, y: 4}
   Elements:

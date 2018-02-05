@@ -7,26 +7,25 @@ using UnityEngine;
 
 public class GlobalEditor : MonoBehaviour
 {
-    [MenuItem("Tools/Reset progress")]
+    /*[MenuItem("Tools/Reset progress")]
     public static void ResetProgress()
     {
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
-    }
+    }*/
 
-    [MenuItem("Tools/Unlock all levels")]
+    /*[MenuItem("Tools/Unlock all levels")]
     public static void UnlockAllLevels()
     {
-        MainManager mainManager =
-            (MainManager) AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GameManager.prefab", typeof(MainManager));
+        MainManager mainManager = (MainManager) AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GameManager.prefab", typeof(MainManager));
 
         for (var i = 0; i < mainManager.Levels.Length; i++)
         {
             PlayerPrefs.SetString("Level" + i, "111");
         }
-    }
+    }*/
 
-    [MenuItem("Tools/Rewrite")]
+    /*[MenuItem("Tools/Rewrite")]
     public static void Rewrite()
     {
         const string rootfolder = @"C:\Users\ma_je\OneDrive\Documents\BitBucket\WorkshopShmup\Fidge\Fidge\Assets\Levels\10-Julian\0-Basic";
@@ -76,5 +75,5 @@ public class GlobalEditor : MonoBehaviour
                 Debug.Log(ex.Message);
             }
         }
-    }
+    }*/
 }

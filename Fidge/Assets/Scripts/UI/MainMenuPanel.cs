@@ -26,6 +26,11 @@ public class MainMenuPanel : Panel
         OptionsPanel.instance.Show();
     }
 
+    public void UI_Credits()
+    {
+        CreditsPanel.instance.Show();
+    }
+
     public void UI_Quit()
     {
         Application.Quit();
