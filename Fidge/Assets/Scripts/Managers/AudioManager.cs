@@ -7,12 +7,24 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance { get; set; }
 
     public AudioSource BackgroundMusic;
-    public AudioSource SoundEffect;
+    public AudioSource[] SoundEffectSources;
 
-    public AudioClip Music;
-    public AudioClip Good;
-    public AudioClip Bad;
-    
+    public AudioClip MenuMusic;
+    public AudioClip LevelMusic;
+    public AudioClip MenuClick;
+    public AudioClip InputDirection;
+    public AudioClip InputGo;
+    public AudioClip PlayerMove;
+    public AudioClip LevelFailed;
+    public AudioClip LevelCleared;
+    public AudioClip Slide;
+    public AudioClip Crack;
+    public AudioClip Wall;
+    public AudioClip Lock;
+    public AudioClip GetKey;
+    public AudioClip GetStar;
+    public AudioClip TeleportLink;
+
     private void Awake()
     {
         if (Instance == null)
@@ -23,18 +35,43 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
-        PlayBackgroundMusic(Music);
+        PlayBackgroundMusic(MenuMusic);
     }
 
     public void PlayBackgroundMusic(AudioClip music)
     {
+        if (music == null)
+        {
+            Debug.Log("Null music reference");
+            return;
+        }
+
+        if (BackgroundMusic.clip == music)
+        {
+            return;
+        }
+
         BackgroundMusic.clip = music;
         BackgroundMusic.Play();
     }
 
     public void PlaySoundEffect(AudioClip effect)
     {
-        SoundEffect.clip = effect;
-        SoundEffect.Play();
+        if (effect == null)
+        {
+            Debug.Log("Null sound effect reference");
+            return;
+        }
+
+        foreach (var soundEffectSource in SoundEffectSources)
+        {
+            if (!soundEffectSource.isPlaying)
+            {
+                soundEffectSource.clip = effect;
+                soundEffectSource.Play();
+
+                break;
+            }
+        }
     }
 }

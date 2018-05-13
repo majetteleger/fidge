@@ -6,11 +6,10 @@ using UnityEngine.UI;
 
 public class LevelSelectionPanel : Panel
 {
-    public static LevelSelectionPanel instance = null;
+    public static LevelSelectionPanel Instance;
 
     public GameObject LevelButtonPrefab;
     public GameObject LevelButtonRowPrefab;
-    //public GameObject LevelDetailsPrefab;
     public GameObject LevelSectionPrefab;
     public GameObject LevelSectionTitlePrefab;
     public ScrollRect LevelButtonScroll;
@@ -22,10 +21,7 @@ public class LevelSelectionPanel : Panel
 
     void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
+        Instance = this;
     }
     
     void Start()
@@ -44,7 +40,7 @@ public class LevelSelectionPanel : Panel
 
             if (sectionTutorial != null)
             {
-                tutorialButton.GetComponent<CanvasGroup>().alpha = 1;
+                tutorialButton.GetComponentInParent<CanvasGroup>().alpha = 1;
                 tutorialButton.onClick.AddListener(() => 
                 {
                     PopupPanel.instance.ShowConfirm(sectionTutorial);
@@ -52,30 +48,26 @@ public class LevelSelectionPanel : Panel
             }
             else
             {
-                tutorialButton.GetComponent<CanvasGroup>().alpha = 0;
+                tutorialButton.GetComponentInParent<CanvasGroup>().alpha = 0;
                 tutorialButton.onClick.RemoveAllListeners();
             }
             
             var section = Instantiate(LevelSectionPrefab, LevelButtonContainer).transform;
             var row = (Transform)null;
-            //var details = (Transform)null;
 
             for (var i = 0; i < levelSection.Levels.Length; i++)
             {
                 if (i % ButtonsPerRow == 0)
                 {
                     row = Instantiate(LevelButtonRowPrefab, section).transform;
-                    //details = Instantiate(LevelDetailsPrefab, section).transform;
                 }
-
-                //var actualDetails = details;
+                
                 var level = levelSection.Levels[i];
 
                 var button = Instantiate(LevelButtonPrefab, row).GetComponent<Button>();
                 button.GetComponentInChildren<Text>().text = (level.Index + 1).ToString();
                 button.onClick.AddListener(() =>
                 {
-                    //OpenLevelDetails(actualDetails, level);
                     PopupPanel.instance.ShowConfirm(level);
                 });
 
@@ -84,15 +76,34 @@ public class LevelSelectionPanel : Panel
                 tempLevelIndex++;
             }
         }
-        
-        LevelButtonScroll.verticalNormalizedPosition = 1;
+
+        Initialize();
     }
 
-    public override void Show()
+    void Update()
     {
-        UpdateLevelButtons();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(LevelButtonContainer.GetComponent<RectTransform>());
+        if (!IsActive)
+        {
+            return;
+        }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            MainMenuPanel.instance.Show();
+        }
+    }
+
+    public override void Show(Panel originPanel = null)
+    {
+        AudioManager.Instance.PlayBackgroundMusic(AudioManager.Instance.MenuMusic);
+
+        UpdateLevelButtons();
+
+        if (originPanel != PopupPanel.instance)
+        {
+            LevelButtonScroll.verticalNormalizedPosition = 1;
+        }
+        
         base.Show();
     }
 
@@ -100,8 +111,7 @@ public class LevelSelectionPanel : Panel
     {
         for (var i = 0; i < _levelButtons.Length; i++)
         {
-            var medalsNeededToUnlock = Mathf.CeilToInt(i * MainManager.Instance.LevelUnlockMultiplier);
-            var unlocked = MainManager.Instance.Medals >= medalsNeededToUnlock;
+            var unlocked = MainManager.Instance.Levels[i].Level.Unlocked;
 
             _levelButtons[i].interactable = unlocked;
             _levelButtons[i].transform.GetChild(1).gameObject.SetActive(unlocked);
@@ -114,26 +124,19 @@ public class LevelSelectionPanel : Panel
 
                 for (var j = 0; j < medals.Length; j++)
                 {
-                    medals[j].color = !string.IsNullOrEmpty(savedMedals) && savedMedals[j] == '1' ? Color.white : new Color(1, 1, 1, 0.25f);
+                    medals[j].color = !string.IsNullOrEmpty(savedMedals) && savedMedals[j] == '1' ? Color.black : new Color(0, 0, 0, 0.25f);
                 }
             }
             else
             {
-                _levelButtons[i].transform.GetChild(2).GetComponentInChildren<Text>().text = medalsNeededToUnlock.ToString();
+                _levelButtons[i].transform.GetChild(2).GetComponentInChildren<Text>().text = MainManager.Instance.Levels[i].Level.MedalsNeededToUnlock.ToString();
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_levelButtons[i].GetComponent<RectTransform>());
             }
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(_levelButtons[i].GetComponent<RectTransform>());
         }
 
         MedalsObtainedText.text = MainManager.Instance.Medals.ToString();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(MedalsObtainedText.transform.parent.GetComponent<RectTransform>());
     }
-
-    /*private void OpenLevelDetails(Transform details, EditableLevel level)
-    {
-        details.GetComponent<RectTransform>().sizeDelta = new Vector2(details.GetComponent<RectTransform>().sizeDelta.x, 100);
-    }*/
-
+    
     public void UI_Back()
     {
         MainMenuPanel.instance.Show();

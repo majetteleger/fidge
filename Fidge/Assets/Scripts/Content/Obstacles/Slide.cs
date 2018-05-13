@@ -4,10 +4,8 @@ using UnityEngine;
 
 public class Slide : Obstacle
 {
-    public Sprite UpSprite;
-    public Sprite RightSprite;
-    public Sprite DownSprite;
-    public Sprite LeftSprite;
+    public DirectedSpriteCollection Sprites;
+    public DirectedSpriteCollection EditorSprites;
 
     public TraversalManager.TraversalMove Direction { get; set; }
 
@@ -21,8 +19,10 @@ public class Slide : Obstacle
         return null;
     }
 
-    public override void HandleResolution()
+    public override IEnumerator HandleResolution()
     {
-        //base.HandleResolution();
+        yield return new WaitForSeconds(TraversalManager.Instance.TraversalSpeed / 2);
+
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Slide);
     }
 }

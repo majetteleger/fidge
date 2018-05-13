@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: ae98f923a12723045a846956c79cc3ea
+timeCreated: 1522373886
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Acre
+  fontNames:
+  - Acre
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

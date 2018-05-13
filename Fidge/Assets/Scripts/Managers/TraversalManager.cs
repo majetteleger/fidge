@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using geniikw.DataRenderer2D;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -23,13 +24,13 @@ public class TraversalManager : MonoBehaviour
     public float ScriptedTraversalPlanningDelay;
 
     public bool IsPlanningTraversal { get; set; }
+    public Coroutine Traversal { get; set; }
+    public List<TraversalMove> TraversalMoves { get; set; }
+    public float TraversalSpeed { get; set; }
 
     private int _currentTraversalMoves;
     private float _currentTraversalTime;
-    private float _traversalSpeed;
-    private List<TraversalMove> _traversalMoves;
     private Node _currentTraversalNode;
-    private Coroutine _traversal;
 
     private void Awake()
     {
@@ -41,28 +42,32 @@ public class TraversalManager : MonoBehaviour
 
     private void Update()
     {
-        if (MainManager.Instance.ActiveLevel != null && !MainManager.Instance.ActiveLevel.Scripted)
+        if (MainManager.Instance.ActiveLevel != null)
         {
-            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+            if (Traversal == null && !TutorialPanel.Instance.IsActive)
             {
-                SimulateButtonPress(InGamePanel.instance.UpButton);
+                if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    SimulateButtonPress(InGamePanel.instance.UpButton);
+                }
+                if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    SimulateButtonPress(InGamePanel.instance.RightButton);
+                }
+                if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    SimulateButtonPress(InGamePanel.instance.DownButton);
+                }
+                if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    SimulateButtonPress(InGamePanel.instance.LeftButton);
+                }
+                if (IsPlanningTraversal && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)))
+                {
+                    SimulateButtonPress(InGamePanel.instance.GoButton);
+                }
             }
-            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                SimulateButtonPress(InGamePanel.instance.RightButton);
-            }
-            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                SimulateButtonPress(InGamePanel.instance.DownButton);
-            }
-            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                SimulateButtonPress(InGamePanel.instance.LeftButton);
-            }
-            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
-            {
-                SimulateButtonPress(InGamePanel.instance.GoButton);
-            }
+            
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 CancelTraversal();
@@ -82,7 +87,7 @@ public class TraversalManager : MonoBehaviour
         _currentTraversalMoves = 0;
         _currentTraversalTime = 0f;
         IsPlanningTraversal = true;
-        _traversalMoves = new List<TraversalMove>();
+        TraversalMoves = new List<TraversalMove>();
 
         var elements = MainManager.Instance.ActiveLevel.GetComponentsInChildren<Element>();
 
@@ -102,28 +107,34 @@ public class TraversalManager : MonoBehaviour
     public void ConfirmTraversal()
     {
         IsPlanningTraversal = false;
-        _traversal = StartCoroutine(ExecuteTraversal());
+        Traversal = StartCoroutine(ExecuteTraversal());
+
+        InGamePanel.instance.ToggleTraversalInputs(false);
     }
 
     public void CancelTraversal()
     {
-        if (_traversal != null)
+        if (Traversal != null)
         {
             StopAllCoroutines();
+            Traversal = null;
         }
 
         IsPlanningTraversal = false;
 
-        if (_traversalMoves != null)
+        if (TraversalMoves != null)
         {
-            _traversalMoves.Clear();
+            TraversalMoves.Clear();
         }
         
         _currentTraversalMoves = 0;
         _currentTraversalTime = 0;
 
-        InGamePanel.instance.UpdateMoves(_currentTraversalMoves);
-        InGamePanel.instance.UpdateTimer(_currentTraversalTime);
+        if(InGamePanel.instance.IsActive && MainManager.Instance.ActiveLevel != null)
+        {
+            InGamePanel.instance.UpdateMoves(_currentTraversalMoves);
+            InGamePanel.instance.UpdateTimer(_currentTraversalTime);
+        }
     }
 
     public void RegisterTraversalMove(TraversalMove traversalMove)
@@ -133,28 +144,28 @@ public class TraversalManager : MonoBehaviour
             StartPlanningTraversal();
         }
 
-        _traversalMoves.Add(traversalMove);
+        TraversalMoves.Add(traversalMove);
         _currentTraversalMoves++;
 
         InGamePanel.instance.UpdateMoves(_currentTraversalMoves);
     }
 
-    public void SimulateTraversalPlanning(TraversalMove[] traversalScript)
+    /*public void SimulateTraversalPlanning(TraversalMove[] traversalScript)
     {
         StartCoroutine(DoSimulateTraversalPlanning(traversalScript));
-    }
-
+    }*/
+    
     private IEnumerator ExecuteTraversal()
     {
-        _traversalSpeed = MaxTraversalSpeed;
+        TraversalSpeed = MaxTraversalSpeed;
 
         if (MainManager.Instance.ActiveLevel.Scripted)
         {
-            yield return new WaitForSeconds(_traversalSpeed);
+            yield return new WaitForSeconds(TraversalSpeed);
         }
 
         _currentTraversalNode = MainManager.Instance.ActiveLevel.StartNode;
-        var traversal = _traversalMoves.ToArray();
+        var traversal = TraversalMoves.ToArray();
 
         for(var i = 0; i < traversal.Length; i++)
         {
@@ -188,22 +199,32 @@ public class TraversalManager : MonoBehaviour
 
             if (nextPath != null)
             {
+                var wall = nextPath.GetComponentInChildren<Wall>() != null;
+                
                 nextNode = nextPath.Traverse(traversal[i], _currentTraversalNode);
+
+                if (wall)
+                {
+                    yield return new WaitForSeconds(TraversalSpeed);
+                }
             }
 
             if (nextPath == null || nextNode == null)
             {
-                AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Bad);
-
-                StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, _currentTraversalNode.transform.position + direction / 2, MaxTraversalSpeed));
+                StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, _currentTraversalNode.transform.position + direction / 2, MaxTraversalSpeed, true));
                 yield return new WaitForSeconds(MaxTraversalSpeed * 2);
 
                 Fail();
                 yield break;
             }
-            
-            StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, _traversalSpeed));
-            yield return new WaitForSeconds(_traversalSpeed);
+
+            if (_currentTraversalNode == nextNode)
+            {
+                continue;
+            }
+
+            StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, TraversalSpeed, nextPath.GetObstacle() == null));
+            yield return new WaitForSeconds(TraversalSpeed);
 
             MainManager.Instance.Player.transform.SetParent(nextNode.transform, true);
 
@@ -228,8 +249,9 @@ public class TraversalManager : MonoBehaviour
                     {
                         nextNode = links[j].transform.parent.GetComponent<Node>();
 
-                        StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, _traversalSpeed));
-                        yield return new WaitForSeconds(_traversalSpeed);
+                        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.TeleportLink);
+                        StartCoroutine(MovePlayer(_currentTraversalNode.transform.position, nextNode.transform.position, TraversalSpeed, false));
+                        yield return new WaitForSeconds(TraversalSpeed);
 
                         MainManager.Instance.Player.transform.SetParent(nextNode.transform, true);
 
@@ -241,13 +263,23 @@ public class TraversalManager : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(_traversalSpeed);
+        yield return new WaitForSeconds(TraversalSpeed);
 
         CheckForCompletion();
     }
     
-    private IEnumerator MovePlayer(Vector3 sourcePosition, Vector3 targetPosition, float time)
+    private IEnumerator MovePlayer(Vector3 sourcePosition, Vector3 targetPosition, float time, bool freeMove)
     {
+        if (Vector3.Distance(sourcePosition, targetPosition) < 0.1f)
+        {
+            Debug.Log("wat");
+        }
+
+        if (freeMove)
+        {
+            AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.PlayerMove);
+        }
+        
         var startTime = Time.time;
 
         while (Time.time < startTime + time)
@@ -260,13 +292,13 @@ public class TraversalManager : MonoBehaviour
 
         MainManager.Instance.Player.transform.position = targetPosition;
 
-        if (_traversalSpeed > MinTraversalSpeed)
+        if (TraversalSpeed > MinTraversalSpeed)
         {
-            _traversalSpeed -= TraversalSpeedStep;
+            TraversalSpeed -= TraversalSpeedStep;
         }
     }
 
-    private IEnumerator DoSimulateTraversalPlanning(TraversalMove[] traversalScript)
+    /*private IEnumerator DoSimulateTraversalPlanning(TraversalMove[] traversalScript)
     {
         yield return new WaitForSeconds(ScriptedTraversalPlanningDelay);
 
@@ -288,11 +320,11 @@ public class TraversalManager : MonoBehaviour
                     break;
             }
 
-            yield return new WaitForSeconds(_traversalSpeed);
+            yield return new WaitForSeconds(TraversalSpeed);
         }
         
         SimulateButtonPress(InGamePanel.instance.GoButton);
-    }
+    }*/
 
     private void SimulateButtonPress(Button button)
     {
@@ -304,9 +336,13 @@ public class TraversalManager : MonoBehaviour
 
     private void CheckForCompletion()
     {
+        var timeMedal = MainManager.Instance.ActiveLevel.Scripted || _currentTraversalTime <= MainManager.Instance.ActiveLevel.ExpectedTime;
+        var movesMedal = MainManager.Instance.ActiveLevel.Scripted || _currentTraversalMoves <= MainManager.Instance.ActiveLevel.ExpectedMoves;
+        var flagMedal = MainManager.Instance.ActiveLevel.Scripted;
+
         if (_currentTraversalNode == MainManager.Instance.ActiveLevel.EndNode)
         {
-            Clear();
+            Clear(timeMedal, movesMedal, flagMedal);
         }
         else
         {
@@ -316,23 +352,24 @@ public class TraversalManager : MonoBehaviour
 
     private void Fail()
     {
-        PopupPanel.instance.ShowLost(MainManager.Instance.Levels[MainManager.Instance.ActiveLevel.Index].Level);
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.LevelFailed);
 
-        Destroy(MainManager.Instance.ActiveLevel.gameObject);
+        CancelTraversal();
+        MainManager.Instance.ReloadLevel();
+        InGamePanel.instance.ToggleTraversalInputs(true);
     }
 
-    private void Clear()
+    private void Clear(bool timeMedal, bool movesMedal, bool flagMedal)
     {
-        var timeMedal = MainManager.Instance.ActiveLevel.Scripted || _currentTraversalTime <= MainManager.Instance.ActiveLevel.ExpectedTime;
-        var movesMedal = MainManager.Instance.ActiveLevel.Scripted || _currentTraversalMoves <= MainManager.Instance.ActiveLevel.ExpectedMoves;
-        var flagMedal = MainManager.Instance.ActiveLevel.Scripted;
-        
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.LevelCleared);
+
         var flags = FindObjectsOfType<Flag>();
 
         for (var i = 0; i < flags.Length; i++)
         {
             if (flags[i].transform.parent != MainManager.Instance.Player.transform)
             {
+                flagMedal = false;
                 break;
             }
 

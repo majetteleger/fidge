@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class Path : Element
 {
+    public Sprite EditorSprite;
     public Sprite Sprite;
+    public Sprite BothStubSprite;
 
     public Node UpNode { get; set; }
     public Node RightNode { get; set; }
@@ -14,7 +16,7 @@ public class Path : Element
     
     public Node Traverse(TraversalManager.TraversalMove traversalMove, Node currentTraversalNode)
     {
-        var obstacle = getObstacle();
+        var obstacle = GetObstacle();
         var nextTraversalNode = (Node)null;
         
         switch (traversalMove)
@@ -47,14 +49,14 @@ public class Path : Element
 
             if(obstacleResolution != null)
             {
-                obstacle.HandleResolution();
+                StartCoroutine(obstacle.HandleResolution());
             }
         }
 
         return nextTraversalNode;
     }
 
-    private Obstacle getObstacle()
+    public Obstacle GetObstacle()
     {
         var obstacle = GetComponentInChildren<Obstacle>();
 

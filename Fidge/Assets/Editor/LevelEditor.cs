@@ -21,6 +21,8 @@ public class LevelEditor : Editor
 
     private bool _showInfo = true;
     private bool _showSolution = true;
+    private bool _showHelp = true;
+    private bool _shortcutKeyReleased = true;
 
     private EditableLevel _editableLevel;
     public EditableLevel EditableLevel
@@ -59,9 +61,7 @@ public class LevelEditor : Editor
 
         //var containerRect = new Rect((Screen.width - levelWidth) / 2, (Screen.height - levelHeight) / 2 + editingAreaOffset, levelWidth, levelHeight);
         var containerRect = new Rect(leftOffset, topOffset, levelWidth, levelHeight);
-
-        var slidePrefab = EditableLevel.LevelPrefab.GetComponent<Level>().SlidePrefab.GetComponent<Slide>();
-
+        
         const float buttonHeight = 40f;
         const float buttonWidth = 50f;
         const float buttonOffset = 5f;
@@ -75,25 +75,25 @@ public class LevelEditor : Editor
         DrawContainerRect(containerRect);
 
         if (GUI.Button(new Rect(levelWidth / 2 + leftOffset - buttonWidth / 2f, topOffset - (buttonHeight + buttonOffset), buttonWidth, buttonHeight),
-            slidePrefab.UpSprite.texture))
+            EditableLevel.LevelPrefab.GetComponent<Level>().UpArrow.texture))
         {
             ShiftLevel(ShiftDirection.Up);
         }
         
         if (GUI.Button(new Rect(levelWidth / 2 + leftOffset - buttonWidth / 2f, topOffset + levelHeight + buttonOffset, buttonWidth, buttonHeight),
-            slidePrefab.DownSprite.texture))
+            EditableLevel.LevelPrefab.GetComponent<Level>().DownArrow.texture))
         {
             ShiftLevel(ShiftDirection.Down);
         }
 
         if (GUI.Button(new Rect(leftOffset - (buttonHeight + buttonOffset), levelHeight / 2f - buttonWidth / 2f + topOffset, buttonHeight, buttonWidth),
-            slidePrefab.LeftSprite.texture))
+            EditableLevel.LevelPrefab.GetComponent<Level>().LeftArrow.texture))
         {
             ShiftLevel(ShiftDirection.Left);
         }
 
         if (GUI.Button(new Rect(leftOffset + levelWidth + buttonOffset, levelHeight / 2f - buttonWidth / 2f + topOffset, buttonHeight, buttonWidth),
-            slidePrefab.RightSprite.texture))
+            EditableLevel.LevelPrefab.GetComponent<Level>().RightArrow.texture))
         {
             ShiftLevel(ShiftDirection.Right);
         }
@@ -108,9 +108,9 @@ public class LevelEditor : Editor
 
             if (EditableLevel.Scripted)
             {
-                var traversalScriptProperty = serializedObject.FindProperty("TraversalScript");
+                var resetTutorialsProperty = serializedObject.FindProperty("ResetTutorials");
                 serializedObject.Update();
-                EditorGUILayout.PropertyField(traversalScriptProperty, true);
+                EditorGUILayout.PropertyField(resetTutorialsProperty, true);
                 serializedObject.ApplyModifiedProperties();
             }
             else
@@ -155,6 +155,28 @@ public class LevelEditor : Editor
 
                 EditorGUILayout.LabelField(solutionString);
             }
+        }
+
+        _showHelp = EditorGUILayout.Foldout(_showHelp, "Help");
+
+        if (_showHelp)
+        {
+            var myStyle = GUI.skin.GetStyle("HelpBox");
+            myStyle.richText = true;
+            myStyle.fontSize = 11;
+
+            EditorGUILayout.TextArea(
+                "<b>Left-Click (Empty cell)</b> : Create node or path\n" +
+                "<b>Left-Click (Empty path)</b> : Change path orientation\n" +
+                "<b>Left-Click (Obstacle or collectable)</b> : Cycle through colors or directions\n" +
+                "<b>Right-Click</b> : Open context menu\n" +
+                "<b>Backspace</b> : Clear cell\n" +
+                "<b>C</b> : Change traversal state modifier to Covered\n" +
+                "<b>R</b> : Change traversal state modifier to Revealed\n" +
+                "<b>N</b> : Clear traversal state modifier\n" +
+                "<b>O (path)</b> : Change path orientation", 
+                myStyle
+            );
         }
 
         if (GUI.changed)
@@ -216,27 +238,23 @@ public class LevelEditor : Editor
                                 
                                 if (EditableLevel.ElementContains(x, y, EditableLevel.KColorRed))
                                 {
-                                    additionalSprite = keyPrefab.RedSprite;
+                                    additionalSprite = keyPrefab.EditorSprites.RedSprite;
                                 }
                                 else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorBlue))
                                 {
-                                    additionalSprite = keyPrefab.BlueSprite;
+                                    additionalSprite = keyPrefab.EditorSprites.BlueSprite;
                                 }
                                 else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorGreen))
                                 {
-                                    additionalSprite = keyPrefab.GreenSprite;
+                                    additionalSprite = keyPrefab.EditorSprites.GreenSprite;
                                 }
-                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorCyan))
+                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorOrange))
                                 {
-                                    additionalSprite = keyPrefab.CyanSprite;
+                                    additionalSprite = keyPrefab.EditorSprites.OrangeSprite;
                                 }
-                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorMagenta))
+                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorPurple))
                                 {
-                                    additionalSprite = keyPrefab.MagentaSprite;
-                                }
-                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorYellow))
-                                {
-                                    additionalSprite = keyPrefab.YellowSprite;
+                                    additionalSprite = keyPrefab.EditorSprites.PurpleSprite;
                                 }
                             }
                             // Link
@@ -246,27 +264,23 @@ public class LevelEditor : Editor
 
                                 if (EditableLevel.ElementContains(x, y, EditableLevel.KColorRed))
                                 {
-                                    additionalSprite = LinkPrefab.RedSprite;
+                                    additionalSprite = LinkPrefab.EditorSprites.RedSprite;
                                 }
                                 else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorBlue))
                                 {
-                                    additionalSprite = LinkPrefab.BlueSprite;
+                                    additionalSprite = LinkPrefab.EditorSprites.BlueSprite;
                                 }
                                 else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorGreen))
                                 {
-                                    additionalSprite = LinkPrefab.GreenSprite;
+                                    additionalSprite = LinkPrefab.EditorSprites.GreenSprite;
                                 }
-                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorCyan))
+                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorOrange))
                                 {
-                                    additionalSprite = LinkPrefab.CyanSprite;
+                                    additionalSprite = LinkPrefab.EditorSprites.OrangeSprite;
                                 }
-                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorMagenta))
+                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorPurple))
                                 {
-                                    additionalSprite = LinkPrefab.MagentaSprite;
-                                }
-                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorYellow))
-                                {
-                                    additionalSprite = LinkPrefab.YellowSprite;
+                                    additionalSprite = LinkPrefab.EditorSprites.PurpleSprite;
                                 }
                             }
                             // Flag
@@ -283,12 +297,12 @@ public class LevelEditor : Editor
                         // Horizontal path
                         if (EditableLevel.ElementContains(x, y, EditableLevel.KHorizontal))
                         {
-                            sprite = EditableLevel.LevelPrefab.GetComponent<Level>().HorizontalPathPrefab.GetComponent<HorizontalPath>().Sprite;
+                            sprite = EditableLevel.LevelPrefab.GetComponent<Level>().HorizontalPathPrefab.GetComponent<HorizontalPath>().EditorSprite;
                         }
                         // Vertical path
                         else if (EditableLevel.ElementContains(x, y, EditableLevel.KVertical))
                         {
-                            sprite = EditableLevel.LevelPrefab.GetComponent<Level>().VerticalPathPrefab.GetComponent<VerticalPath>().Sprite;
+                            sprite = EditableLevel.LevelPrefab.GetComponent<Level>().VerticalPathPrefab.GetComponent<VerticalPath>().EditorSprite;
                         }
 
                         // Obstacles
@@ -300,35 +314,40 @@ public class LevelEditor : Editor
 
                             if (EditableLevel.ElementContains(x, y, EditableLevel.KColorRed))
                             {
-                                additionalSprite = lockPrefab.RedSprite;
+                                additionalSprite = lockPrefab.EditorSprites.RedSprite;
                             }
                             else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorBlue))
                             {
-                                additionalSprite = lockPrefab.BlueSprite;
+                                additionalSprite = lockPrefab.EditorSprites.BlueSprite;
                             }
                             else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorGreen))
                             {
-                                additionalSprite = lockPrefab.GreenSprite;
+                                additionalSprite = lockPrefab.EditorSprites.GreenSprite;
                             }
-                            else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorCyan))
+                            else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorOrange))
                             {
-                                additionalSprite = lockPrefab.CyanSprite;
+                                additionalSprite = lockPrefab.EditorSprites.OrangeSprite;
                             }
-                            else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorMagenta))
+                            else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorPurple))
                             {
-                                additionalSprite = lockPrefab.MagentaSprite;
-                            }
-                            else if (EditableLevel.ElementContains(x, y, EditableLevel.KColorYellow))
-                            {
-                                additionalSprite = lockPrefab.YellowSprite;
+                                additionalSprite = lockPrefab.EditorSprites.PurpleSprite;
                             }
                         }
                         // Wall
                         else if (EditableLevel.ElementContains(x, y, EditableLevel.KWall))
                         {
                             var wallPrefab = EditableLevel.LevelPrefab.GetComponent<Level>().WallPrefab.GetComponent<Wall>();
+                            
+                            if (EditableLevel.ElementContains(x, y, EditableLevel.KHorizontal))
+                            {
+                                additionalSprite = wallPrefab.EditorSprites.VerticalSprite;
+                            }
+                            else if (EditableLevel.ElementContains(x, y, EditableLevel.KVertical))
+                            {
+                                additionalSprite = wallPrefab.EditorSprites.HorizontalSprite;
+                            }
 
-                            additionalSprite = wallPrefab.GetComponent<SpriteRenderer>().sprite;
+                            
                         }
                         // Crack
                         else if (EditableLevel.ElementContains(x, y, EditableLevel.KCrack))
@@ -344,19 +363,19 @@ public class LevelEditor : Editor
 
                             if (EditableLevel.ElementContains(x, y, EditableLevel.KDirectionUp))
                             {
-                                additionalSprite = slidePrefab.UpSprite;
+                                additionalSprite = slidePrefab.EditorSprites.UpSprite;
                             }
                             else if(EditableLevel.ElementContains(x, y, EditableLevel.KDirectionRight))
                             {
-                                additionalSprite = slidePrefab.RightSprite;
+                                additionalSprite = slidePrefab.EditorSprites.RightSprite;
                             }
                             else if (EditableLevel.ElementContains(x, y, EditableLevel.KDirectionDown))
                             {
-                                additionalSprite = slidePrefab.DownSprite;
+                                additionalSprite = slidePrefab.EditorSprites.DownSprite;
                             }
                             else if (EditableLevel.ElementContains(x, y, EditableLevel.KDirectionLeft))
                             {
-                                additionalSprite = slidePrefab.LeftSprite;
+                                additionalSprite = slidePrefab.EditorSprites.LeftSprite;
                             }
                         }
                     }
@@ -375,11 +394,11 @@ public class LevelEditor : Editor
                     // Traversal state
                     if (EditableLevel.ElementContains(x, y, EditableLevel.KTraversalStateCovered))
                     {
-                        DrawSprite(EditableLevel.LevelPrefab.GetComponent<Level>().CoveredPrefab.GetComponent<SpriteRenderer>().sprite, newRect);
+                        DrawSprite(EditableLevel.LevelPrefab.GetComponent<Level>().CoveredPrefab.GetComponent<Covered>().EditorSprite, newRect);
                     }
                     else if(EditableLevel.ElementContains(x, y, EditableLevel.KTraversalStateRevealed))
                     {
-                        DrawSprite(EditableLevel.LevelPrefab.GetComponent<Level>().RevealedPrefab.GetComponent<SpriteRenderer>().sprite, newRect);
+                        DrawSprite(EditableLevel.LevelPrefab.GetComponent<Level>().RevealedPrefab.GetComponent<Revealed>().EditorSprite, newRect);
                     }
                 }
 
@@ -387,25 +406,9 @@ public class LevelEditor : Editor
                 {
                     EditorGUI.DrawRect(newRect, new Color(0, 0, 0, 0.25f));
 
-                    // Shortcuts
-                    if (currentEvent.keyCode == KeyCode.N)
-                    {
-                        ChangeTraversalState(x, y, string.Empty);
-                    }
-                    if (currentEvent.keyCode == KeyCode.C)
-                    {
-                        ChangeTraversalState(x, y, EditableLevel.KTraversalStateCovered);
-                    }
-                    if (currentEvent.keyCode == KeyCode.R)
-                    {
-                        ChangeTraversalState(x, y, EditableLevel.KTraversalStateRevealed);
-                    }
-                    if (currentEvent.keyCode == KeyCode.Delete || currentEvent.keyCode == KeyCode.Backspace)
-                    {
-                        ClearElement(x, y);
-                    }
-
-                    if (currentEvent.type == EventType.mouseDown && currentEvent.isMouse)
+                    HandleShortcuts(currentEvent, currentX, currentY);
+                    
+                    if (currentEvent.type == EventType.MouseDown && currentEvent.isMouse)
                     {
                         switch (currentEvent.button)
                         {
@@ -413,9 +416,30 @@ public class LevelEditor : Editor
                                 
                                 if (EditableLevel.ElementContains(x, y, EditableLevel.KPath))
                                 {
-                                    if ((x + y) % 2 == 1 && !EditableLevel.Shifted || (x + y) % 2 == 0 && EditableLevel.Shifted)
+                                    if (EditableLevel.ElementContains(x, y, EditableLevel.Obstacles))
+                                    {
+                                        if (EditableLevel.ElementContains(x, y, EditableLevel.Directions))
+                                        {
+                                            CycleDirections(x, y);
+                                        }
+                                        else if(EditableLevel.ElementContains(x, y, EditableLevel.Colors))
+                                        {
+                                            CycleColors(x, y);
+                                        }
+                                    }
+                                    else if ((x + y) % 2 == 1 && !EditableLevel.Shifted || (x + y) % 2 == 0 && EditableLevel.Shifted)
                                     {
                                         ChangePathOrientation(currentX, currentY);
+                                    }
+                                }
+                                else if (EditableLevel.ElementContains(x, y, EditableLevel.KNode))
+                                {
+                                    if (EditableLevel.ElementContains(x, y, EditableLevel.Collectables))
+                                    {
+                                        if (EditableLevel.ElementContains(x, y, EditableLevel.Colors))
+                                        {
+                                            CycleColors(x, y);
+                                        }
                                     }
                                 }
                                 else
@@ -511,17 +535,13 @@ public class LevelEditor : Editor
                                             {
                                                 ChangeColor(currentX, currentY, EditableLevel.KColorBlue);
                                             });
-                                            menu.AddItem(new GUIContent("Lock/Color/Cyan"), false, () =>
+                                            menu.AddItem(new GUIContent("Lock/Color/Orange"), false, () =>
                                             {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorCyan);
+                                                ChangeColor(currentX, currentY, EditableLevel.KColorOrange);
                                             });
-                                            menu.AddItem(new GUIContent("Lock/Color/Magenta"), false, () =>
+                                            menu.AddItem(new GUIContent("Lock/Color/Purple"), false, () =>
                                             {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorMagenta);
-                                            });
-                                            menu.AddItem(new GUIContent("Lock/Color/Yellow"), false, () =>
-                                            {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorYellow);
+                                                ChangeColor(currentX, currentY, EditableLevel.KColorPurple);
                                             });
                                             menu.AddItem(new GUIContent("Lock/Delete"), false, () =>
                                             {
@@ -614,17 +634,13 @@ public class LevelEditor : Editor
                                             {
                                                 ChangeColor(currentX, currentY, EditableLevel.KColorBlue);
                                             });
-                                            menu.AddItem(new GUIContent("Key/Color/Cyan"), false, () =>
+                                            menu.AddItem(new GUIContent("Key/Color/Orange"), false, () =>
                                             {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorCyan);
+                                                ChangeColor(currentX, currentY, EditableLevel.KColorOrange);
                                             });
-                                            menu.AddItem(new GUIContent("Key/Color/Magenta"), false, () =>
+                                            menu.AddItem(new GUIContent("Key/Color/Purple"), false, () =>
                                             {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorMagenta);
-                                            });
-                                            menu.AddItem(new GUIContent("Key/Color/Yellow"), false, () =>
-                                            {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorYellow);
+                                                ChangeColor(currentX, currentY, EditableLevel.KColorPurple);
                                             });
                                             menu.AddItem(new GUIContent("Key/Delete"), false, () =>
                                             {
@@ -646,17 +662,13 @@ public class LevelEditor : Editor
                                             {
                                                 ChangeColor(currentX, currentY, EditableLevel.KColorBlue);
                                             });
-                                            menu.AddItem(new GUIContent("Link/Color/Cyan"), false, () =>
+                                            menu.AddItem(new GUIContent("Link/Color/Orange"), false, () =>
                                             {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorCyan);
+                                                ChangeColor(currentX, currentY, EditableLevel.KColorOrange);
                                             });
-                                            menu.AddItem(new GUIContent("Link/Color/Magenta"), false, () =>
+                                            menu.AddItem(new GUIContent("Link/Color/Purple"), false, () =>
                                             {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorMagenta);
-                                            });
-                                            menu.AddItem(new GUIContent("Link/Color/Yellow"), false, () =>
-                                            {
-                                                ChangeColor(currentX, currentY, EditableLevel.KColorYellow);
+                                                ChangeColor(currentX, currentY, EditableLevel.KColorPurple);
                                             });
                                             menu.AddItem(new GUIContent("Link/Delete"), false, () =>
                                             {
@@ -790,6 +802,57 @@ public class LevelEditor : Editor
         EditableLevel.NumberOfSolutions = Solutions.Count;
         EditableLevel.MinimumMoves = minimumMoves / 2;
         EditableLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
+
+        var numberOfElements = 0;
+        var numberOfFlags = 0;
+        string[] mechanics = {
+            EditableLevel.KSlide, 
+            EditableLevel.KWall, 
+            EditableLevel.KCrack, 
+            EditableLevel.KLock, 
+            EditableLevel.KLink,
+            EditableLevel.KTraversalStateCovered, 
+            EditableLevel.KTraversalStateRevealed
+        };
+
+        bool[] differentMechanics = new bool[mechanics.Length];
+        var numberOfDifferentMechanics = 0;
+
+        for (var i = 0; i < EditableLevel.Elements.Length; i++)
+        {
+            if (!string.IsNullOrEmpty(EditableLevel.Elements[i]))
+            {
+                numberOfElements++;
+
+                if (EditableLevel.Elements[i].Contains(EditableLevel.KFlag))
+                {
+                    numberOfFlags++;
+                }
+
+                for (var j = 0; j < mechanics.Length; j++)
+                {
+                    if (!differentMechanics[j] && EditableLevel.Elements[i].Contains(mechanics[j]))
+                    {
+                        differentMechanics[j] = true;
+                        numberOfDifferentMechanics++;
+                    }
+                }
+            }
+        }
+
+        var newName = string.Format("{0}-{1}-{2}-{3}-{4}",
+            numberOfDifferentMechanics,
+            (EditableLevel.MinimumMoves + EditableLevel.MinimumMovesWithFlag).ToString("D3"), 
+            numberOfFlags,
+            numberOfElements.ToString("D3"), 
+            EditableLevel.NumberOfSolutions.ToString("D4")
+        );
+
+        string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject.GetInstanceID());
+        AssetDatabase.RenameAsset(assetPath, newName);
+        AssetDatabase.SaveAssets();
+
+        Debug.Log(newName);
     }
 
     private string GetSuggestedTime()
@@ -820,6 +883,83 @@ public class LevelEditor : Editor
     private int GetSuggestedMovesValue()
     {
         return EditableLevel.MinimumMoves + 1;
+    }
+
+    private void HandleShortcuts(Event currentEvent, int x, int y)
+    {
+        // GetKey
+        if (currentEvent.keyCode == KeyCode.N)
+        {
+            ChangeTraversalState(x, y, string.Empty);
+        }
+        if (currentEvent.keyCode == KeyCode.C)
+        {
+            ChangeTraversalState(x, y, EditableLevel.KTraversalStateCovered);
+        }
+        if (currentEvent.keyCode == KeyCode.R)
+        {
+            ChangeTraversalState(x, y, EditableLevel.KTraversalStateRevealed);
+        }
+        if (currentEvent.keyCode == KeyCode.Backspace)
+        {
+            ClearElement(x, y);
+        }
+        //
+
+        if (_shortcutKeyReleased)
+        {
+            // GetKeyDown
+            if (currentEvent.keyCode == KeyCode.O)
+            {
+                ChangePathOrientation(x, y);
+            }
+            //
+
+            if (currentEvent.keyCode != KeyCode.None)
+            {
+                _shortcutKeyReleased = false;
+            }
+        }
+        
+        if (currentEvent.type == EventType.KeyUp)
+        {
+            _shortcutKeyReleased = true;
+        }
+    }
+
+    private int GetNextValueIndex(int x, int y, string[] values)
+    {
+        var currentValueIndex = 0;
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            if (EditableLevel.ElementContains(x, y, values[i]))
+            {
+                currentValueIndex = i;
+                break;
+            }
+        }
+
+        currentValueIndex++;
+
+        if (currentValueIndex >= values.Length)
+        {
+            currentValueIndex = 0;
+        }
+
+        return currentValueIndex;
+    }
+
+    private void CycleColors(int x, int y)
+    {
+        var nextValueIndex = GetNextValueIndex(x, y, EditableLevel.Colors);
+        ChangeColor(x, y, EditableLevel.Colors[nextValueIndex]);
+    }
+
+    private void CycleDirections(int x, int y)
+    {
+        var nextValueIndex = GetNextValueIndex(x, y, EditableLevel.Directions);
+        ChangeDirection(x, y, EditableLevel.Directions[nextValueIndex]);
     }
 
     #region Undo-able functions

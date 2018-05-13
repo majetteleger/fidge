@@ -5,12 +5,8 @@ using UnityEngine;
 
 public class Link : Content
 {
-    public Sprite RedSprite;
-    public Sprite BlueSprite;
-    public Sprite GreenSprite;
-    public Sprite CyanSprite;
-    public Sprite MagentaSprite;
-    public Sprite YellowSprite;
+    public ColoredSpriteCollection Sprites;
+    public ColoredSpriteCollection EditorSprites;
 
     public Level.KeyLockColor Color { get; set; }
 }

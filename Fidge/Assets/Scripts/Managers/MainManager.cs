@@ -34,9 +34,9 @@ public class MainManager : MonoBehaviour
     
     public SequentialLevel[] Levels { get; set; }
     public bool DirtyMedals { get; set; }
-
-    public int LastLoadedLevelIndex { get; private set; }
     
+    public EditableLevel LastLoadedLevel { get; private set; }
+
     private Player player;
     public Player Player
     {
@@ -155,12 +155,12 @@ public class MainManager : MonoBehaviour
 
     public void ReloadLevel()
     {
-        LoadLevel(Levels[LastLoadedLevelIndex].Level);
+        LoadLevel(LastLoadedLevel);
     }
 
     public void LoadNextLevel()
     {
-        LoadLevel(Levels[LastLoadedLevelIndex].NextLevel);
+        LoadLevel(Levels[LastLoadedLevel.Index].NextLevel);
     }
 
     public void LoadLevel(EditableLevel editableLevel)
@@ -172,19 +172,26 @@ public class MainManager : MonoBehaviour
         
         if (editableLevel != null)
         {
+            TutorialManager.Instance.ListeningForTutorialChecks = true;
+
+            InGamePanel.instance.ShowLevel(editableLevel);
             var level = editableLevel.InstantiateLevel();
-            InGamePanel.instance.Show();
-
+            
             level.Index = editableLevel.Index;
+            LastLoadedLevel = editableLevel;
 
-            if (editableLevel.Index > 0)
+            var tutorialTaggers = FindObjectsOfType<TutorialTagger>();
+
+            foreach (var tutorialTagger in tutorialTaggers)
             {
-                LastLoadedLevelIndex = editableLevel.Index;
+                tutorialTagger.CheckForTutorial();
             }
+
+            TutorialManager.Instance.ListeningForTutorialChecks = false;
         }
         else
         {
-            LevelSelectionPanel.instance.Show();
+            LevelSelectionPanel.Instance.Show();
         }
     }
 }

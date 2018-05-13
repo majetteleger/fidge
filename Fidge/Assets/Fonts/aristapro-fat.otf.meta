@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 3f44124b28b3ed448975fec7050f7fea
+timeCreated: 1522371416
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Arista Pro
+  fontNames:
+  - Arista Pro
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

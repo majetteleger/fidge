@@ -9,8 +9,8 @@ public class Obstacle : Content
         return null;
     }
 
-    public virtual void HandleResolution()
+    public virtual IEnumerator HandleResolution()
     {
-        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Good);
+        yield return null;
     }
 }

@@ -1,81 +1,40 @@
 
 - Tasks -
 
-- SOUND
-	- Button Click
-	- Panel change/show
-	- Traversal input
-	- Go
-	- Player move
-	- Level failed
-	- Level cleared
-	- Interactions with the obstacles
-		- Slide
-		- Crack
-		- Wall
-		- Lock
-		- Covered
-	- Interactions with the collectables
-		- Key
-		- Flag
-		- Link
-	- Menu music
-	- Level music
+- Levels levels levels LEVELLLSSLSLS
+
+- Monetize: Free first n levels, pay for the rest
+	- Disabled section graphic
+	- "Thanks, buy the rest" panel
+
 - VISUAL EFFECTS / ANIMATION
 	- Button Click
 	- Panel change/show
 	- Traversal input
 	- Go
 	- Player move
-	- Level failed
+	- Level failed + reset
 	- Level cleared
+	- Level start : cover
+	- level start: reveal
 	- Interactions with the obstacles
 		- Slide
 		- Crack
 		- Wall
 		- Lock
-		- Covered
 	- Interactions with the collectables
 		- Key
 		- Flag
 		- Link
-- GRAPHICS
-	- Obstacles
-		- Slide
-		- Crack
-		- Wall
-		- Lock
-		- Covered
-		- Revealed
-	- Collectables
-		- Key
-		- Flag
-		- Link
-	- Node
-	- Start node
-	- End node
-	- Path
-	- Menu buttons
-	- UI panels layout
-		- Main menu
-		- Level selection
-		- Option
-		- Credits
-		- In-game
-		- Popup
-	- Traversal input
-	- Level buttons
-	- Level objectives/score/description
-	- Level previews (?)
-	- Level timer
-	- Level move counter
-	- Level collectables display
-
 
 
 ....................
 
 x Bugs x
+
+x Performance issues on device
+x Completion issues (Julian: "I noticed if you get the star within the time limit you win but if you get the stars and time runs out you lose") (only on mac?)
+x Arrow and bubble placement different on phone / mac / probably different resolutions
 
 x Level solver : Link levels might not have correct solutions (e.g. Link Level 2)
 	Print out the solutions to make sure they're right
@@ -85,12 +44,23 @@ x Level solver : Revealed Level 3 can't find a solution
 
 ....................
 
-+ Possible Features +
++ Possible Features (For. The. Sequel.) + 
 
 + Hint (consumable) (pings where you currently are in the traversal)
 + In-game level editor
++ Endless / Scrolling / Procedurally generated mode (Have to get to checkpoints to advance)
++ Additional input methods for choice in options
++ Bonus levels after section
+	+ Unlock when all medals of a section have been collected
++ Super Bonus levels after section
+	+ Unlocks when a special insivible key (at the end of an invisible path) in one level of a section has been collected
+	+ Insivisble path shows (briefly) when you traverse a node or a path next to it
 
 + Crossing path
++ Buttons you have to land on to open a door on the level 
+	+ levels where you have more than one "go" to traverse it
+	+ buttons could also activate/deactive other traps and obstacles
++ Different keys that gets destroyed by (different) locks
 + Multiple end nodes / possible traversal but only one optimal one
 + Cracks and walls with more than 1 health
 + Triggers that toggle paths on or off
@@ -99,34 +69,11 @@ x Level solver : Revealed Level 3 can't find a solution
 	+ Move in a square, a set number of nodes each direction
 	+ Straight line & turn 180 degrees when they can't move straight ahead
 	+ Straight line & turn 90 degrees when they can't move straight ahead
-+ Endless / Scrolling / Procedurally generated mode (Have to get to checkpoints to advance)
 
 
 ....................
 
 ? Questions ?
 
-? Try some other input methods
-? Do Locks destroy keys?
-? Think about monetization
-	Free?
-	Fixed price?
-	Donation based?
-	Microtransactions?
-		Goodies (hints)?
-		Level unlock?
-	Ads? 
-		Banner? 
-		Optional videos for goodies? 
-		Videos every n levels?
-	Free first n levels, pay for the rest?
+? 
 
-
-
-....................
-
-= Editor & Structure
-
-= More shortcuts (with help toggle that lists them)
-= Polish job on right-click menus and content adding
-= More generic LevelElement & Content

@@ -16,6 +16,24 @@ public class OptionsPanel : Panel
         }
     }
 
+    void Start()
+    {
+        Initialize();
+    }
+
+    void Update()
+    {
+        if(!IsActive)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            MainMenuPanel.instance.Show();
+        }
+    }
+
     public void UI_ResetProgress()
     {
         MainManager.Instance.Medals = 0;

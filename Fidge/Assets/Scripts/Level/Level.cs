@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using geniikw.DataRenderer2D;
 using UnityEngine;
 
 public class Level : MonoBehaviour
@@ -9,9 +10,8 @@ public class Level : MonoBehaviour
         Red,
         Green,
         Blue,
-        Cyan,
-        Magenta,
-        Yellow
+        Orange,
+        Purple,
     }
     
     [Header("Prefabs")]
@@ -29,10 +29,19 @@ public class Level : MonoBehaviour
     public GameObject SlidePrefab;
     public GameObject CoveredPrefab;
     public GameObject RevealedPrefab;
+    public GameObject ModifierMaskPrefab;
     [Header("Containers")]
     public Transform NodesContainer;
     public Transform PathsContainer;
     public Transform EmptyElementsContainer;
+    public Transform ShadowsContainer;
+    public Color ShadowsColor;
+    public Vector2 ShadowOffset;
+    [Header("Editor")]
+    public Sprite UpArrow;
+    public Sprite RightArrow;
+    public Sprite DownArrow;
+    public Sprite LeftArrow;
 
     public bool Scripted { get; set; }
     public int Index { get; set; }
@@ -81,11 +90,6 @@ public class Level : MonoBehaviour
     public static string GetSavedValue(int levelIndex)
     {
         return PlayerPrefs.GetString("Level" + levelIndex);
-    }
-
-    public bool Cleared
-    {
-        get { return TimeMedal || MovesMedal || FlagMedal; }
     }
 
     public bool TimeMedal
@@ -140,14 +144,22 @@ public class Level : MonoBehaviour
         LinkElements<Node, Path>();
         LinkElements<Path, Node>();
         
-        StartNode.GetComponent<SpriteRenderer>().sprite = NodePrefab.GetComponent<Node>().StartSprite;
         EndNode.GetComponent<SpriteRenderer>().sprite = NodePrefab.GetComponent<Node>().EndSprite;
-        
-        Instantiate(PlayerPrefab, StartNode.transform);
+
+        foreach (var element in GetComponentsInChildren<Element>())
+        {
+            if (element.State == Element.TraversalState.Revealed)
+            {
+                element.Cover();
+            }
+        }
         
         if (Application.isPlaying && Scripted)
         {
-            TraversalManager.Instance.SimulateTraversalPlanning(editableLevel.TraversalScript);
+            foreach (var tutorialTag in editableLevel.ResetTutorials)
+            {
+                TutorialManager.Instance.SaveTutorial(tutorialTag, false);
+            }
         }
     }
     
@@ -208,12 +220,10 @@ public class Level : MonoBehaviour
 
             if (node != null)
             {
-                node.UpPath = upLink as Path;
-                node.RightPath = rightLink as Path;
-                node.DownPath = downLink as Path;
-                node.LeftPath = leftLink as Path;
-
-
+                node.UpPath = upLink as VerticalPath;
+                node.RightPath = rightLink as HorizontalPath;
+                node.DownPath = downLink as VerticalPath;
+                node.LeftPath = leftLink as HorizontalPath;
             }
 
             if (path != null)

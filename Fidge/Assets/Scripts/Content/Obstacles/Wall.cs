@@ -5,9 +5,13 @@ using UnityEngine;
 
 public class Wall : Obstacle
 {
+    public OrientedSpriteCollection Sprites;
+    public OrientedSpriteCollection EditorSprites;
+
     public int Health { get; set; }
 
     private int _currentHealth;
+    private Vector3 _playerOriginalPosition;
 
     private void Start()
     {
@@ -17,22 +21,54 @@ public class Wall : Obstacle
 
     public override Node Resolve(Node currentTraversalNode, Node nextTraversalNode, TraversalManager.TraversalMove direction)
     {
-        if(_currentHealth <= 0)
-        {
-            return nextTraversalNode;
-        }
+        StartCoroutine(DoResolving());
 
-        _currentHealth--;
         return currentTraversalNode;
     }
 
-    public override void HandleResolution()
+    public override IEnumerator HandleResolution()
     {
-        base.HandleResolution();
+        yield return new WaitForSeconds(TraversalManager.Instance.TraversalSpeed / 2);
+        
+        if (_currentHealth <= 0)
+        {
+            StopAllCoroutines();
+            Destroy(gameObject);
+        }
+    }
+
+    private IEnumerator DoResolving()
+    {
+        _playerOriginalPosition = MainManager.Instance.Player.transform.position;
+
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Wall);
+
+        StartCoroutine(MovePlayer(_playerOriginalPosition, transform.position, TraversalManager.Instance.TraversalSpeed / 4));
+        yield return new WaitForSeconds(TraversalManager.Instance.TraversalSpeed / 4);
+
+        _currentHealth--;
 
         if (_currentHealth <= 0)
         {
-            Destroy(gameObject);
+            GetComponent<SpriteRenderer>().enabled = false;
         }
+
+        StartCoroutine(MovePlayer(transform.position, _playerOriginalPosition, TraversalManager.Instance.TraversalSpeed / 4));
+        yield return new WaitForSeconds(TraversalManager.Instance.TraversalSpeed / 4);
+    }
+
+    private IEnumerator MovePlayer(Vector3 sourcePosition, Vector3 targetPosition, float time)
+    {
+        var startTime = Time.time;
+
+        while (Time.time < startTime + time)
+        {
+            var step = Mathf.SmoothStep(0.0f, 1.0f, (Time.time - startTime) / time);
+            MainManager.Instance.Player.transform.position = Vector3.Lerp(sourcePosition, targetPosition, step);
+
+            yield return null;
+        }
+
+        MainManager.Instance.Player.transform.position = targetPosition;
     }
 }

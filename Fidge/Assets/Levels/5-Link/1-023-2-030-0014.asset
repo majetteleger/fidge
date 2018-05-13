@@ -1,0 +1,145 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1a44d4a91cfb8d4e844e48f246a1b25, type: 3}
+  m_Name: 1-023-2-030-0014
+  m_EditorClassIdentifier: 
+  Scripted: 0
+  AllowedEndNodeBypasses: 0
+  Desription: 
+  Author: Alvaro
+  ExpectedTime: 4
+  ExpectedMoves: 8
+  ResetTutorials: 
+  Shifted: 0
+  Index: 53
+  NumberOfSolutions: -1
+  MinimumMoves: -1
+  MinimumMovesWithFlag: -1
+  StartNode: {x: 6, y: 8}
+  EndNode: {x: 4, y: 4}
+  Elements:
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)(F)
+  - 
+  - (N)
+  - (P)(H)
+  - (N)
+  - (P)(H)
+  - (N)(LK)(CR)
+  - 
+  - 
+  - (P)(V)
+  - 
+  - (P)(V)
+  - 
+  - (P)(V)
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - 
+  - (N)(LK)(CG)
+  - 
+  - (N)(LK)(CO)
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)
+  - 
+  - 
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)(LK)(CB)
+  - 
+  - 
+  - (P)(V)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - (P)(H)
+  - (N)(LK)(CB)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)(LK)(CO)
+  - 
+  - (N)(LK)(CG)
+  - 
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)
+  - 
+  - 
+  - 
+  - (P)(V)
+  - 
+  - 
+  - 
+  - 
+  - (N)(F)
+  - (P)(H)
+  - (N)(LK)(CR)
+  - (P)(H)
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 

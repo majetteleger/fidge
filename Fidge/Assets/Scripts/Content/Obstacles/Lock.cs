@@ -5,24 +5,17 @@ using UnityEngine;
 
 public class Lock : Obstacle
 {
-    public Sprite RedSprite;
-    public Sprite BlueSprite;
-    public Sprite GreenSprite;
-    public Sprite CyanSprite;
-    public Sprite MagentaSprite;
-    public Sprite YellowSprite;
+    public ColoredSpriteCollection Sprites;
+    public ColoredSpriteCollection EditorSprites;
 
     public Level.KeyLockColor Color { get; set; }
 
     private int _keysToUnlock;
-
-    private void Start()
-    {
-        _keysToUnlock = FindKeys();
-    }
-
+    
     public override Node Resolve(Node currentTraversalNode, Node nextTraversalNode, TraversalManager.TraversalMove direction)
     {
+        _keysToUnlock = FindKeys();
+
         var playerCollectables = MainManager.Instance.Player.GetCollectables();
         var collectedKeys = 0;
 
@@ -39,10 +32,12 @@ public class Lock : Obstacle
         return collectedKeys >= _keysToUnlock ? nextTraversalNode: null;
     }
 
-    public override void HandleResolution()
+    public override IEnumerator HandleResolution()
     {
-        base.HandleResolution();
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Lock);
 
+        yield return new WaitForSeconds(TraversalManager.Instance.TraversalSpeed / 2);
+        
         var playerCollectables = MainManager.Instance.Player.GetCollectables();
 
         for (var i = 0; i < playerCollectables.Length; i++)

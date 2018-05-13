@@ -25,10 +25,10 @@ public class GlobalEditor : MonoBehaviour
         }
     }*/
 
-    /*[MenuItem("Tools/Rewrite")]
+    [MenuItem("Tools/Rewrite")]
     public static void Rewrite()
     {
-        const string rootfolder = @"C:\Users\ma_je\OneDrive\Documents\BitBucket\WorkshopShmup\Fidge\Fidge\Assets\Levels\10-Julian\0-Basic";
+        const string rootfolder = @"C:\Users\M-Antoine\Documents\SharedProjects\Fidge\Fidge\Assets\Levels";
 
         var files = Directory.GetFiles(rootfolder, "*.asset*", SearchOption.AllDirectories);
         foreach (var file in files)
@@ -42,29 +42,9 @@ public class GlobalEditor : MonoBehaviour
                 {
                     if (i > 20)
                     {
-                        lines[i] = lines[i].Replace(@"-TSR", @"(TSR)");
-                        lines[i] = lines[i].Replace(@"-TSC", @"(TSC)");
-                        lines[i] = lines[i].Replace(@"-CY", @"(CY)");
-                        lines[i] = lines[i].Replace(@"-CM", @"(CM)");
-                        lines[i] = lines[i].Replace(@"-CC", @"(CC)");
-                        lines[i] = lines[i].Replace(@"-CB", @"(CB)");
-                        lines[i] = lines[i].Replace(@"-CG", @"(CG)");
-                        lines[i] = lines[i].Replace(@"-CR", @"(CR)");
-                        lines[i] = lines[i].Replace(@"-DL", @"(DL)");
-                        lines[i] = lines[i].Replace(@"-DD", @"(DD)");
-                        lines[i] = lines[i].Replace(@"-DR", @"(DR)");
-                        lines[i] = lines[i].Replace(@"-DU", @"(DU)");
-                        lines[i] = lines[i].Replace(@"-LK", @"(LK)");
-                        lines[i] = lines[i].Replace(@"-S", @"(S)");
-                        lines[i] = lines[i].Replace(@"-C", @"(C)");
-                        lines[i] = lines[i].Replace(@"-W", @"(W)");
-                        lines[i] = lines[i].Replace(@"-L", @"(L)");
-                        lines[i] = lines[i].Replace(@"-K", @"(K)");
-                        lines[i] = lines[i].Replace(@"-V", @"(V)");
-                        lines[i] = lines[i].Replace(@"-H", @"(H)");
-                        lines[i] = lines[i].Replace(@"-P", @"(P)");
-                        lines[i] = lines[i].Replace(@"-N", @"(N)");
-                        lines[i] = lines[i].Replace(@"-F", @"(F)");
+                        lines[i] = lines[i].Replace(@"(CY)", @"(CO)");
+                        lines[i] = lines[i].Replace(@"(CM)", @"(CP)");
+                        lines[i] = lines[i].Replace(@"(CC)", @"(CO)");
                     }
                 }
                 
@@ -75,5 +55,5 @@ public class GlobalEditor : MonoBehaviour
                 Debug.Log(ex.Message);
             }
         }
-    }*/
+    }
 }

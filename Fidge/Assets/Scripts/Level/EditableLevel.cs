@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using Random = UnityEngine.Random;
 
 [System.Serializable]
 public class EditableLevel : ScriptableObject
@@ -28,16 +29,15 @@ public class EditableLevel : ScriptableObject
     public const string KColorRed = "(CR)";
     public const string KColorGreen = "(CG)";
     public const string KColorBlue = "(CB)";
-    public const string KColorCyan = "(CC)";
-    public const string KColorMagenta = "(CM)";
-    public const string KColorYellow = "(CY)";
+    public const string KColorOrange = "(CO)";
+    public const string KColorPurple = "(CP)";
     public const string KTraversalStateCovered = "(TSC)";
     public const string KTraversalStateRevealed = "(TSR)";
 
     public static readonly string[] Collectables = {KKey, KFlag, KLink};
     public static readonly string[] Obstacles = {KLock, KWall, KCrack , KSlide};
     public static readonly string[] LevelElements = {KNode, KPath, KVertical, KHorizontal};
-    public static readonly string[] Colors = {KColorRed, KColorGreen, KColorBlue, KColorCyan, KColorMagenta, KColorYellow};
+    public static readonly string[] Colors = {KColorRed, KColorGreen, KColorBlue, KColorOrange, KColorPurple};
     public static readonly string[] Directions = {KDirectionUp, KDirectionRight, KDirectionDown, KDirectionLeft};
     public static readonly string[] TraversalStates = { KTraversalStateCovered, KTraversalStateRevealed };
 
@@ -47,7 +47,7 @@ public class EditableLevel : ScriptableObject
     public string Author;
     public int ExpectedTime;
     public int ExpectedMoves;
-    public TraversalManager.TraversalMove[] TraversalScript;
+    public TutorialManager.TutorialTag[] ResetTutorials;
 
     [HideInInspector] public bool Shifted;
     [HideInInspector] public int Index;
@@ -72,6 +72,10 @@ public class EditableLevel : ScriptableObject
         }
     }
 
+    public int MedalsNeededToUnlock => Mathf.CeilToInt(Index * MainManager.Instance.LevelUnlockMultiplier);
+
+    public bool Unlocked => MainManager.Instance.Medals >= MedalsNeededToUnlock;
+
     public EditableLevel()
     {
         Elements = new string[KWidth * KHeight];
@@ -82,6 +86,11 @@ public class EditableLevel : ScriptableObject
     
     public string GetElement(int x, int y)
     {
+        if (x + y * KWidth > Elements.Length - 1)
+        {
+            return null;
+        }
+
         return Elements[x + y * KWidth];
     }
 
@@ -134,7 +143,20 @@ public class EditableLevel : ScriptableObject
 
         RemoveFromElement(x, y, contentToRemove);
     }
-    
+
+    public bool ElementContains(int x, int y, string[] characters)
+    {
+        foreach (var character in characters)
+        {
+            if (ElementContains(x, y, character))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public bool ElementContains(int x, int y, string character)
     {
         var source = GetElement(x, y);
@@ -167,11 +189,13 @@ public class EditableLevel : ScriptableObject
                         if (x == (int)StartNode.x && y == (int)StartNode.y)
                         {
                             level.StartNode = node;
+                            Instantiate(level.PlayerPrefab, level.StartNode.transform);
                         }
                         // End node
                         else if (x == (int)EndNode.x && y == (int)EndNode.y)
                         {
                             level.EndNode = node;
+                            level.EndNode.gameObject.AddComponent<TutorialTagger>().Tag = TutorialManager.TutorialTag.EndNode;
                         }
 
                         // Collectables
@@ -187,32 +211,27 @@ public class EditableLevel : ScriptableObject
                                 if (ElementContains(x, y, KColorRed))
                                 {
                                     newKey.Color = Level.KeyLockColor.Red;
-                                    newKeyRenderer.sprite = newKey.RedSprite;
+                                    newKeyRenderer.sprite = newKey.Sprites.RedSprite;
                                 }
                                 else if (ElementContains(x, y, KColorGreen))
                                 {
                                     newKey.Color = Level.KeyLockColor.Green;
-                                    newKeyRenderer.sprite = newKey.GreenSprite;
+                                    newKeyRenderer.sprite = newKey.Sprites.GreenSprite;
                                 }
                                 else if (ElementContains(x, y, KColorBlue))
                                 {
                                     newKey.Color = Level.KeyLockColor.Blue;
-                                    newKeyRenderer.sprite = newKey.BlueSprite;
+                                    newKeyRenderer.sprite = newKey.Sprites.BlueSprite;
                                 }
-                                else if (ElementContains(x, y, KColorCyan))
+                                else if (ElementContains(x, y, KColorOrange))
                                 {
-                                    newKey.Color = Level.KeyLockColor.Cyan;
-                                    newKeyRenderer.sprite = newKey.CyanSprite;
+                                    newKey.Color = Level.KeyLockColor.Orange;
+                                    newKeyRenderer.sprite = newKey.Sprites.OrangeSprite;
                                 }
-                                else if (ElementContains(x, y, KColorMagenta))
+                                else if (ElementContains(x, y, KColorPurple))
                                 {
-                                    newKey.Color = Level.KeyLockColor.Magenta;
-                                    newKeyRenderer.sprite = newKey.MagentaSprite;
-                                }
-                                else if (ElementContains(x, y, KColorYellow))
-                                {
-                                    newKey.Color = Level.KeyLockColor.Yellow;
-                                    newKeyRenderer.sprite = newKey.YellowSprite;
+                                    newKey.Color = Level.KeyLockColor.Purple;
+                                    newKeyRenderer.sprite = newKey.Sprites.PurpleSprite;
                                 }
                             }
                             // Link
@@ -225,32 +244,27 @@ public class EditableLevel : ScriptableObject
                                 if (ElementContains(x, y, KColorRed))
                                 {
                                     newLink.Color = Level.KeyLockColor.Red;
-                                    newLinkRenderer.sprite = newLink.RedSprite;
+                                    newLinkRenderer.sprite = newLink.Sprites.RedSprite;
                                 }
                                 else if (ElementContains(x, y, KColorGreen))
                                 {
                                     newLink.Color = Level.KeyLockColor.Green;
-                                    newLinkRenderer.sprite = newLink.GreenSprite;
+                                    newLinkRenderer.sprite = newLink.Sprites.GreenSprite;
                                 }
                                 else if (ElementContains(x, y, KColorBlue))
                                 {
                                     newLink.Color = Level.KeyLockColor.Blue;
-                                    newLinkRenderer.sprite = newLink.BlueSprite;
+                                    newLinkRenderer.sprite = newLink.Sprites.BlueSprite;
                                 }
-                                else if (ElementContains(x, y, KColorCyan))
+                                else if (ElementContains(x, y, KColorOrange))
                                 {
-                                    newLink.Color = Level.KeyLockColor.Cyan;
-                                    newLinkRenderer.sprite = newLink.CyanSprite;
+                                    newLink.Color = Level.KeyLockColor.Orange;
+                                    newLinkRenderer.sprite = newLink.Sprites.OrangeSprite;
                                 }
-                                else if (ElementContains(x, y, KColorMagenta))
+                                else if (ElementContains(x, y, KColorPurple))
                                 {
-                                    newLink.Color = Level.KeyLockColor.Magenta;
-                                    newLinkRenderer.sprite = newLink.MagentaSprite;
-                                }
-                                else if (ElementContains(x, y, KColorYellow))
-                                {
-                                    newLink.Color = Level.KeyLockColor.Yellow;
-                                    newLinkRenderer.sprite = newLink.YellowSprite;
+                                    newLink.Color = Level.KeyLockColor.Purple;
+                                    newLinkRenderer.sprite = newLink.Sprites.PurpleSprite;
                                 }
                             }
                             // Flag
@@ -287,38 +301,44 @@ public class EditableLevel : ScriptableObject
                                 if (ElementContains(x, y, KColorRed))
                                 {
                                     newLock.Color = Level.KeyLockColor.Red;
-                                    newLockRenderer.sprite = newLock.RedSprite;
+                                    newLockRenderer.sprite = newLock.Sprites.RedSprite;
                                 }
                                 else if (ElementContains(x, y, KColorGreen))
                                 {
                                     newLock.Color = Level.KeyLockColor.Green;
-                                    newLockRenderer.sprite = newLock.GreenSprite;
+                                    newLockRenderer.sprite = newLock.Sprites.GreenSprite;
                                 }
                                 else if (ElementContains(x, y, KColorBlue))
                                 {
                                     newLock.Color = Level.KeyLockColor.Blue;
-                                    newLockRenderer.sprite = newLock.BlueSprite;
+                                    newLockRenderer.sprite = newLock.Sprites.BlueSprite;
                                 }
-                                else if (ElementContains(x, y, KColorCyan))
+                                else if (ElementContains(x, y, KColorOrange))
                                 {
-                                    newLock.Color = Level.KeyLockColor.Cyan;
-                                    newLockRenderer.sprite = newLock.CyanSprite;
+                                    newLock.Color = Level.KeyLockColor.Orange;
+                                    newLockRenderer.sprite = newLock.Sprites.OrangeSprite;
                                 }
-                                else if (ElementContains(x, y, KColorMagenta))
+                                else if (ElementContains(x, y, KColorPurple))
                                 {
-                                    newLock.Color = Level.KeyLockColor.Magenta;
-                                    newLockRenderer.sprite = newLock.MagentaSprite;
-                                }
-                                else if (ElementContains(x, y, KColorYellow))
-                                {
-                                    newLock.Color = Level.KeyLockColor.Yellow;
-                                    newLockRenderer.sprite = newLock.YellowSprite;
+                                    newLock.Color = Level.KeyLockColor.Purple;
+                                    newLockRenderer.sprite = newLock.Sprites.PurpleSprite;
                                 }
                             }
                             // Wall
                             else if (ElementContains(x, y, KWall))
                             {
                                 Instantiate(level.WallPrefab, newElementGameObject.transform);
+                                var newWall = newElementGameObject.GetComponentInChildren<Wall>();
+                                var newWallRenderer = newWall.GetComponent<SpriteRenderer>();
+                                
+                                if (ElementContains(x, y, KHorizontal))
+                                {
+                                    newWallRenderer.sprite = newWall.Sprites.VerticalSprite;
+                                }
+                                else if(ElementContains(x, y, KVertical))
+                                {
+                                    newWallRenderer.sprite = newWall.Sprites.HorizontalSprite;
+                                }
                             }
                             // Crack
                             else if (ElementContains(x, y, KCrack))
@@ -335,22 +355,22 @@ public class EditableLevel : ScriptableObject
                                 if (ElementContains(x, y, KDirectionUp))
                                 {
                                     newSlide.Direction = TraversalManager.TraversalMove.Up;
-                                    newSlideRenderer.sprite = newSlide.UpSprite;
+                                    newSlideRenderer.sprite = newSlide.Sprites.UpSprite;
                                 }
                                 else if (ElementContains(x, y, KDirectionRight))
                                 {
                                     newSlide.Direction = TraversalManager.TraversalMove.Right;
-                                    newSlideRenderer.sprite = newSlide.RightSprite;
+                                    newSlideRenderer.sprite = newSlide.Sprites.RightSprite;
                                 }
                                 else if (ElementContains(x, y, KDirectionDown))
                                 {
                                     newSlide.Direction = TraversalManager.TraversalMove.Down;
-                                    newSlideRenderer.sprite = newSlide.DownSprite;
+                                    newSlideRenderer.sprite = newSlide.Sprites.DownSprite;
                                 }
                                 else if (ElementContains(x, y, KDirectionLeft))
                                 {
                                     newSlide.Direction = TraversalManager.TraversalMove.Left;
-                                    newSlideRenderer.sprite = newSlide.LeftSprite;
+                                    newSlideRenderer.sprite = newSlide.Sprites.LeftSprite;
                                 }
                             }
                         }
@@ -368,7 +388,7 @@ public class EditableLevel : ScriptableObject
                         -y * halfPathLength + ((KHeight - 1) * halfPathLength / 2),
                         0
                     );
-
+                    
                     // Traversal state
                     var newTraversalStateGameObject = (GameObject)null;
                     var newElement = newElementGameObject.GetComponent<Element>();
@@ -377,18 +397,26 @@ public class EditableLevel : ScriptableObject
                     {
                         newElement.State = Element.TraversalState.Covered;
                         newTraversalStateGameObject = Instantiate(level.CoveredPrefab, level.NodesContainer);
+
+                        var newMask = Instantiate(level.ModifierMaskPrefab, level.NodesContainer);
+                        newMask.transform.SetParent(newElementGameObject.transform, false);
                     }
                     else if (ElementContains(x, y, KTraversalStateRevealed))
                     {
                         newElement.State = Element.TraversalState.Revealed;
                         newTraversalStateGameObject = Instantiate(level.RevealedPrefab, level.NodesContainer);
-
-                        newElement.Cover();
                     }
 
                     if (newTraversalStateGameObject != null)
                     {
                         newTraversalStateGameObject.transform.SetParent(newElementGameObject.transform, false);
+                        var traversalStateObject = newTraversalStateGameObject.GetComponent<TraversalStateModifier>();
+
+                        newTraversalStateGameObject.GetComponent<SpriteRenderer>().color = new Color(
+                            Random.Range(traversalStateObject.RandomColorFrom.r, traversalStateObject.RandomColorTo.r),
+                            Random.Range(traversalStateObject.RandomColorFrom.g, traversalStateObject.RandomColorTo.g),
+                            Random.Range(traversalStateObject.RandomColorFrom.b, traversalStateObject.RandomColorTo.b)
+                        );
                     }
                 }
             }

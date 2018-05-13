@@ -5,12 +5,15 @@ using UnityEngine;
 
 public class Key : Collectable
 {
-    public Sprite RedSprite;
-    public Sprite BlueSprite;
-    public Sprite GreenSprite;
-    public Sprite CyanSprite;
-    public Sprite MagentaSprite;
-    public Sprite YellowSprite;
+    public ColoredSpriteCollection Sprites;
+    public ColoredSpriteCollection EditorSprites;
 
     public Level.KeyLockColor Color { get; set; }
+
+    public override void Contact()
+    {
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.GetKey);
+
+        base.Contact();
+    }
 }

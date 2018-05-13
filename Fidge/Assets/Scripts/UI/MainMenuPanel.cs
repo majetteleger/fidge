@@ -7,6 +7,8 @@ using UnityEngine.UI;
 public class MainMenuPanel : Panel
 {
     public static MainMenuPanel instance = null;
+
+    public EditableLevel HowToLevel;
     
     void Awake()
     {
@@ -16,9 +18,27 @@ public class MainMenuPanel : Panel
         }
     }
 
+    void Start()
+    {
+        Initialize();
+    }
+
+    void Update()
+    {
+        if (!IsActive)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            LevelSelectionPanel.Instance.Show();
+        }
+    }
+
     public void UI_LevelSelection()
     {
-        LevelSelectionPanel.instance.Show();
+        LevelSelectionPanel.Instance.Show();
     }
 
     public void UI_Options()
@@ -31,8 +51,8 @@ public class MainMenuPanel : Panel
         CreditsPanel.instance.Show();
     }
 
-    public void UI_Quit()
+    public void UI_HowTo()
     {
-        Application.Quit();
+        MainManager.Instance.LoadLevel(HowToLevel);
     }
 }

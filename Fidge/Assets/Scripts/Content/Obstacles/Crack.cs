@@ -23,10 +23,12 @@ public class Crack : Obstacle
         return nextTraversalNode;
     }
 
-    public override void HandleResolution()
+    public override IEnumerator HandleResolution()
     {
-        //base.HandleResolution();
-
+        yield return new WaitForSeconds(TraversalManager.Instance.TraversalSpeed / 2);
+        
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.Crack);
+        
         if (_currentHealth <= 0)
         {
             Destroy(Path.gameObject);

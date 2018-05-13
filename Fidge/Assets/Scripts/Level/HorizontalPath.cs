@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class HorizontalPath : Path
 {
-    
+    public Sprite LeftStubSprite;
+    public Sprite RightStubSprite;
+
+    void Update()
+    {
+    }
 }
 

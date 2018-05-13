@@ -4,5 +4,10 @@ using UnityEngine;
 
 public class Flag : Collectable
 {
-    
+    public override void Contact()
+    {
+        AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.GetStar);
+
+        base.Contact();
+    }
 }

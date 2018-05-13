@@ -29,14 +29,32 @@ public class CreditsPanel : Panel
         }
     }
 
-    public override void Show()
+    void Start()
     {
         LoadEntries();
         LayoutRebuilder.ForceRebuildLayoutImmediate(Content.GetComponent<RectTransform>());
 
-        base.Show();
+        Initialize();
     }
 
+    void Update()
+    {
+        if (!IsActive)
+        {
+            if (!IsActive)
+            {
+                return;
+            }
+
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            MainMenuPanel.instance.Show();
+        }
+    }
+    
     public void LoadEntries()
     {
         for (var i = 0; i < Sections.Length; i++)
@@ -49,9 +67,7 @@ public class CreditsPanel : Panel
                 var newEntry = Instantiate(EntryPrefab, Content);
                 newEntry.GetComponentInChildren<Text>().text = Sections[i].Entries[j];
             }
-        }
-
-        
+        } 
     }
 
     public void UI_Back()

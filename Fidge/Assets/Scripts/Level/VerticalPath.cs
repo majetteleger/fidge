@@ -4,5 +4,6 @@ using UnityEngine;
 
 public class VerticalPath : Path
 {
-    
+    public Sprite DownStubSprite;
+    public Sprite UpStubSprite;
 }

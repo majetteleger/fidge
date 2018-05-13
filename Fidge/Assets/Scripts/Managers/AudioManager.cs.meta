@@ -3,8 +3,26 @@ guid: c9e8ca619df620e4e8c80ec255c69111
 timeCreated: 1517793750
 licenseType: Free
 MonoImporter:
+  externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - BackgroundMusic: {instanceID: 0}
+  - SoundEffect: {instanceID: 0}
+  - MenuMusic: {instanceID: 0}
+  - LevelMusic: {instanceID: 0}
+  - MenuClick: {instanceID: 0}
+  - InputDirection: {fileID: 8300000, guid: a1c71b99c0cbad1498ea9be33b1db03b, type: 3}
+  - InputGo: {fileID: 8300000, guid: f76ef783c9ce7481cbe3f57083122a9c, type: 3}
+  - PlayerMove: {fileID: 8300000, guid: 3e94126a4424c3040a62f173e27abce5, type: 3}
+  - LevelFailed: {fileID: 8300000, guid: 04fd0d912f85b134ba196b9320b3dd82, type: 3}
+  - LevelCleared: {fileID: 8300000, guid: c20b0cac23dbda940bb1dfbaba1166d0, type: 3}
+  - Slide: {fileID: 8300000, guid: 4b41075e9f8e6704591e5082c7e7ea90, type: 3}
+  - Crack: {instanceID: 0}
+  - Wall: {fileID: 8300000, guid: 654dbf4b7ad5146038cd4b3174b532a6, type: 3}
+  - Lock: {instanceID: 0}
+  - GetKey: {fileID: 8300000, guid: badd56bfc010cfa498a96647d80fae05, type: 3}
+  - GetStar: {fileID: 8300000, guid: 8408e7e36024b59488427a45f244d697, type: 3}
+  - TeleportLink: {fileID: 8300000, guid: 91af71829c97ba646865b0f6ba29692d, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

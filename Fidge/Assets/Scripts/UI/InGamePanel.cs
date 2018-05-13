@@ -12,25 +12,21 @@ public class InGamePanel : Panel
     public GameObject CollectablePrefab;
     public CanvasGroup ObjectiveBars;
     public CanvasGroup TraversalInput;
-    public Image TimerImage;
-    //public Text TimerText;
-    public Image MovesImage;
-    //public Text MovesText;
+    public CanvasGroup TimerIcon;
+    public CanvasGroup MovesIcon;
+    public RectTransform Timer;
+    public RectTransform Moves;
+    public GameObject MoreMenu;
     public Button ResetButton;
     public Button UpButton;
     public Button RightButton;
     public Button DownButton;
     public Button LeftButton;
     public Button GoButton;
-    public RectTransform Menu;
-    public Button MenuButton;
-    public Image MenuButtonImage;
-    public Sprite OpenSprite;
-    public Sprite CloseSprite;
-    public Image Blocker;
-    public CanvasGroup CinematicBars;
-
-    private bool _initialized;
+    
+    private float _maxObjectiveWidth;
+    private float _minObjectiveWidth;
+    private Button[] _traversalInputs;
 
     void Awake()
     {
@@ -38,6 +34,18 @@ public class InGamePanel : Panel
         {
             instance = this;
         }
+
+        _maxObjectiveWidth = Timer.sizeDelta.x;
+        _minObjectiveWidth = Timer.sizeDelta.y;
+
+        _traversalInputs = new[]
+        {
+            UpButton,
+            RightButton,
+            DownButton,
+            LeftButton,
+            GoButton
+        };
     }
 
     void Start()
@@ -48,63 +56,84 @@ public class InGamePanel : Panel
         {
             buttons[i].GetComponent<Image>().alphaHitTestMinimumThreshold = 0.1f;
         }
+
+        Initialize();
     }
 
-    void Update()
+    public void ShowLevel(EditableLevel level)
     {
-        if (MainManager.Instance.ActiveLevel != null && !_initialized)
+        if (Application.isPlaying)
         {
-            var scripted = MainManager.Instance.ActiveLevel.Scripted;
-            
-            if (Application.isPlaying)
+            UpdateCollectables(null);
+            ToggleTraversalInputs(true);
+
+            if (!level.Scripted)
             {
-                UpdateCollectables(null);
-                Blocker.raycastTarget = scripted;
-                ObjectiveBars.alpha = !scripted ? 1 : 0;
-                CinematicBars.alpha = scripted ? 1 : 0;
-                ResetButton.gameObject.SetActive(!scripted);
+                ObjectiveBars.gameObject.SetActive(true);
+                Timer.gameObject.SetActive(true);
+                Moves.gameObject.SetActive(true);
+                TimerIcon.alpha = 1;
+                MovesIcon.alpha = 1;
+                TimerIcon.GetComponentInParent<Shadow>().enabled = true;
+                MovesIcon.GetComponentInParent<Shadow>().enabled = true;
             }
-
-            _initialized = true;
+            else
+            {
+                ObjectiveBars.gameObject.SetActive(false);
+            }
         }
+
+        UI_Less();
+
+        Show();
     }
 
-    public override void Show()
+    public override void Show(Panel originPanel = null)
     {
-        UI_CloseMenu();
-        _initialized = false;
+        AudioManager.Instance.PlayBackgroundMusic(AudioManager.Instance.LevelMusic);
 
-        base.Show();
+        base.Show(originPanel);
     }
 
+    public override void Hide()
+    {
+        TraversalManager.Instance.CancelTraversal();
+
+        base.Hide();
+    }
+    
     public void UpdateTimer(float value = 0f)
     {
         var remainingValue = MainManager.Instance.ActiveLevel.ExpectedTime - value;
 
-        if (remainingValue < 0)
+        if (remainingValue <= 0)
         {
+            Timer.gameObject.SetActive(false);
+            TimerIcon.alpha = 0.4f;
+            TimerIcon.GetComponentInParent<Shadow>().enabled = false;
             return;
         }
 
-        var normalizedValue = remainingValue / MainManager.Instance.ActiveLevel.ExpectedTime;
+        var normalizedValue = remainingValue / MainManager.Instance.ActiveLevel.ExpectedTime * (_maxObjectiveWidth - _minObjectiveWidth);
         
-        TimerImage.fillAmount = normalizedValue;
-        //TimerText.text = Mathf.RoundToInt(remainingValue).ToString();
+        Timer.sizeDelta = new Vector2(normalizedValue + _minObjectiveWidth, Timer.sizeDelta.y);
     }
 
     public void UpdateMoves(int value = 0)
     {
         var remainingValue = MainManager.Instance.ActiveLevel.ExpectedMoves - value;
 
-        if (remainingValue < 0)
+        if (remainingValue <= 0)
         {
+            Moves.gameObject.SetActive(false);
+            MovesIcon.alpha = 0.4f;
+            MovesIcon.GetComponentInParent<Shadow>().enabled = false;
             return;
         }
 
-        var normalizedValue = (float)remainingValue / MainManager.Instance.ActiveLevel.ExpectedMoves;
+        var normalizedValue = (float)remainingValue / MainManager.Instance.ActiveLevel.ExpectedMoves * (_maxObjectiveWidth - _minObjectiveWidth);
         
-        MovesImage.fillAmount = normalizedValue;
-        //MovesText.text = remainingValue.ToString();
+        Moves.sizeDelta = new Vector2(normalizedValue + _minObjectiveWidth, Timer.sizeDelta.y);
     }
 
     public void UpdateCollectables(Collectable[] collectables)
@@ -129,41 +158,43 @@ public class InGamePanel : Panel
         }
     }
 
-    public void UI_OpenMenu()
+    public void ToggleTraversalInputs(bool toggle)
     {
-        MenuButton.onClick.RemoveAllListeners();
-        MenuButton.onClick.AddListener(UI_CloseMenu);
-
-        Menu.anchoredPosition = new Vector2(0, 0);
-        MenuButtonImage.sprite = CloseSprite;
+        foreach (var traversalInput in _traversalInputs)
+        {
+            traversalInput.interactable = toggle;
+        }
     }
 
-    public void UI_CloseMenu()
+    public void UI_More()
     {
-        MenuButton.onClick.RemoveAllListeners();
-        MenuButton.onClick.AddListener(UI_OpenMenu);
-
-        Menu.anchoredPosition = new Vector2(0, 100);
-        MenuButtonImage.sprite = OpenSprite;
+        MoreMenu.SetActive(true);
     }
-    
+
+    public void UI_Less()
+    {
+        MoreMenu.SetActive(false);
+    }
+
     public void UI_Back()
     {
         TraversalManager.Instance.CancelTraversal();
 
         Destroy(MainManager.Instance.ActiveLevel.gameObject);
-        LevelSelectionPanel.instance.Show();
+        LevelSelectionPanel.Instance.Show();
     }
 
     public void UI_Reset()
     {
         TraversalManager.Instance.CancelTraversal();
         MainManager.Instance.ReloadLevel();
+        UI_Less();
     }
 
     public void UI_Go()
     {
         TraversalManager.Instance.ConfirmTraversal();
+        UI_Less();
     }
 
     public void UI_RegisterTraversalMove(string traversalMoveInput)
@@ -187,5 +218,7 @@ public class InGamePanel : Panel
         }
 
         TraversalManager.Instance.RegisterTraversalMove(traversalMove);
+
+        UI_Less();
     }
 }

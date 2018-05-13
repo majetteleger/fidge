@@ -1,9 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Panel : MonoBehaviour
 {
+    public List<Panel> CoexistsWith;
+
+    public virtual bool IsActive
+    {
+        get
+        {
+            return _canvasGroup.interactable;
+        }
+    }
+
 	private CanvasGroup canvasGroup;
 	private CanvasGroup _canvasGroup
 	{
@@ -18,25 +29,57 @@ public class Panel : MonoBehaviour
 		}
 	}
 
-	public virtual void Show()
+	public virtual void Show(Panel originPanel = null)
 	{
 		_canvasGroup.alpha = 1;
 		_canvasGroup.blocksRaycasts = true;
+		_canvasGroup.interactable = true;
+        
+        foreach (var panel in UIManager.instance.Panels)
+        {
+            if(panel == this || CoexistsWith.Contains(panel))
+            {
+                continue;
+            }
 
-		for (int i = 0; i < UIManager.instance.Panels.Length; i++)
-		{
-			if(UIManager.instance.Panels[i] == this)
-			{
-				continue;
-			}
-
-			UIManager.instance.Panels[i].Hide();
-		}
+            panel.Hide();
+        }
 	}
 
-	public void Hide()
+	public virtual void Hide()
 	{
-		_canvasGroup.alpha = 0;
+	    if (!IsActive)
+	    {
+	        return;
+	    }
+
+        _canvasGroup.alpha = 0;
 		_canvasGroup.blocksRaycasts = false;
-	}
+		_canvasGroup.interactable = false;
+    }
+
+    public virtual void Initialize()
+    {
+        var buttons = GetComponentsInChildren<Button>();
+
+        foreach (var button in buttons)
+        {
+            if (button.transform.parent == InGamePanel.instance.TraversalInput.transform)
+            {
+                if(button == InGamePanel.instance.GoButton)
+                {
+                    button.onClick.AddListener(() => { AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.InputGo); });
+                }
+                else
+                {
+                    button.onClick.AddListener(() => { AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.InputDirection); });
+                }
+            }
+            else
+            {
+                button.onClick.AddListener(() => { AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.MenuClick); });
+            }
+            
+        }
+    }
 }
