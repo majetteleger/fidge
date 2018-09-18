@@ -100,7 +100,7 @@ public class HypotheticalSolution
 
     public void Solve(Vector2 position)
     {
-        if (Movements.Count > 100)
+        if (Movements.Count > 200)
         {
             Debug.Log("Solution aborted");
             return;
@@ -284,7 +284,6 @@ public class HypotheticalSolution
             }
             if (currentElement.Contains(EditableLevel.KLock))
             {
-                var unlocked = false;
                 var lockColor = string.Empty;
 
                 for (var i = 0; i < EditableLevel.Colors.Length; i++)
@@ -295,28 +294,7 @@ public class HypotheticalSolution
                         break;
                     }
                 }
-
-                for (var i = 0; i < Elements.Length; i++)
-                {
-                    if (Elements[i] != null && Elements[i].Contains(EditableLevel.KKey))
-                    {
-                        var keyColor = string.Empty;
-
-                        for (var j = 0; j < EditableLevel.Colors.Length; j++)
-                        {
-                            if (Elements[i].Contains(EditableLevel.Colors[j]))
-                            {
-                                keyColor = EditableLevel.Colors[j];
-
-                                if (lockColor == keyColor)
-                                {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                }
-
+                
                 for (var i = 0; i < CollectedCollectables.Count; i++)
                 {
                     if (CollectedCollectables[i].Contains(EditableLevel.KKey))
@@ -331,21 +309,19 @@ public class HypotheticalSolution
 
                                 if (lockColor == keyColor)
                                 {
-                                    unlocked = true;
+                                    CollectedCollectables.RemoveAt(i);
+                                    RemoveFromElement((int)currentPosition.x, (int)currentPosition.y, EditableLevel.KLock);
+
+                                    goto keyFound;
                                 }
                             }
                         }
                     }
                 }
 
-                if (unlocked)
-                {
-                    RemoveFromElement((int)currentPosition.x, (int)currentPosition.y, EditableLevel.KLock);
-                }
-                else
-                {
-                    return false;
-                }
+                return false;
+
+                keyFound:;
             }
         }
         

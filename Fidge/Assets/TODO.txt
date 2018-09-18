@@ -1,17 +1,31 @@
 
 - Tasks -
 
-- Levels levels levels LEVELLLSSLSLS
+- Final configs
+	- locked portrait mode
+	- test for different resolutions / screen sizes
+	- splashscreen
+	- icon
+	- banner/video trailer
+	- other build related stuff?
+- Graphics/text for pay-blocked sections 
+- Review ALL texts
 
-- Monetize: Free first n levels, pay for the rest
-	- Disabled section graphic
-	- "Thanks, buy the rest" panel
+- Levels levels levels LEVELLLSSLSLS
+	- Final selection
+	- (figure out how many I give out for free)
+	- figure out balance values (moves, time) + order
+
+x Performance issues on device (due to UI being always active?)
+x Arrow and bubble placement different on phone / mac / probably different resolutions
+	x bubble placement on TraversalInput and TraversalModifiers is a bit weird
 
 - VISUAL EFFECTS / ANIMATION
 	- Button Click
 	- Panel change/show
 	- Traversal input
 	- Go
+	- Player "idle emphasis"
 	- Player move
 	- Level failed + reset
 	- Level cleared
@@ -32,9 +46,10 @@
 
 x Bugs x
 
-x Performance issues on device
+
+x Julian: "If the player hits "go" without making any moves, the level doesnt end"
 x Completion issues (Julian: "I noticed if you get the star within the time limit you win but if you get the stars and time runs out you lose") (only on mac?)
-x Arrow and bubble placement different on phone / mac / probably different resolutions
+
 
 x Level solver : Link levels might not have correct solutions (e.g. Link Level 2)
 	Print out the solutions to make sure they're right
@@ -46,6 +61,9 @@ x Level solver : Revealed Level 3 can't find a solution
 
 + Possible Features (For. The. Sequel.) + 
 
+++ General stuff ++
+
++ Landscape mode
 + Hint (consumable) (pings where you currently are in the traversal)
 + In-game level editor
 + Endless / Scrolling / Procedurally generated mode (Have to get to checkpoints to advance)
@@ -56,11 +74,14 @@ x Level solver : Revealed Level 3 can't find a solution
 	+ Unlocks when a special insivible key (at the end of an invisible path) in one level of a section has been collected
 	+ Insivisble path shows (briefly) when you traverse a node or a path next to it
 
+++ Obstacles/features for levels
+
++ Non-uniform-to-grid path
+	+ Twisted / weird direction
 + Crossing path
 + Buttons you have to land on to open a door on the level 
-	+ levels where you have more than one "go" to traverse it
+	+ making levels where you have more than one "go" to traverse it
 	+ buttons could also activate/deactive other traps and obstacles
-+ Different keys that gets destroyed by (different) locks
 + Multiple end nodes / possible traversal but only one optimal one
 + Cracks and walls with more than 1 health
 + Triggers that toggle paths on or off
@@ -69,6 +90,9 @@ x Level solver : Revealed Level 3 can't find a solution
 	+ Move in a square, a set number of nodes each direction
 	+ Straight line & turn 180 degrees when they can't move straight ahead
 	+ Straight line & turn 90 degrees when they can't move straight ahead
++ Usable "items" or "powers" that you collect and use in a sort of "stack"
+	+ is using them a move?
+	+ the ability to reorder the stack as a move?
 
 
 ....................

@@ -66,11 +66,11 @@ public class LevelEditor : Editor
         const float buttonWidth = 50f;
         const float buttonOffset = 5f;
 
-        EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Instantiate")) { InstantiateLevel(); }
-            if (GUILayout.Button("Delete Instance")) { DeleteInstance(); }
+        //EditorGUILayout.BeginHorizontal();
+            //if (GUILayout.Button("Instantiate")) { InstantiateLevel(); }
+            //if (GUILayout.Button("Delete Instance")) { DeleteInstance(); }
             if (GUILayout.Button("Clear")) { ClearLevel(); }
-        EditorGUILayout.EndHorizontal();
+        //EditorGUILayout.EndHorizontal();
 
         DrawContainerRect(containerRect);
 
@@ -117,7 +117,7 @@ public class LevelEditor : Editor
             {
                 EditableLevel.ExpectedTime = EditorGUILayout.IntField("Expected Time", EditableLevel.ExpectedTime);
                 EditableLevel.ExpectedMoves = EditorGUILayout.IntField("Expected Moves", EditableLevel.ExpectedMoves);
-                if (GUILayout.Button(string.Format("Apply suggested values (Time: {0}, Moves: {1})", GetSuggestedTime(), GetSuggestedMoves()))) { ApplySuggestedExpectedValues(); }
+                if (GUILayout.Button(string.Format("Apply suggested values (Time: {0}, Moves: {1})", GetSuggestedTime(), GetSuggestedMoves()))) { ApplySuggestedExpectedValues(EditableLevel); }
             }
 
             EditorGUILayout.BeginHorizontal();
@@ -138,7 +138,7 @@ public class LevelEditor : Editor
             {
                 EditableLevel.AllowedEndNodeBypasses = EditorGUILayout.IntField("Allowed End Node Bypasses", EditableLevel.AllowedEndNodeBypasses);
 
-                if (GUILayout.Button("Compute possible solution(s)")) { ComputeSolution(); }
+                if (GUILayout.Button("Compute possible solution(s)")) { ComputeSolution(EditableLevel); }
 
                 var solutionString = string.Empty;
 
@@ -762,11 +762,11 @@ public class LevelEditor : Editor
         EditableLevel.MinimumMovesWithFlag = -1;
     }
 
-    private void ComputeSolution()
+    public static void ComputeSolution(EditableLevel editableLevel)
     {
         Solutions = new List<HypotheticalSolution>();
 
-        var firstSolution = new HypotheticalSolution(EditableLevel);
+        var firstSolution = new HypotheticalSolution(editableLevel);
         firstSolution.Solve();
 
         var minimumMoves = int.MaxValue;
@@ -799,9 +799,9 @@ public class LevelEditor : Editor
             }
         }
 
-        EditableLevel.NumberOfSolutions = Solutions.Count;
-        EditableLevel.MinimumMoves = minimumMoves / 2;
-        EditableLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
+        editableLevel.NumberOfSolutions = Solutions.Count;
+        editableLevel.MinimumMoves = minimumMoves / 2;
+        editableLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
 
         var numberOfElements = 0;
         var numberOfFlags = 0;
@@ -818,20 +818,20 @@ public class LevelEditor : Editor
         bool[] differentMechanics = new bool[mechanics.Length];
         var numberOfDifferentMechanics = 0;
 
-        for (var i = 0; i < EditableLevel.Elements.Length; i++)
+        for (var i = 0; i < editableLevel.Elements.Length; i++)
         {
-            if (!string.IsNullOrEmpty(EditableLevel.Elements[i]))
+            if (!string.IsNullOrEmpty(editableLevel.Elements[i]))
             {
                 numberOfElements++;
 
-                if (EditableLevel.Elements[i].Contains(EditableLevel.KFlag))
+                if (editableLevel.Elements[i].Contains(EditableLevel.KFlag))
                 {
                     numberOfFlags++;
                 }
 
                 for (var j = 0; j < mechanics.Length; j++)
                 {
-                    if (!differentMechanics[j] && EditableLevel.Elements[i].Contains(mechanics[j]))
+                    if (!differentMechanics[j] && editableLevel.Elements[i].Contains(mechanics[j]))
                     {
                         differentMechanics[j] = true;
                         numberOfDifferentMechanics++;
@@ -842,17 +842,15 @@ public class LevelEditor : Editor
 
         var newName = string.Format("{0}-{1}-{2}-{3}-{4}",
             numberOfDifferentMechanics,
-            (EditableLevel.MinimumMoves + EditableLevel.MinimumMovesWithFlag).ToString("D3"), 
+            (editableLevel.MinimumMoves + editableLevel.MinimumMovesWithFlag).ToString("D3"), 
             numberOfFlags,
-            numberOfElements.ToString("D3"), 
-            EditableLevel.NumberOfSolutions.ToString("D4")
+            numberOfElements.ToString("D3"),
+            editableLevel.NumberOfSolutions.ToString("D4")
         );
 
-        string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject.GetInstanceID());
+        var assetPath = AssetDatabase.GetAssetPath(Selection.activeObject.GetInstanceID());
         AssetDatabase.RenameAsset(assetPath, newName);
         AssetDatabase.SaveAssets();
-
-        Debug.Log(newName);
     }
 
     private string GetSuggestedTime()
@@ -862,7 +860,7 @@ public class LevelEditor : Editor
             return "?";
         }
 
-        return GetSuggestedTimeValue().ToString();
+        return GetSuggestedTimeValue(EditableLevel).ToString();
     }
 
     private string GetSuggestedMoves()
@@ -872,17 +870,17 @@ public class LevelEditor : Editor
             return "?";
         }
 
-        return GetSuggestedMovesValue().ToString();
+        return GetSuggestedMovesValue(EditableLevel).ToString();
     }
 
-    private int GetSuggestedTimeValue()
+    private static int GetSuggestedTimeValue(EditableLevel editableLevel)
     {
-        return Mathf.CeilToInt(EditableLevel.MinimumMoves * 0.5f);
+        return Mathf.CeilToInt(editableLevel.MinimumMoves * 0.5f);
     }
 
-    private int GetSuggestedMovesValue()
+    private static int GetSuggestedMovesValue(EditableLevel editableLevel)
     {
-        return EditableLevel.MinimumMoves + 1;
+        return editableLevel.MinimumMoves + 1;
     }
 
     private void HandleShortcuts(Event currentEvent, int x, int y)
@@ -1226,17 +1224,17 @@ public class LevelEditor : Editor
         EditableLevel.EndNode = Vector2.zero;
     }
 
-    private void ApplySuggestedExpectedValues()
+    public static void ApplySuggestedExpectedValues(EditableLevel editableLevel)
     {
-        if (EditableLevel.ExpectedMoves < 0)
+        if (editableLevel.ExpectedMoves < 0)
         {
-            ComputeSolution();
+            ComputeSolution(editableLevel);
         }
 
-        Undo.RecordObject(EditableLevel, "ApplySuggestedExpectedValues");
+        Undo.RecordObject(editableLevel, "ApplySuggestedExpectedValues");
 
-        EditableLevel.ExpectedMoves = GetSuggestedMovesValue();
-        EditableLevel.ExpectedTime = GetSuggestedTimeValue();
+        editableLevel.ExpectedMoves = GetSuggestedMovesValue(editableLevel);
+        editableLevel.ExpectedTime = GetSuggestedTimeValue(editableLevel);
     }
     
     #endregion

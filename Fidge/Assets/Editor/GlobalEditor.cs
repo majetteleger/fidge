@@ -7,13 +7,13 @@ using UnityEngine;
 
 public class GlobalEditor : MonoBehaviour
 {
-    /*[MenuItem("Tools/Reset progress")]
+    [MenuItem("Tools/Reset everything")]
     public static void ResetProgress()
     {
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
-    }*/
-
+    }
+    
     /*[MenuItem("Tools/Unlock all levels")]
     public static void UnlockAllLevels()
     {
@@ -25,7 +25,7 @@ public class GlobalEditor : MonoBehaviour
         }
     }*/
 
-    [MenuItem("Tools/Rewrite")]
+    /*[MenuItem("Tools/Rewrite")]
     public static void Rewrite()
     {
         const string rootfolder = @"C:\Users\M-Antoine\Documents\SharedProjects\Fidge\Fidge\Assets\Levels";
@@ -55,5 +55,5 @@ public class GlobalEditor : MonoBehaviour
                 Debug.Log(ex.Message);
             }
         }
-    }
+    }*/
 }
