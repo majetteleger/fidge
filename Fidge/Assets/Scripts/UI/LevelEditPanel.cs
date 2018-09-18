@@ -1,11 +1,16 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LevelEditPanel : Panel
 {
+    public const int KWidth = 7;
+    public const int KHeight = 11;
+
     public enum UserClickType
     {
         Element,
@@ -22,8 +27,12 @@ public class LevelEditPanel : Panel
     public GameObject MessageBubbleBackground;
     public Text BackMessageText;
     [TextArea] public string BackMessage;
+    public Sprite NodeSprite;
+    public Sprite VerticalPathSprite;
+    public Sprite HorizontalPathSprite;
 
     private UserClickType _clickType;
+    private LevelCell[] _levelCells;
 
     void Awake()
     {
@@ -33,6 +42,13 @@ public class LevelEditPanel : Panel
     void Start()
     {
         SetupSounds();
+        _levelCells = GetComponentsInChildren<LevelCell>();
+
+        for (var i = 0; i < _levelCells.Length; i++)
+        {
+            var newPosition = new Vector2Int(i % KWidth, i / KWidth);
+            _levelCells[i].Position = newPosition;
+        }
     }
 
     void Update()
@@ -72,9 +88,73 @@ public class LevelEditPanel : Panel
         return true;
     }
 
+    private LevelCell GetCellByPosition(int x, int y)
+    {
+        var position = new Vector2Int(x, y);
+
+        foreach (var levelCell in _levelCells)
+        {
+            if (levelCell.Position == position)
+            {
+                return levelCell;
+            }
+        }
+
+        return null;
+    }
+
     public void UI_ClickOnCell()
     {
-        // open the context menu OR add the element OR add the traversal modifier
+        var cellClicked = EventSystem.current.currentSelectedGameObject.GetComponent<LevelCell>();
+
+        switch (_clickType)
+        {
+            case UserClickType.Element:
+
+                if (!string.IsNullOrEmpty(cellClicked.Content))
+                {
+                    if (!cellClicked.PositionIsOdd)
+                    {
+                        cellClicked.ChangePathOrientation();
+                        cellClicked.ChangeSprite(cellClicked.Content.Contains(EditableLevel.KVertical) ? VerticalPathSprite : HorizontalPathSprite);
+                    }
+
+                    break;
+                }
+                
+                if (cellClicked.PositionIsOdd)
+                {
+                    cellClicked.ChangeSprite(NodeSprite);
+                    cellClicked.Content = EditableLevel.KNode;
+                }
+                else
+                {
+                    cellClicked.Content = EditableLevel.KPath;
+
+                    var upCell = GetCellByPosition(cellClicked.Position.x, cellClicked.Position.y + 1);
+                    var downCell = GetCellByPosition(cellClicked.Position.x, cellClicked.Position.y - 1);
+                    var upIsNode = upCell != null && !string.IsNullOrEmpty(upCell.Content) && upCell.Content.Contains(EditableLevel.KNode);
+                    var downIsNode = downCell != null && !string.IsNullOrEmpty(downCell.Content) && downCell.Content.Contains(EditableLevel.KNode);
+
+                    if (upIsNode || downIsNode)
+                    {
+                        cellClicked.ChangeSprite(VerticalPathSprite);
+                        cellClicked.Content += EditableLevel.KVertical;
+                    }
+                    else
+                    {
+                        cellClicked.ChangeSprite(HorizontalPathSprite);
+                        cellClicked.Content += EditableLevel.KHorizontal;
+                    }
+                    
+                }
+                
+                break;
+            case UserClickType.Content:
+                break;
+            case UserClickType.TraversalModifier:
+                break;
+        }
     }
 
     public void UI_Validate()
@@ -108,7 +188,6 @@ public class LevelEditPanel : Panel
     {
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        // close confrimation popup
     }
 
     public void UI_ToggleElement()
