@@ -33,3 +33,6 @@ sysinfo.txt
 *.apk
 *.unitypackage
 Fidge/Library/
+Fidge/Build/
+Fidge/Temp/
+Fidge/.vs/
