@@ -20,9 +20,9 @@ MonoBehaviour:
   ResetTutorials: 
   Shifted: 0
   Index: 52
-  NumberOfSolutions: -1
-  MinimumMoves: -1
-  MinimumMovesWithFlag: -1
+  NumberOfSolutions: 2
+  MinimumMoves: 10
+  MinimumMovesWithFlag: 13
   StartNode: {x: 6, y: 8}
   EndNode: {x: 2, y: 2}
   Elements:

@@ -1,0 +1,145 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1a44d4a91cfb8d4e844e48f246a1b25, type: 3}
+  m_Name: 3-026-1-042-0006
+  m_EditorClassIdentifier: 
+  Scripted: 0
+  AllowedEndNodeBypasses: 0
+  Desription: 
+  Author: Julian
+  ExpectedTime: 6
+  ExpectedMoves: 13
+  ResetTutorials: 
+  Shifted: 1
+  Index: 0
+  NumberOfSolutions: 6
+  MinimumMoves: 12
+  MinimumMovesWithFlag: 14
+  StartNode: {x: 0, y: 1}
+  EndNode: {x: 8, y: 11}
+  Elements:
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - (P)(H)
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)(S)(DU)
+  - 
+  - (P)(V)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - 
+  - (N)
+  - (P)(H)(S)(DR)
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)
+  - 
+  - (P)(V)(C)
+  - 
+  - (P)(V)(C)
+  - (N)
+  - 
+  - 
+  - 
+  - (N)
+  - 
+  - (N)
+  - (P)(H)(S)(DL)
+  - (N)
+  - (P)(V)
+  - 
+  - 
+  - 
+  - (P)(V)
+  - (N)
+  - (P)(V)
+  - (N)
+  - (P)(H)
+  - (N)
+  - 
+  - 
+  - 
+  - (N)(F)
+  - (P)(H)
+  - (N)
+  - 
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (P)(V)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - (P)(V)
+  - 
+  - (P)(H)
+  - (N)
+  - (P)(H)
+  - 
+  - 
+  - 
+  - 
+  - (N)
+  - (P)(H)(W)
+  - (N)
+  - (P)(H)(W)
+  - (N)
+  - (P)(H)(W)
+  - (N)
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 

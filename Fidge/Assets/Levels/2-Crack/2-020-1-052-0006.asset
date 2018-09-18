@@ -17,7 +17,7 @@ MonoBehaviour:
   Author: Marc-Antoine
   ExpectedTime: 3
   ExpectedMoves: 7
-  TraversalScript: 020000000300000000000000
+  ResetTutorials: 
   Shifted: 0
   Index: 32
   NumberOfSolutions: 6

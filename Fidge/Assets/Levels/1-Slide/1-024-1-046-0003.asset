@@ -14,10 +14,10 @@ MonoBehaviour:
   Scripted: 0
   AllowedEndNodeBypasses: 0
   Desription: 
-  Author: 
+  Author: Marc-Antoine
   ExpectedTime: 6
   ExpectedMoves: 12
-  TraversalScript: 
+  ResetTutorials: 
   Shifted: 0
   Index: 6
   NumberOfSolutions: 3

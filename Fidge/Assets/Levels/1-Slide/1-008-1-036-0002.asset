@@ -14,10 +14,10 @@ MonoBehaviour:
   Scripted: 0
   AllowedEndNodeBypasses: 0
   Desription: 
-  Author: 
+  Author: Marc-Antoine
   ExpectedTime: 1
   ExpectedMoves: 3
-  TraversalScript: 
+  ResetTutorials: 
   Shifted: 0
   Index: 4
   NumberOfSolutions: 2
@@ -59,7 +59,7 @@ MonoBehaviour:
   - 
   - 
   - (N)
-  - (P)(V)
+  - (P)(V)(S)(DU)
   - (N)
   - 
   - 
@@ -109,7 +109,7 @@ MonoBehaviour:
   - 
   - 
   - (N)
-  - (P)(H)
+  - (P)(H)(S)(DR)
   - (N)
   - (P)(V)
   - 
@@ -121,7 +121,7 @@ MonoBehaviour:
   - (N)
   - 
   - (N)
-  - (P)(H)
+  - (P)(H)(S)(DL)
   - (N)
   - 
   - 
