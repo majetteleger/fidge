@@ -38,3 +38,5 @@ Fidge/.vs/
 Fidge/ProjectSettings/ProjectVersion.txt
 Fidge/Build/
 Fidge/.vs/Fidge/v15/Server/sqlite3/db.lock
+Fidge/obj/Debug/build.force
+Fidge/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache

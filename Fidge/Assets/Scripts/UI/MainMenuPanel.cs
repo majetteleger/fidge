@@ -55,4 +55,9 @@ public class MainMenuPanel : Panel
     {
         MainManager.Instance.LoadLevel(HowToLevel);
     }
+
+    public void UI_Editor()
+    {
+        LevelEditorMenuPanel.instance.Show();
+    }
 }
