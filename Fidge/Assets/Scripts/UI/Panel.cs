@@ -58,9 +58,9 @@ public class Panel : MonoBehaviour
 		_canvasGroup.interactable = false;
     }
 
-    public virtual void Initialize()
+    public virtual void SetupSounds()
     {
-        var buttons = GetComponentsInChildren<Button>();
+        var buttons = GetComponentsInChildren<Button>(true);
 
         foreach (var button in buttons)
         {
@@ -81,5 +81,22 @@ public class Panel : MonoBehaviour
             }
             
         }
+    }
+
+    public void UpdateButtonSprite(Image image, Sprite onSprite, Sprite offSprite, bool value)
+    {
+        image.sprite = value ? onSprite : offSprite;
+    }
+
+    public void ForceLayoutRebuilding(RectTransform transformToRebuild)
+    {
+        var layoutGroup = transformToRebuild.GetComponent<VerticalLayoutGroup>();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(transformToRebuild);
+        LayoutRebuilder.MarkLayoutForRebuild(transformToRebuild);
+        Canvas.ForceUpdateCanvases();
+
+        layoutGroup.CalculateLayoutInputVertical();
+        layoutGroup.SetLayoutVertical();
     }
 }

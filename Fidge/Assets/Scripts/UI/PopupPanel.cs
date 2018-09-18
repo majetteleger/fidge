@@ -35,7 +35,7 @@ public class PopupPanel : Panel
 
     void Start()
     {
-        Initialize();
+        SetupSounds();
     }
 
     void Update()
@@ -118,8 +118,8 @@ public class PopupPanel : Panel
 
         var levelSavedValue = level != null ? Level.GetSavedValue(level.Index) : string.Empty;
 
-        NextButton.gameObject.SetActive(!scripted);
-
+        var nextLevelButtonActive = !scripted;
+        
         if (!scripted)
         {
             for (int i = 0; i < Medals.Length; i++)
@@ -135,19 +135,29 @@ public class PopupPanel : Panel
                 Medals[i].alpha = gotMedal ? 1f : UnobtainedOpacity;
             }
 
-            var nextLevel = MainManager.Instance.Levels[level.Index + 1].Level;
-            var nextLevelUnlocked = nextLevel != null && nextLevel.Unlocked;
+            var nextLevel = level.Index + 1 < MainManager.Instance.Levels.Length - 1 ? MainManager.Instance.Levels[level.Index + 1].Level : null;
 
-            NextButton.interactable = nextLevelUnlocked;
-            NextButton.transform.GetChild(0).gameObject.SetActive(nextLevelUnlocked);
-            NextButton.transform.GetChild(1).gameObject.SetActive(!nextLevelUnlocked);
-            NextButton.transform.GetChild(2).gameObject.SetActive(!nextLevelUnlocked);
-
-            if (!nextLevelUnlocked)
+            if (nextLevel != null)
             {
-                NextButton.transform.GetChild(2).GetComponentInChildren<Text>().text = nextLevel.MedalsNeededToUnlock.ToString();
+                var nextLevelUnlocked = nextLevel != null && nextLevel.Unlocked;
+
+                NextButton.interactable = nextLevelUnlocked;
+                NextButton.transform.GetChild(0).gameObject.SetActive(nextLevelUnlocked);
+                NextButton.transform.GetChild(1).gameObject.SetActive(!nextLevelUnlocked);
+                NextButton.transform.GetChild(2).gameObject.SetActive(!nextLevelUnlocked);
+
+                if (!nextLevelUnlocked)
+                {
+                    NextButton.transform.GetChild(2).GetComponentInChildren<Text>().text = nextLevel.MedalsNeededToUnlock.ToString();
+                }
+            }
+            else
+            {
+                nextLevelButtonActive = false;
             }
         }
+
+        NextButton.gameObject.SetActive(nextLevelButtonActive);
 
         BackButton.gameObject.SetActive(true);
 

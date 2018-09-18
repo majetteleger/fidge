@@ -86,7 +86,7 @@ MonoBehaviour:
     PurpleSprite: {fileID: 21300058, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
   EditorSprites:
     RedSprite: {fileID: 21300028, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
-    BlueSprite: {fileID: 21300016, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+    BlueSprite: {fileID: 21300064, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
     GreenSprite: {fileID: 21300016, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
     OrangeSprite: {fileID: 21300038, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
     PurpleSprite: {fileID: 21300058, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}

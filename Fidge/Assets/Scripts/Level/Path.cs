@@ -62,5 +62,10 @@ public class Path : Element
 
         return obstacle;
     }
+
+    public virtual void TryTurnToStubs()
+    {
+
+    }
 }
 

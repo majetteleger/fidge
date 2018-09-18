@@ -24,6 +24,45 @@ public class AudioManager : MonoBehaviour
     public AudioClip GetKey;
     public AudioClip GetStar;
     public AudioClip TeleportLink;
+    
+    public bool MusicOn
+    {
+        get
+        {
+            return PlayerPrefs.GetInt("MusicOn") == 1;
+        }
+        set
+        {
+            PlayerPrefs.SetInt("MusicOn", value ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+    }
+
+    public bool SoundOn
+    {
+        get
+        {
+            return PlayerPrefs.GetInt("SoundOn") == 1;
+        }
+        set
+        {
+            PlayerPrefs.SetInt("SoundOn", value ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+    }
+
+    private bool AudioFirstStart
+    {
+        get
+        {
+            return PlayerPrefs.GetInt("AudioFirstStart") == 0;
+        }
+        set
+        {
+            PlayerPrefs.SetInt("AudioFirstStart", value ? 0 : 1);
+            PlayerPrefs.Save();
+        }
+    }
 
     private void Awake()
     {
@@ -35,22 +74,35 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
+        if (AudioFirstStart)
+        {
+            MusicOn = true;
+            SoundOn = true;
+            SaveVolumePref("MusicVolume", 1f);
+            SaveVolumePref("SoundVolume", 1f);
+        }
+
+        BackgroundMusic.mute = !MusicOn;
+        foreach (var soundEffectSource in SoundEffectSources)
+        {
+            soundEffectSource.mute = !SoundOn;
+        }
+
+        AdjustMusic(PlayerPrefs.GetFloat("MusicVolume"));
+        AdjustSound(PlayerPrefs.GetFloat("SoundVolume"));
+
         PlayBackgroundMusic(MenuMusic);
+
+        AudioFirstStart = false;
     }
 
     public void PlayBackgroundMusic(AudioClip music)
     {
-        if (music == null)
-        {
-            Debug.Log("Null music reference");
-            return;
-        }
-
-        if (BackgroundMusic.clip == music)
+        if (music == null || BackgroundMusic.clip == music)
         {
             return;
         }
-
+        
         BackgroundMusic.clip = music;
         BackgroundMusic.Play();
     }
@@ -59,7 +111,6 @@ public class AudioManager : MonoBehaviour
     {
         if (effect == null)
         {
-            Debug.Log("Null sound effect reference");
             return;
         }
 
@@ -73,5 +124,43 @@ public class AudioManager : MonoBehaviour
                 break;
             }
         }
+    }
+
+    public void ToggleMusic()
+    {
+        var newValue = !MusicOn;
+
+        BackgroundMusic.mute = !newValue;
+        MusicOn = newValue;
+    }
+
+    public void ToggleSound()
+    {
+        var newValue = !SoundOn;
+
+        foreach (var soundEffectSource in SoundEffectSources)
+        {
+            soundEffectSource.mute = !newValue;
+        }
+        
+        SoundOn = newValue;
+    }
+
+    public void AdjustMusic(float volumeValue)
+    {
+        BackgroundMusic.volume = volumeValue;
+    }
+
+    public void AdjustSound(float volumeValue)
+    {
+        foreach (var soundEffectSource in SoundEffectSources)
+        {
+            soundEffectSource.volume = volumeValue;
+        }
+    }
+
+    public void SaveVolumePref(string volumePref, float volumeValue)
+    {
+        PlayerPrefs.SetFloat(volumePref, volumeValue);
     }
 }

@@ -39,7 +39,7 @@ public class TutorialPanel : Panel
 
     void Start()
     {
-        Initialize();
+        SetupSounds();
     }
     
     public void AdvanceTutorial()
@@ -165,7 +165,7 @@ public class TutorialPanel : Panel
 
                 TargetMask.type = Image.Type.Sliced;
                 TargetMask.sprite = LongMask;
-                TargetMask.GetComponent<RectTransform>().sizeDelta = new Vector2(116f, 116f);
+                TargetMask.GetComponent<RectTransform>().sizeDelta = new Vector2(124f, 124f);
 
                 foreach (var tagger in FindObjectsOfType<TutorialTagger>().Where(x => x.Tag == tutorial.TargetTag))
                 {

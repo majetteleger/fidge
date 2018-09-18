@@ -17,13 +17,18 @@ public class InGamePanel : Panel
     public RectTransform Timer;
     public RectTransform Moves;
     public GameObject MoreMenu;
-    public Button ResetButton;
     public Button UpButton;
     public Button RightButton;
     public Button DownButton;
     public Button LeftButton;
     public Button GoButton;
-    
+    public Image MusicImage;
+    public Image SoundImage;
+    public Sprite MusicOnSprite;
+    public Sprite MusicOffSprite;
+    public Sprite SoundOnSprite;
+    public Sprite SoundOffSprite;
+
     private float _maxObjectiveWidth;
     private float _minObjectiveWidth;
     private Button[] _traversalInputs;
@@ -57,7 +62,7 @@ public class InGamePanel : Panel
             buttons[i].GetComponent<Image>().alphaHitTestMinimumThreshold = 0.1f;
         }
 
-        Initialize();
+        SetupSounds();
     }
 
     public void ShowLevel(EditableLevel level)
@@ -90,6 +95,9 @@ public class InGamePanel : Panel
 
     public override void Show(Panel originPanel = null)
     {
+        UpdateButtonSprite(MusicImage, MusicOnSprite, MusicOffSprite, AudioManager.Instance.MusicOn);
+        UpdateButtonSprite(SoundImage, SoundOnSprite, SoundOffSprite, AudioManager.Instance.SoundOn);
+
         AudioManager.Instance.PlayBackgroundMusic(AudioManager.Instance.LevelMusic);
 
         base.Show(originPanel);
@@ -189,6 +197,18 @@ public class InGamePanel : Panel
         TraversalManager.Instance.CancelTraversal();
         MainManager.Instance.ReloadLevel();
         UI_Less();
+    }
+
+    public void UI_ToggleMusic()
+    {
+        AudioManager.Instance.ToggleMusic();
+        UpdateButtonSprite(MusicImage, MusicOnSprite, MusicOffSprite, AudioManager.Instance.MusicOn);
+    }
+
+    public void UI_ToggleSound()
+    {
+        AudioManager.Instance.ToggleSound();
+        UpdateButtonSprite(SoundImage, SoundOnSprite, SoundOffSprite, AudioManager.Instance.SoundOn);
     }
 
     public void UI_Go()

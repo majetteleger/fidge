@@ -9,15 +9,10 @@ public class Lock : Obstacle
     public ColoredSpriteCollection EditorSprites;
 
     public Level.KeyLockColor Color { get; set; }
-
-    private int _keysToUnlock;
     
     public override Node Resolve(Node currentTraversalNode, Node nextTraversalNode, TraversalManager.TraversalMove direction)
     {
-        _keysToUnlock = FindKeys();
-
         var playerCollectables = MainManager.Instance.Player.GetCollectables();
-        var collectedKeys = 0;
 
         for (var i = 0; i < playerCollectables.Length; i++)
         {
@@ -25,11 +20,11 @@ public class Lock : Obstacle
 
             if (key != null && key.Color == Color)
             {
-                collectedKeys++;
+                return nextTraversalNode;
             }
         }
 
-        return collectedKeys >= _keysToUnlock ? nextTraversalNode: null;
+        return null;
     }
 
     public override IEnumerator HandleResolution()
@@ -47,26 +42,11 @@ public class Lock : Obstacle
             if (key != null && key.Color == Color)
             {
                 DestroyImmediate(key.gameObject);
+                break;
             }
         }
 
         DestroyImmediate(gameObject);
         InGamePanel.instance.UpdateCollectables(MainManager.Instance.Player.GetCollectables());
-    }
-
-    public int FindKeys()
-    {
-        var keys = FindObjectsOfType<Key>();
-        var keysToUnlock = 0;
-
-        for (var i = 0; i < keys.Length; i++)
-        {
-            if(keys[i].Color == Color)
-            {
-                keysToUnlock++;
-            }
-        }
-
-        return keysToUnlock;
     }
 }

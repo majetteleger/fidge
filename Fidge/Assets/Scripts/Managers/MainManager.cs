@@ -33,10 +33,24 @@ public class MainManager : MonoBehaviour
     public static MainManager Instance;
     
     public SequentialLevel[] Levels { get; set; }
-    public bool DirtyMedals { get; set; }
     
     public EditableLevel LastLoadedLevel { get; private set; }
 
+    public bool DirtyMedals { get; set; }
+
+    public bool Paid
+    {
+        get
+        {
+            return PlayerPrefs.GetInt("Paid") == 1;
+        }
+        set
+        {
+            PlayerPrefs.SetInt("Paid", value ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+    }
+    
     private Player player;
     public Player Player
     {
@@ -70,14 +84,14 @@ public class MainManager : MonoBehaviour
     {
         get
         {
-            if (DirtyMedals || medals == 0)
+            if (DirtyMedals)
             {
                 medals = 0;
 
                 for (var i = 0; i < Levels.Length; i++)
                 {
                     var savedValue = PlayerPrefs.GetString("Level" + i);
-
+                    
                     for (var j = 0; j < savedValue.Length; j++)
                     {
                         if (savedValue[j] == '1')
@@ -146,6 +160,8 @@ public class MainManager : MonoBehaviour
         }
 
         Levels = editableLevels.ToArray();
+
+        DirtyMedals = true;
     }
 
     private void Start()
@@ -193,5 +209,13 @@ public class MainManager : MonoBehaviour
         {
             LevelSelectionPanel.Instance.Show();
         }
+    }
+
+    public void Pay()
+    {
+        Paid = true;
+
+        LevelSelectionPanel.Instance.UpdateSectionBlockers();
+        OptionsPanel.instance.UpdatePayButton();
     }
 }

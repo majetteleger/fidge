@@ -34,7 +34,7 @@ public class CreditsPanel : Panel
         LoadEntries();
         LayoutRebuilder.ForceRebuildLayoutImmediate(Content.GetComponent<RectTransform>());
 
-        Initialize();
+        SetupSounds();
     }
 
     void Update()

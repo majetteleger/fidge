@@ -20,7 +20,7 @@ public class MainMenuPanel : Panel
 
     void Start()
     {
-        Initialize();
+        SetupSounds();
     }
 
     void Update()

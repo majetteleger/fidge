@@ -232,6 +232,8 @@ public class Level : MonoBehaviour
                 path.RightNode = rightLink as Node;
                 path.DownNode = downLink as Node;
                 path.LeftNode = leftLink as Node;
+
+                path.TryTurnToStubs();
             }
         }
     }
