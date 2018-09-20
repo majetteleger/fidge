@@ -6,34 +6,10 @@ using UnityEngine.UI;
 public class Panel : MonoBehaviour
 {
     public List<Panel> CoexistsWith;
-
-    public virtual bool IsActive
-    {
-        get
-        {
-            return _canvasGroup.interactable;
-        }
-    }
-
-	private CanvasGroup canvasGroup;
-	private CanvasGroup _canvasGroup
-	{
-		get
-		{
-			if(canvasGroup == null)
-			{
-				canvasGroup = GetComponent<CanvasGroup>();
-			}
-
-			return canvasGroup;
-		}
-	}
-
+    
 	public virtual void Show(Panel originPanel = null)
 	{
-		_canvasGroup.alpha = 1;
-		_canvasGroup.blocksRaycasts = true;
-		_canvasGroup.interactable = true;
+		gameObject.SetActive(true);
         
         foreach (var panel in UIManager.instance.Panels)
         {
@@ -48,14 +24,7 @@ public class Panel : MonoBehaviour
 
 	public virtual void Hide()
 	{
-	    if (!IsActive)
-	    {
-	        return;
-	    }
-
-        _canvasGroup.alpha = 0;
-		_canvasGroup.blocksRaycasts = false;
-		_canvasGroup.interactable = false;
+	    gameObject.SetActive(false);
     }
 
     public virtual void SetupSounds()
@@ -64,7 +33,7 @@ public class Panel : MonoBehaviour
 
         foreach (var button in buttons)
         {
-            if (button.transform.parent == InGamePanel.instance.TraversalInput.transform)
+            if (InGamePanel.instance != null && button.transform.parent == InGamePanel.instance.TraversalInput.transform)
             {
                 if(button == InGamePanel.instance.GoButton)
                 {

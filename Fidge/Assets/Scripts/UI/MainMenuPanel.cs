@@ -25,11 +25,6 @@ public class MainMenuPanel : Panel
 
     void Update()
     {
-        if (!IsActive)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
             LevelSelectionPanel.Instance.Show();

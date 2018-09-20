@@ -39,16 +39,6 @@ public class CreditsPanel : Panel
 
     void Update()
     {
-        if (!IsActive)
-        {
-            if (!IsActive)
-            {
-                return;
-            }
-
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             MainMenuPanel.instance.Show();

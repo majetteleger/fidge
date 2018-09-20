@@ -40,11 +40,6 @@ public class PopupPanel : Panel
 
     void Update()
     {
-        if (!IsActive)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             LevelSelectionPanel.Instance.Show(instance);

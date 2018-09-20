@@ -13,26 +13,38 @@ public class LevelEditPanel : Panel
 
     public enum UserClickType
     {
-        Element,
+        Base,
         Content,
         TraversalModifier
     }
 
     public static LevelEditPanel Instance;
 
+    public GameObject LevelCellPrefab;
+    public Transform LevelCellContainer;
     public Button ToggleElementButton;
     public Button ToggleContentButton;
     public Button ToggleTraversalModifierButton;
+    public RectTransform NodeContextMenu;
+    public RectTransform NodeContextMenuButtonGroup;
     public GameObject MessageBubble;
     public GameObject MessageBubbleBackground;
     public Text BackMessageText;
+    public float LongPressTime;
     [TextArea] public string BackMessage;
     public Sprite NodeSprite;
+    public Sprite StartNodeSprite;
+    public Sprite EndNodeSprite;
     public Sprite VerticalPathSprite;
     public Sprite HorizontalPathSprite;
 
     private UserClickType _clickType;
     private LevelCell[] _levelCells;
+    private bool _cellPressed;
+    private float _longPressTimer;
+    private LevelCell _cellClicked;
+    private Vector2Int? _startNodePosition;
+    private Vector2Int? _endNodePosition;
 
     void Awake()
     {
@@ -42,25 +54,62 @@ public class LevelEditPanel : Panel
     void Start()
     {
         SetupSounds();
-        _levelCells = GetComponentsInChildren<LevelCell>();
 
-        for (var i = 0; i < _levelCells.Length; i++)
+        _longPressTimer = LongPressTime;
+
+    var levelCellList = new List<LevelCell>();
+
+        for (var i = 0; i < KWidth * KHeight; i++)
         {
+            var newLevelCell = Instantiate(LevelCellPrefab, LevelCellContainer).GetComponent<LevelCell>();
             var newPosition = new Vector2Int(i % KWidth, i / KWidth);
-            _levelCells[i].Position = newPosition;
+            newLevelCell.Position = newPosition;
+
+            var trigger = newLevelCell.gameObject.AddComponent<EventTrigger>();
+
+            var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+            pointerDown.callback.AddListener((e) =>
+            {
+                _cellClicked = EventSystem.current.currentSelectedGameObject.GetComponent<LevelCell>();
+
+                _cellPressed = true;
+            });
+
+            trigger.triggers.Add(pointerDown);
+
+            var pointerUp = new EventTrigger.Entry{ eventID = EventTriggerType.PointerUp };
+            pointerUp.callback.AddListener((e) =>
+            {
+                _cellClicked = EventSystem.current.currentSelectedGameObject.GetComponent<LevelCell>();
+
+                ClickOnCell();
+                _longPressTimer = LongPressTime;
+                _cellPressed = false;
+            });
+
+            trigger.triggers.Add(pointerUp);
+            
+            levelCellList.Add(newLevelCell);
         }
+
+        _levelCells = levelCellList.ToArray();
     }
 
     void Update()
     {
-        if (!IsActive)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             MainMenuPanel.instance.Show();
+        }
+
+        if (_cellPressed && _longPressTimer > 0)
+        {
+            _longPressTimer -= Time.deltaTime;
+
+            if (_longPressTimer <= 0)
+            {
+                OpenContextMenu(_clickType);
+            }
         }
     }
 
@@ -72,7 +121,7 @@ public class LevelEditPanel : Panel
 
     private void ToggleElement()
     {
-        _clickType = UserClickType.Element;
+        _clickType = UserClickType.Base;
         ToggleElementButton.interactable = false;
         ToggleContentButton.interactable = true;
         ToggleTraversalModifierButton.interactable = true;
@@ -103,58 +152,130 @@ public class LevelEditPanel : Panel
         return null;
     }
 
-    public void UI_ClickOnCell()
+    private void ClickOnCell()
     {
-        var cellClicked = EventSystem.current.currentSelectedGameObject.GetComponent<LevelCell>();
-
+        if (_longPressTimer <= 0)
+        {
+            return;
+        }
+        
         switch (_clickType)
         {
-            case UserClickType.Element:
+            case UserClickType.Base:
 
-                if (!string.IsNullOrEmpty(cellClicked.Content))
+                if (!string.IsNullOrEmpty(_cellClicked.Content))
                 {
-                    if (!cellClicked.PositionIsOdd)
+                    if (!_cellClicked.PositionIsOdd)
                     {
-                        cellClicked.ChangePathOrientation();
-                        cellClicked.ChangeSprite(cellClicked.Content.Contains(EditableLevel.KVertical) ? VerticalPathSprite : HorizontalPathSprite);
+                        _cellClicked.ChangePathOrientation();
+                        _cellClicked.ChangeSprite(
+                            _cellClicked.Content.Contains(EditableLevel.KVertical)
+                                ? VerticalPathSprite
+                                : HorizontalPathSprite, UserClickType.Base);
                     }
 
                     break;
                 }
-                
-                if (cellClicked.PositionIsOdd)
+
+                if (_cellClicked.PositionIsOdd)
                 {
-                    cellClicked.ChangeSprite(NodeSprite);
-                    cellClicked.Content = EditableLevel.KNode;
+                    _cellClicked.ChangeSprite(NodeSprite, UserClickType.Base);
+                    _cellClicked.Content = EditableLevel.KNode;
                 }
                 else
                 {
-                    cellClicked.Content = EditableLevel.KPath;
+                    _cellClicked.Content = EditableLevel.KPath;
 
-                    var upCell = GetCellByPosition(cellClicked.Position.x, cellClicked.Position.y + 1);
-                    var downCell = GetCellByPosition(cellClicked.Position.x, cellClicked.Position.y - 1);
-                    var upIsNode = upCell != null && !string.IsNullOrEmpty(upCell.Content) && upCell.Content.Contains(EditableLevel.KNode);
-                    var downIsNode = downCell != null && !string.IsNullOrEmpty(downCell.Content) && downCell.Content.Contains(EditableLevel.KNode);
+                    var upCell = GetCellByPosition(_cellClicked.Position.x, _cellClicked.Position.y + 1);
+                    var downCell = GetCellByPosition(_cellClicked.Position.x, _cellClicked.Position.y - 1);
+                    var upIsNode = upCell != null && !string.IsNullOrEmpty(upCell.Content) &&
+                                   upCell.Content.Contains(EditableLevel.KNode);
+                    var downIsNode = downCell != null && !string.IsNullOrEmpty(downCell.Content) &&
+                                     downCell.Content.Contains(EditableLevel.KNode);
 
                     if (upIsNode || downIsNode)
                     {
-                        cellClicked.ChangeSprite(VerticalPathSprite);
-                        cellClicked.Content += EditableLevel.KVertical;
+                        _cellClicked.ChangeSprite(VerticalPathSprite, UserClickType.Base);
+                        _cellClicked.Content += EditableLevel.KVertical;
                     }
                     else
                     {
-                        cellClicked.ChangeSprite(HorizontalPathSprite);
-                        cellClicked.Content += EditableLevel.KHorizontal;
+                        _cellClicked.ChangeSprite(HorizontalPathSprite, UserClickType.Base);
+                        _cellClicked.Content += EditableLevel.KHorizontal;
                     }
-                    
+
                 }
-                
+
                 break;
             case UserClickType.Content:
                 break;
             case UserClickType.TraversalModifier:
                 break;
         }
+    }
+
+    private void OpenContextMenu(UserClickType clickType)
+    {
+        if (_cellClicked == null || string.IsNullOrEmpty(_cellClicked.Content))
+        {
+            return;
+        }
+
+        var top = Camera.main.ScreenToViewportPoint(_cellClicked.transform.position).y < 0.5f;
+        var right = Camera.main.ScreenToViewportPoint(_cellClicked.transform.position).x < 0.5f;
+
+        if (_cellClicked.Content.Contains(EditableLevel.KNode))
+        {
+            NodeContextMenu.gameObject.SetActive(true);
+            NodeContextMenuButtonGroup.anchoredPosition = _cellClicked.transform.localPosition;
+            NodeContextMenuButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
+        }
+    }
+    
+    public void UI_CloseContextMenu()
+    {
+        NodeContextMenu.gameObject.SetActive(false);
+    }
+
+    public void UI_MakeStartNode()
+    {
+        if (_startNodePosition.HasValue)
+        {
+            var previousStartNode = GetCellByPosition(_startNodePosition.Value.x, _startNodePosition.Value.y);
+            if (previousStartNode != null && !string.IsNullOrEmpty(previousStartNode.Content) && previousStartNode.Content.Contains(EditableLevel.KNode))
+            {
+                previousStartNode.ChangeSprite(NodeSprite, UserClickType.Base);
+            }
+
+            if (_endNodePosition == _cellClicked.Position)
+            {
+                _endNodePosition = null;
+            }
+        }
+        
+        _startNodePosition = _cellClicked.Position;
+        _cellClicked.ChangeSprite(StartNodeSprite, UserClickType.Base);
+        
+    }
+
+    public void UI_MakeEndNode()
+    {
+        if (_endNodePosition.HasValue)
+        {
+            var previousEndNode = GetCellByPosition(_endNodePosition.Value.x, _endNodePosition.Value.y);
+            if (previousEndNode != null && !string.IsNullOrEmpty(previousEndNode.Content) && previousEndNode.Content.Contains(EditableLevel.KNode))
+            {
+                previousEndNode.ChangeSprite(NodeSprite, UserClickType.Base);
+            }
+
+            if (_startNodePosition == _cellClicked.Position)
+            {
+                _startNodePosition = null;
+            }
+        }
+            
+        _endNodePosition = _cellClicked.Position;
+        _cellClicked.ChangeSprite(EndNodeSprite, UserClickType.Base);
     }
 
     public void UI_Validate()

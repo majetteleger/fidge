@@ -1,21 +1,20 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LevelCell : MonoBehaviour
 {
+    public Image BaseImage;
+    public Image ContentImage;
+    public Image TraversalModifierImage;
+
     public Vector2Int Position { get; set; }
-    public Image Image { get; set; }
     public string Content { get; set; }
 
     public bool PositionIsOdd { get { return (Position.x + Position.y) % 2 == 0; } }
     
-    private void Start()
-    {
-        Image = GetComponent<Image>();
-    }
-
     public void ChangePathOrientation()
     {
         var oldContent = Content;
@@ -40,8 +39,29 @@ public class LevelCell : MonoBehaviour
         Content = new string(newContent);
     }
 
-    public void ChangeSprite(Sprite sprite)
+    public void ChangeSprite(Sprite sprite, LevelEditPanel.UserClickType clickType)
     {
-        Image.sprite = sprite;
+        var imageToChange = (Image) null;
+
+        switch (clickType)
+        {
+            case LevelEditPanel.UserClickType.Base:
+                imageToChange = BaseImage;
+                break;
+            case LevelEditPanel.UserClickType.Content:
+                imageToChange = ContentImage;
+                break;
+            case LevelEditPanel.UserClickType.TraversalModifier:
+                imageToChange = TraversalModifierImage;
+                break;
+        }
+
+        if (imageToChange == null)
+        {
+            return;
+        }
+
+        imageToChange.color = Color.white;
+        imageToChange.sprite = sprite;
     }
 }

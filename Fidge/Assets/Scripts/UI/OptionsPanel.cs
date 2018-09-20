@@ -35,11 +35,6 @@ public class OptionsPanel : Panel
     
     void Update()
     {
-        if(!IsActive)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             MainMenuPanel.instance.Show();

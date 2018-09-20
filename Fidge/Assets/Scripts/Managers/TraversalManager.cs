@@ -44,7 +44,7 @@ public class TraversalManager : MonoBehaviour
     {
         if (MainManager.Instance.ActiveLevel != null)
         {
-            if (Traversal == null && !TutorialPanel.Instance.IsActive)
+            if (Traversal == null)
             {
                 if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
                 {
@@ -130,7 +130,7 @@ public class TraversalManager : MonoBehaviour
         _currentTraversalMoves = 0;
         _currentTraversalTime = 0;
 
-        if(InGamePanel.instance.IsActive && MainManager.Instance.ActiveLevel != null)
+        if(MainManager.Instance.ActiveLevel != null)
         {
             InGamePanel.instance.UpdateMoves(_currentTraversalMoves);
             InGamePanel.instance.UpdateTimer(_currentTraversalTime);
