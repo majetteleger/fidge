@@ -253,8 +253,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BaseImage: {fileID: 114431126696326862}
-  ContentImage: {fileID: 114473402460864044}
+  ExtraImage: {fileID: 114473402460864044}
   TraversalModifierImage: {fileID: 114318999599524972}
+  NodeSprite: {fileID: 21300000, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  VerticalPathSprite: {fileID: 21300068, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  HorizontalPathSprite: {fileID: 21300042, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed,
+    type: 3}
+  KeySprites:
+  - {fileID: 21300026, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300014, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300080, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300046, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300056, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  LinkSprites:
+  - {fileID: 21300030, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300018, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300066, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300040, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300060, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  LockSprites:
+  - {fileID: 21300028, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300016, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300064, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300038, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300058, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  SlideSprites:
+  - {fileID: 21300008, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300044, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300022, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  - {fileID: 21300054, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  CrackSprite: {fileID: 21300010, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  WallSprite: {fileID: 21300012, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  FlagSprite: {fileID: 21300006, guid: 0cf4c4b2701b1244ab1fc7dd8a1d0aed, type: 3}
+  CoveredSprite: {fileID: 21300000, guid: 3f805e1591e9dfd4d9dd3fbe398eadd3, type: 3}
+  RevealedSprite: {fileID: 21300000, guid: e039c657d52da0d40af1bb9fa34e6b1f, type: 3}
 --- !u!222 &222471680874220442
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -292,10 +324,10 @@ RectTransform:
   m_Father: {fileID: 224836932730847360}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 85, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224574616499896476
 RectTransform:
@@ -310,10 +342,10 @@ RectTransform:
   m_Father: {fileID: 224836932730847360}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224707979594784468
 RectTransform:
@@ -328,10 +360,10 @@ RectTransform:
   m_Father: {fileID: 224836932730847360}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 85, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224836932730847360
 RectTransform:
@@ -352,5 +384,5 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 85, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}

@@ -14,8 +14,9 @@ public class LevelEditPanel : Panel
     public enum UserClickType
     {
         Base,
-        Content,
-        TraversalModifier
+        Extra,
+        TraversalModifier,
+        NONE
     }
 
     public static LevelEditPanel Instance;
@@ -23,20 +24,33 @@ public class LevelEditPanel : Panel
     public GameObject LevelCellPrefab;
     public Transform LevelCellContainer;
     public Button ToggleElementButton;
-    public Button ToggleContentButton;
+    public Image ToggleElementButtonImage;
+    public Button ToggleExtraButton;
+    public Image ToggleExtraButtonImage;
     public Button ToggleTraversalModifierButton;
-    public RectTransform NodeContextMenu;
-    public RectTransform NodeContextMenuButtonGroup;
+    public Image ToggleTraversalModifierButtonImage;
+    public LevelEditContextMenu ContextMenu;
     public GameObject MessageBubble;
     public GameObject MessageBubbleBackground;
     public Text BackMessageText;
     public float LongPressTime;
     [TextArea] public string BackMessage;
+    
+    [Header("Sprites")]
     public Sprite NodeSprite;
     public Sprite StartNodeSprite;
     public Sprite EndNodeSprite;
     public Sprite VerticalPathSprite;
     public Sprite HorizontalPathSprite;
+    public Sprite KeySprite;
+    public Sprite LinkSprite;
+    public Sprite LockSprite;
+    public Sprite SlideSprite;
+    public Sprite CrackSprite;
+    public Sprite WallSprite;
+    public Sprite FlagSprite;
+    public Sprite CoveredSprite;
+    public Sprite RevealedSprite;
 
     private UserClickType _clickType;
     private LevelCell[] _levelCells;
@@ -45,6 +59,8 @@ public class LevelEditPanel : Panel
     private LevelCell _cellClicked;
     private Vector2Int? _startNodePosition;
     private Vector2Int? _endNodePosition;
+    private string _toggledExtra;
+    private string _toggledTraversalModifier;
 
     void Awake()
     {
@@ -56,8 +72,11 @@ public class LevelEditPanel : Panel
         SetupSounds();
 
         _longPressTimer = LongPressTime;
+        _clickType = UserClickType.NONE;
+        _toggledExtra = EditableLevel.KKey;
+        _toggledTraversalModifier = EditableLevel.KTraversalStateCovered;
 
-    var levelCellList = new List<LevelCell>();
+        var levelCellList = new List<LevelCell>();
 
         for (var i = 0; i < KWidth * KHeight; i++)
         {
@@ -119,25 +138,7 @@ public class LevelEditPanel : Panel
         base.Show(originPanel);
     }
 
-    private void ToggleElement()
-    {
-        _clickType = UserClickType.Base;
-        ToggleElementButton.interactable = false;
-        ToggleContentButton.interactable = true;
-        ToggleTraversalModifierButton.interactable = true;
-    }
-
-    private void SaveLevel()
-    {
-        // save to a json
-    }
-
-    private bool Validate()
-    {
-        return true;
-    }
-
-    private LevelCell GetCellByPosition(int x, int y)
+    public LevelCell GetCellByPosition(int x, int y)
     {
         var position = new Vector2Int(x, y);
 
@@ -152,6 +153,16 @@ public class LevelEditPanel : Panel
         return null;
     }
 
+    private void SaveLevel()
+    {
+        // save to a json
+    }
+
+    private bool Validate()
+    {
+        return true;
+    }
+    
     private void ClickOnCell()
     {
         if (_longPressTimer <= 0)
@@ -163,53 +174,20 @@ public class LevelEditPanel : Panel
         {
             case UserClickType.Base:
 
-                if (!string.IsNullOrEmpty(_cellClicked.Content))
-                {
-                    if (!_cellClicked.PositionIsOdd)
-                    {
-                        _cellClicked.ChangePathOrientation();
-                        _cellClicked.ChangeSprite(
-                            _cellClicked.Content.Contains(EditableLevel.KVertical)
-                                ? VerticalPathSprite
-                                : HorizontalPathSprite, UserClickType.Base);
-                    }
-
-                    break;
-                }
-
-                if (_cellClicked.PositionIsOdd)
-                {
-                    _cellClicked.ChangeSprite(NodeSprite, UserClickType.Base);
-                    _cellClicked.Content = EditableLevel.KNode;
-                }
-                else
-                {
-                    _cellClicked.Content = EditableLevel.KPath;
-
-                    var upCell = GetCellByPosition(_cellClicked.Position.x, _cellClicked.Position.y + 1);
-                    var downCell = GetCellByPosition(_cellClicked.Position.x, _cellClicked.Position.y - 1);
-                    var upIsNode = upCell != null && !string.IsNullOrEmpty(upCell.Content) &&
-                                   upCell.Content.Contains(EditableLevel.KNode);
-                    var downIsNode = downCell != null && !string.IsNullOrEmpty(downCell.Content) &&
-                                     downCell.Content.Contains(EditableLevel.KNode);
-
-                    if (upIsNode || downIsNode)
-                    {
-                        _cellClicked.ChangeSprite(VerticalPathSprite, UserClickType.Base);
-                        _cellClicked.Content += EditableLevel.KVertical;
-                    }
-                    else
-                    {
-                        _cellClicked.ChangeSprite(HorizontalPathSprite, UserClickType.Base);
-                        _cellClicked.Content += EditableLevel.KHorizontal;
-                    }
-
-                }
+                _cellClicked.ChangeBase();
 
                 break;
-            case UserClickType.Content:
+
+            case UserClickType.Extra:
+
+                _cellClicked.ChangeExtra(_toggledExtra);
+
                 break;
+
             case UserClickType.TraversalModifier:
+
+                _cellClicked.ChangeTraversalModifier(_toggledTraversalModifier);
+
                 break;
         }
     }
@@ -221,20 +199,74 @@ public class LevelEditPanel : Panel
             return;
         }
 
-        var top = Camera.main.ScreenToViewportPoint(_cellClicked.transform.position).y < 0.5f;
-        var right = Camera.main.ScreenToViewportPoint(_cellClicked.transform.position).x < 0.5f;
-
-        if (_cellClicked.Content.Contains(EditableLevel.KNode))
-        {
-            NodeContextMenu.gameObject.SetActive(true);
-            NodeContextMenuButtonGroup.anchoredPosition = _cellClicked.transform.localPosition;
-            NodeContextMenuButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
-        }
+        ContextMenu.Activate(_cellClicked);
     }
-    
-    public void UI_CloseContextMenu()
+
+    private void CycleThroughExtra()
     {
-        NodeContextMenu.gameObject.SetActive(false);
+        var newIndex = 0;
+
+        var extraToCycleThrough = new string[EditableLevel.Collectables.Length + EditableLevel.Obstacles.Length];
+        EditableLevel.Collectables.CopyTo(extraToCycleThrough, 0);
+        EditableLevel.Obstacles.CopyTo(extraToCycleThrough, EditableLevel.Collectables.Length);
+
+        var extraSprites = new[]
+        {
+            KeySprite,
+            FlagSprite,
+            LinkSprite,
+            LockSprite,
+            WallSprite,
+            CrackSprite,
+            SlideSprite
+        };
+
+        if (!string.IsNullOrEmpty(_toggledExtra))
+        {
+            for (var i = 0; i < extraToCycleThrough.Length; i++)
+            {
+                if (extraToCycleThrough[i] == _toggledExtra)
+                {
+                    newIndex = i < extraToCycleThrough.Length - 1 ? i + 1 : 0;
+                }
+            }
+        }
+
+        _toggledExtra = extraToCycleThrough[newIndex];
+        ToggleExtraButtonImage.sprite = extraSprites[newIndex];
+    }
+
+    private void CycleThroughTraversalModifier()
+    {
+        var newIndex = 0;
+
+        var traversalModifierToCycleThrough = new string[EditableLevel.TraversalStates.Length];
+        EditableLevel.TraversalStates.CopyTo(traversalModifierToCycleThrough, 0);
+
+        var traversalModifierSprites = new[]
+        {
+            CoveredSprite,
+            RevealedSprite
+        };
+
+        if (!string.IsNullOrEmpty(_toggledTraversalModifier))
+        {
+            for (var i = 0; i < traversalModifierToCycleThrough.Length; i++)
+            {
+                if (traversalModifierToCycleThrough[i] == _toggledTraversalModifier)
+                {
+                    newIndex = i < traversalModifierToCycleThrough.Length - 1 ? i + 1 : 0;
+                }
+            }
+        }
+
+        _toggledTraversalModifier = traversalModifierToCycleThrough[newIndex];
+        ToggleTraversalModifierButtonImage.sprite = traversalModifierSprites[newIndex];
+    }
+
+    public void UI_ChangePathOrientation()
+    {
+        _cellClicked.ChangePathOrientation();
     }
 
     public void UI_MakeStartNode()
@@ -310,26 +342,51 @@ public class LevelEditPanel : Panel
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
     }
-
+    
     public void UI_ToggleElement()
     {
         ToggleElement();
     }
 
-    public void UI_ToggleContent()
+    private void ToggleElement()
     {
-        _clickType = UserClickType.Content;
-        ToggleElementButton.interactable = true;
-        ToggleContentButton.interactable = false;
-        ToggleTraversalModifierButton.interactable = true;
+        if (_clickType == UserClickType.Base)
+        {
+            return;
+        }
+
+        _clickType = UserClickType.Base;
+        ToggleElementButton.GetComponent<Image>().color = Color.gray;
+        ToggleExtraButton.GetComponent<Image>().color = Color.white;
+        ToggleTraversalModifierButton.GetComponent<Image>().color = Color.white;
+    }
+
+    public void UI_ToggleExtra()
+    {
+        if (_clickType == UserClickType.Extra)
+        {
+            CycleThroughExtra();
+            return;
+        }
+
+        _clickType = UserClickType.Extra;
+        ToggleElementButton.GetComponent<Image>().color = Color.white;
+        ToggleExtraButton.GetComponent<Image>().color = Color.gray;
+        ToggleTraversalModifierButton.GetComponent<Image>().color = Color.white;
     }
 
     public void UI_ToggleTraversalModifier()
     {
+        if (_clickType == UserClickType.TraversalModifier)
+        {
+            CycleThroughTraversalModifier();
+            return;
+        }
+
         _clickType = UserClickType.TraversalModifier;
-        ToggleElementButton.interactable = true;
-        ToggleContentButton.interactable = true;
-        ToggleTraversalModifierButton.interactable = false;
+        ToggleElementButton.GetComponent<Image>().color = Color.white;
+        ToggleExtraButton.GetComponent<Image>().color = Color.white;
+        ToggleTraversalModifierButton.GetComponent<Image>().color = Color.gray;
     }
 
     public void UI_OtherOptions()
