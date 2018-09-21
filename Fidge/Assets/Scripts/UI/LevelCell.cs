@@ -53,7 +53,7 @@ public class LevelCell : MonoBehaviour
 
         Content = new string(newContent);
     }
-
+    
     public void ChangeSprite(Sprite sprite, LevelEditPanel.UserClickType clickType)
     {
         var imageToChange = (Image) null;
@@ -76,12 +76,36 @@ public class LevelCell : MonoBehaviour
             return;
         }
 
-        imageToChange.color = Color.white;
+        imageToChange.color = sprite != null ? Color.white : Color.clear;
         imageToChange.sprite = sprite;
     }
 
-    public void ChangeBase()
+    public void ChangeBase(string selectedBase)
     {
+        if (selectedBase == LevelEditPanel.KDelete)
+        {
+            RemoveFromElement(EditableLevel.LevelElements);
+            RemoveFromElement(EditableLevel.Collectables);
+            RemoveFromElement(EditableLevel.Obstacles);
+            RemoveFromElement(EditableLevel.Colors);
+            RemoveFromElement(EditableLevel.Directions);
+
+            if (LevelEditPanel.Instance.StartNodePosition == Position)
+            {
+                LevelEditPanel.Instance.StartNodePosition = null;
+            }
+
+            if (LevelEditPanel.Instance.EndNodePosition == Position)
+            {
+                LevelEditPanel.Instance.EndNodePosition = null;
+            }
+
+            ChangeSprite(null, LevelEditPanel.UserClickType.Base);
+            ChangeSprite(null, LevelEditPanel.UserClickType.Extra);
+
+            return;
+        }
+
         if (PositionIsOdd)
         {
             if (!string.IsNullOrEmpty(Content) && Content.Contains(EditableLevel.KNode))
@@ -128,21 +152,33 @@ public class LevelCell : MonoBehaviour
         }
     }
 
-    public void ChangeExtra(string extra)
+    public void ChangeExtra(string selectedExtra)
     {
-        if (EditableLevel.Collectables.Contains(extra) && !Content.Contains(EditableLevel.KNode))
+        if (selectedExtra == LevelEditPanel.KDelete)
+        {
+            RemoveFromElement(EditableLevel.Collectables);
+            RemoveFromElement(EditableLevel.Obstacles);
+            RemoveFromElement(EditableLevel.Colors);
+            RemoveFromElement(EditableLevel.Directions);
+            
+            ChangeSprite(null, LevelEditPanel.UserClickType.Extra);
+
+            return;
+        }
+
+        if (EditableLevel.Collectables.Contains(selectedExtra) && !Content.Contains(EditableLevel.KNode))
         {
             Debug.Log("Can only place this extra on a node");
             return;   
         }
 
-        if (EditableLevel.Obstacles.Contains(extra) && !Content.Contains(EditableLevel.KPath))
+        if (EditableLevel.Obstacles.Contains(selectedExtra) && !Content.Contains(EditableLevel.KPath))
         {
             Debug.Log("Can only place this extra on a path");
             return;
         }
 
-        switch (extra)
+        switch (selectedExtra)
         {
             case EditableLevel.KKey:
 
@@ -252,9 +288,18 @@ public class LevelCell : MonoBehaviour
         }
     }
 
-    public void ChangeTraversalModifier(string traversalModifier)
+    public void ChangeTraversalModifier(string selectedTraversalModifier)
     {
-        switch (traversalModifier)
+        if (selectedTraversalModifier == LevelEditPanel.KDelete)
+        {
+            RemoveFromElement(EditableLevel.TraversalStates);
+
+            ChangeSprite(null, LevelEditPanel.UserClickType.TraversalModifier);
+
+            return;
+        }
+
+        switch (selectedTraversalModifier)
         {
             case EditableLevel.KTraversalStateCovered:
 
@@ -283,6 +328,24 @@ public class LevelCell : MonoBehaviour
                 ChangeSprite(RevealedSprite, LevelEditPanel.UserClickType.TraversalModifier);
 
                 break;
+        }
+    }
+
+    public void Clear()
+    {
+        Content = string.Empty;
+        ChangeSprite(null, LevelEditPanel.UserClickType.Base);
+        ChangeSprite(null, LevelEditPanel.UserClickType.Extra);
+        ChangeSprite(null, LevelEditPanel.UserClickType.TraversalModifier);
+
+        if (LevelEditPanel.Instance.StartNodePosition == Position)
+        {
+            LevelEditPanel.Instance.StartNodePosition = null;
+        }
+
+        if (LevelEditPanel.Instance.EndNodePosition == Position)
+        {
+            LevelEditPanel.Instance.EndNodePosition = null;
         }
     }
 

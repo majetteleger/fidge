@@ -12,19 +12,15 @@ public class LevelEditContextMenu : MonoBehaviour
     public GameObject MakeStartNodeButton;
     public GameObject MakeEndNodeButton;
     public GameObject ChangePathOrientationButton;
+    public GameObject ClearButton;
+    public GameObject ResetButton;
+    public GameObject CenterButton;
 
     private GameObject[] _buttons;
 
     public void Activate(LevelCell cellClicked)
     {
         _buttons = GetComponentsInChildren<Button>(true).Where(x => x.gameObject != gameObject).Select(x => x.gameObject).ToArray();
-
-        var top = Camera.main.ScreenToViewportPoint(cellClicked.transform.position).y < 0.5f;
-        var right = Camera.main.ScreenToViewportPoint(cellClicked.transform.position).x < 0.5f;
-
-        gameObject.SetActive(true);
-        ButtonGroup.anchoredPosition = cellClicked.transform.localPosition;
-        ButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
         
         if (cellClicked.Content.Contains(EditableLevel.KNode))
         {
@@ -33,7 +29,8 @@ public class LevelEditContextMenu : MonoBehaviour
                 var buttonActive = 
                     button == MakeStartNodeButton ||
                     button == MakeEndNodeButton ||
-                    button == CancelButton;
+                    button == CancelButton ||
+                    button == ClearButton;
 
                 button.SetActive(buttonActive);
             }
@@ -44,11 +41,43 @@ public class LevelEditContextMenu : MonoBehaviour
             {
                 var buttonActive =
                     button == ChangePathOrientationButton ||
-                    button == CancelButton;
+                    button == CancelButton ||
+                    button == ClearButton;
 
                 button.SetActive(buttonActive);
             }
         }
+
+        var top = Camera.main.ScreenToViewportPoint(cellClicked.transform.position).y < 0.5f;
+        var right = Camera.main.ScreenToViewportPoint(cellClicked.transform.position).x < 0.5f;
+
+        gameObject.SetActive(true);
+        ButtonGroup.anchoredPosition = cellClicked.transform.localPosition;
+        ButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
+    }
+
+    public void Activate(Button buttonClicked)
+    {
+        _buttons = GetComponentsInChildren<Button>(true).Where(x => x.gameObject != gameObject).Select(x => x.gameObject).ToArray();
+
+        if (buttonClicked == LevelEditPanel.Instance.OtherOptionsButton)
+        {
+            foreach (var button in _buttons)
+            {
+                var buttonActive =
+                    button == ResetButton ||
+                    button == CenterButton;
+
+                button.SetActive(buttonActive);
+            }
+        }
+
+        var top = Camera.main.ScreenToViewportPoint(buttonClicked.transform.position).y < 0.5f;
+        var right = Camera.main.ScreenToViewportPoint(buttonClicked.transform.position).x < 0.5f;
+
+        gameObject.SetActive(true);
+        ButtonGroup.anchoredPosition = buttonClicked.transform.localPosition;
+        ButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
     }
 
     public void UI_Close()
