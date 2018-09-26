@@ -79,13 +79,34 @@ public class InGamePanel : Panel
                 Moves.gameObject.SetActive(true);
                 TimerIcon.alpha = 1;
                 MovesIcon.alpha = 1;
-                TimerIcon.GetComponentInParent<Shadow>().enabled = true;
-                MovesIcon.GetComponentInParent<Shadow>().enabled = true;
+                TimerIcon.GetComponentsInParent<Shadow>(true)[0].enabled = true;
+                MovesIcon.GetComponentsInParent<Shadow>(true)[0].enabled = true;
             }
             else
             {
                 ObjectiveBars.gameObject.SetActive(false);
             }
+        }
+
+        UI_Less();
+
+        Show();
+    }
+
+    public void ShowLevel(LevelEditPanel.UserLevel level)
+    {
+        if (Application.isPlaying)
+        {
+            UpdateCollectables(null);
+            ToggleTraversalInputs(true);
+
+            ObjectiveBars.gameObject.SetActive(true);
+            Timer.gameObject.SetActive(true);
+            Moves.gameObject.SetActive(true);
+            TimerIcon.alpha = 1;
+            MovesIcon.alpha = 1;
+            TimerIcon.GetComponentsInParent<Shadow>(true)[0].enabled = true;
+            MovesIcon.GetComponentsInParent<Shadow>(true)[0].enabled = true;
         }
 
         UI_Less();
@@ -188,8 +209,18 @@ public class InGamePanel : Panel
     {
         TraversalManager.Instance.CancelTraversal();
 
+        var activeLevelWasUserMade = MainManager.Instance.ActiveLevel.UserMade;
+
         Destroy(MainManager.Instance.ActiveLevel.gameObject);
-        LevelSelectionPanel.Instance.Show();
+
+        if (activeLevelWasUserMade)
+        {
+            UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Play);
+        }
+        else
+        {
+            LevelSelectionPanel.Instance.Show();
+        }
     }
 
     public void UI_Reset()

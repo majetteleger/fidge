@@ -24,10 +24,7 @@ public class LevelSelectionPanel : Panel
     void Awake()
     {
         Instance = this;
-    }
-    
-    void Start()
-    {
+
         _levelButtons = new Button[MainManager.Instance.Levels.Length];
 
         var tempLevelIndex = 0;
@@ -55,7 +52,7 @@ public class LevelSelectionPanel : Panel
             var section = Instantiate(LevelSectionPrefab, LevelButtonContainer).GetComponent<LevelSection>();
             var numberOfRows = 0;
             var rowHeight = 0f;
-            var row = (Transform) null;
+            var row = (Transform)null;
 
             for (var j = 0; j < levelSection.Levels.Length; j++)
             {
@@ -76,7 +73,7 @@ public class LevelSelectionPanel : Panel
 
                 tempLevelIndex++;
             }
-            
+
             section.Blocker.SetAsLastSibling();
 
             var sectionSpacing = section.GetComponent<VerticalLayoutGroup>().spacing;
@@ -95,7 +92,7 @@ public class LevelSelectionPanel : Panel
 
         SetupSounds();
     }
-
+    
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))

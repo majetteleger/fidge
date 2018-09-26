@@ -15,6 +15,7 @@ public class LevelEditContextMenu : MonoBehaviour
     public GameObject ClearButton;
     public GameObject ResetButton;
     public GameObject CenterButton;
+    public GameObject DeleteButton;
 
     private GameObject[] _buttons;
 
@@ -66,7 +67,8 @@ public class LevelEditContextMenu : MonoBehaviour
             {
                 var buttonActive =
                     button == ResetButton ||
-                    button == CenterButton;
+                    button == CenterButton ||
+                    button == DeleteButton;
 
                 button.SetActive(buttonActive);
             }

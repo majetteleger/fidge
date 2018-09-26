@@ -43,6 +43,9 @@ public class Level : MonoBehaviour
     public Sprite DownArrow;
     public Sprite LeftArrow;
 
+    public bool UserMade { get; set; }
+    public string Guid { get; set; }
+
     public bool Scripted { get; set; }
     public int Index { get; set; }
     public string Name { get; set; }
@@ -58,7 +61,7 @@ public class Level : MonoBehaviour
         {
             if (string.IsNullOrEmpty(savedKey))
             {
-                savedKey = "Level" + Index;
+                savedKey = UserMade ? Guid : "Level" + Index;
             }
 
             return savedKey;
@@ -92,6 +95,11 @@ public class Level : MonoBehaviour
         return PlayerPrefs.GetString("Level" + levelIndex);
     }
 
+    public static string GetSavedValue(string guid)
+    {
+        return PlayerPrefs.GetString(guid);
+    }
+    
     public bool TimeMedal
     {
         get { return _savedValue[0] == '1'; }
@@ -130,6 +138,30 @@ public class Level : MonoBehaviour
         _savedValue = newValue;
 
         MainManager.Instance.DirtyMedals = true;
+    }
+
+    public void Initiliaze(LevelEditPanel.UserLevel userLevel)
+    {
+        UserMade = true;
+        Guid = userLevel.Guid;
+        Name = userLevel.Guid;
+        ExpectedTime = userLevel.ExpectedTime;
+        ExpectedMoves = userLevel.ExpectedMoves;
+
+        gameObject.name = Name;
+
+        LinkElements<Node, Path>();
+        LinkElements<Path, Node>();
+
+        EndNode.GetComponent<SpriteRenderer>().sprite = NodePrefab.GetComponent<Node>().EndSprite;
+
+        foreach (var element in GetComponentsInChildren<Element>())
+        {
+            if (element.State == Element.TraversalState.Revealed)
+            {
+                element.Cover();
+            }
+        }
     }
 
     public void Initiliaze(EditableLevel editableLevel)

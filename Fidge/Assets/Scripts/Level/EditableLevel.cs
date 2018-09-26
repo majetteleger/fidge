@@ -40,7 +40,7 @@ public class EditableLevel : ScriptableObject
     public static readonly string[] Colors = {KColorRed, KColorGreen, KColorBlue, KColorOrange, KColorPurple};
     public static readonly string[] Directions = {KDirectionUp, KDirectionRight, KDirectionDown, KDirectionLeft};
     public static readonly string[] TraversalStates = { KTraversalStateCovered, KTraversalStateRevealed };
-
+    
     public bool Scripted;
     public int AllowedEndNodeBypasses;
     public string Desription;

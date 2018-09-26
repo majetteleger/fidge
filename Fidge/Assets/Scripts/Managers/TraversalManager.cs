@@ -355,7 +355,9 @@ public class TraversalManager : MonoBehaviour
         AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.LevelFailed);
 
         CancelTraversal();
+
         MainManager.Instance.ReloadLevel();
+
         InGamePanel.instance.ToggleTraversalInputs(true);
     }
 
@@ -378,7 +380,14 @@ public class TraversalManager : MonoBehaviour
         
         MainManager.Instance.ActiveLevel.Save(timeMedal, movesMedal, flagMedal);
 
-        PopupPanel.instance.ShowWon(MainManager.Instance.ActiveLevel.Index >= 0 ? MainManager.Instance.Levels[MainManager.Instance.ActiveLevel.Index].Level : null);
+        if (MainManager.Instance.ActiveLevel.UserMade)
+        {
+            PopupPanel.instance.ShowWon(MainManager.Instance.ActiveLevel.Guid);
+        }
+        else
+        {
+            PopupPanel.instance.ShowWon(MainManager.Instance.ActiveLevel.Index >= 0 ? MainManager.Instance.Levels[MainManager.Instance.ActiveLevel.Index].Level : null);
+        }
         
         Destroy(MainManager.Instance.ActiveLevel.gameObject);
     }

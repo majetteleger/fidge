@@ -33,10 +33,11 @@ public class MainManager : MonoBehaviour
     public static MainManager Instance;
     
     public SequentialLevel[] Levels { get; set; }
-    
     public EditableLevel LastLoadedLevel { get; private set; }
-
+    public LevelEditPanel.UserLevel LastLoadedUserLevel { get; private set; }
     public bool DirtyMedals { get; set; }
+
+    private bool _lastLevelWasUserMade;
 
     public bool Paid
     {
@@ -171,7 +172,19 @@ public class MainManager : MonoBehaviour
 
     public void ReloadLevel()
     {
-        LoadLevel(LastLoadedLevel);
+        if (_lastLevelWasUserMade)
+        {
+            LoadLevel(LastLoadedUserLevel);
+        }
+        else
+        {
+            LoadLevel(LastLoadedLevel);
+        }
+    }
+
+    public void ReloadUserLevel()
+    {
+        LoadLevel(LastLoadedUserLevel);
     }
 
     public void LoadNextLevel()
@@ -181,6 +194,8 @@ public class MainManager : MonoBehaviour
 
     public void LoadLevel(EditableLevel editableLevel)
     {
+        _lastLevelWasUserMade = false;
+
         if (ActiveLevel != null)
         {
             DestroyImmediate(ActiveLevel.gameObject);
@@ -195,6 +210,40 @@ public class MainManager : MonoBehaviour
             
             level.Index = editableLevel.Index;
             LastLoadedLevel = editableLevel;
+
+            var tutorialTaggers = FindObjectsOfType<TutorialTagger>();
+
+            foreach (var tutorialTagger in tutorialTaggers)
+            {
+                tutorialTagger.CheckForTutorial();
+            }
+
+            TutorialManager.Instance.ListeningForTutorialChecks = false;
+        }
+        else
+        {
+            LevelSelectionPanel.Instance.Show();
+        }
+    }
+
+    public void LoadLevel(LevelEditPanel.UserLevel userLevel)
+    {
+        _lastLevelWasUserMade = true;
+
+        if (ActiveLevel != null)
+        {
+            DestroyImmediate(ActiveLevel.gameObject);
+        }
+
+        if (userLevel != null)
+        {
+            TutorialManager.Instance.ListeningForTutorialChecks = true;
+
+            InGamePanel.instance.ShowLevel(userLevel);
+            var level = userLevel.InstantiateLevel();
+
+            level.Guid = userLevel.Guid;
+            LastLoadedUserLevel = userLevel;
 
             var tutorialTaggers = FindObjectsOfType<TutorialTagger>();
 

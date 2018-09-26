@@ -25,7 +25,7 @@ public class LevelCell : MonoBehaviour
     public Sprite CoveredSprite;
     public Sprite RevealedSprite;
 
-    public Vector2Int Position { get; set; }
+    public Vector2 Position { get; set; }
     public string Content { get; set; }
 
     public bool PositionIsOdd { get { return (Position.x + Position.y) % 2 == 0; } }
@@ -131,8 +131,8 @@ public class LevelCell : MonoBehaviour
 
             Content = EditableLevel.KPath;
 
-            var upCell = LevelEditPanel.Instance.GetCellByPosition(Position.x, Position.y + 1);
-            var downCell = LevelEditPanel.Instance.GetCellByPosition(Position.x, Position.y - 1);
+            var upCell = LevelEditPanel.Instance.GetCellByPosition((int)Position.x, (int)Position.y + 1);
+            var downCell = LevelEditPanel.Instance.GetCellByPosition((int)Position.x, (int)Position.y - 1);
             var upIsNode = upCell != null && !string.IsNullOrEmpty(upCell.Content) &&
                            upCell.Content.Contains(EditableLevel.KNode);
             var downIsNode = downCell != null && !string.IsNullOrEmpty(downCell.Content) &&

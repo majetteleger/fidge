@@ -23,7 +23,10 @@ public class PopupPanel : Panel
     public string LostMessage;
     public float UnobtainedOpacity;
 
+    private UserLevelsPanel.UserActivity _userActivity;
+    private bool _loadUserLevel;
     private EditableLevel _levelToLoad;
+    private LevelEditPanel.UserLevel _userLevelToLoad;
 
     void Awake()
     {
@@ -49,7 +52,15 @@ public class PopupPanel : Panel
             if (ConfirmButton.IsActive())
             {
                 InGamePanel.instance.Show();
-                MainManager.Instance.LoadLevel(_levelToLoad);
+
+                if (_loadUserLevel)
+                {
+                    MainManager.Instance.LoadLevel(_userLevelToLoad);
+                }
+                else
+                {
+                    MainManager.Instance.LoadLevel(_levelToLoad);
+                }
             }
             else if (NextButton.IsActive())
             {
@@ -66,6 +77,7 @@ public class PopupPanel : Panel
 
     public void ShowConfirm(EditableLevel level)
     {
+        _loadUserLevel = false;
         _levelToLoad = level;
         
         var scripted = level.Scripted;
@@ -103,6 +115,45 @@ public class PopupPanel : Panel
         Show();
     }
 
+    public void ShowConfirm(LevelEditPanel.UserLevel level, UserLevelsPanel.UserActivity activity)
+    {
+        _userActivity = activity;
+        _loadUserLevel = true;
+        _userLevelToLoad = level;
+        
+        Message.text = "User Level";
+
+        MedalsParent.SetActive(activity == UserLevelsPanel.UserActivity.Play);
+
+        if (activity == UserLevelsPanel.UserActivity.Play)
+        {
+            var levelSavedValue = Level.GetSavedValue(level.Guid);
+
+            for (int i = 0; i < Medals.Length; i++)
+            {
+                var gotMedal = !string.IsNullOrEmpty(levelSavedValue) && levelSavedValue[i] == '1';
+
+                foreach (var shadow in Medals[i].GetComponentsInChildren<Shadow>())
+                {
+                    shadow.enabled = gotMedal;
+                }
+
+                Medals[i].transform.GetChild(1).GetComponent<Image>().enabled = gotMedal;
+                Medals[i].alpha = gotMedal ? 1f : UnobtainedOpacity;
+            }
+        }
+        
+        BackButton.gameObject.SetActive(true);
+        RetryButton.gameObject.SetActive(false);
+        ReplayButton.gameObject.SetActive(false);
+        NextButton.gameObject.SetActive(false);
+        ConfirmButton.gameObject.SetActive(true);
+        PlayButton.gameObject.SetActive(false);
+        MedalsObtainedText.transform.parent.gameObject.SetActive(false);
+
+        Show();
+    }
+
     public void ShowWon(EditableLevel level)
     {
         var scripted = level == null || level.Scripted;
@@ -117,7 +168,7 @@ public class PopupPanel : Panel
         
         if (!scripted)
         {
-            for (int i = 0; i < Medals.Length; i++)
+            for (var i = 0; i < Medals.Length; i++)
             {
                 var gotMedal = !string.IsNullOrEmpty(levelSavedValue) && levelSavedValue[i] == '1';
 
@@ -153,15 +204,10 @@ public class PopupPanel : Panel
         }
 
         NextButton.gameObject.SetActive(nextLevelButtonActive);
-
         BackButton.gameObject.SetActive(true);
-
         RetryButton.gameObject.SetActive(!scripted);
-
         ReplayButton.gameObject.SetActive(scripted);
-        
         ConfirmButton.gameObject.SetActive(false);
-
         PlayButton.gameObject.SetActive(false);
 
         MedalsObtainedText.transform.parent.gameObject.SetActive(true);
@@ -170,28 +216,48 @@ public class PopupPanel : Panel
         Show();
     }
 
-    /*public void ShowLost(EditableLevel level)
+    public void ShowWon(string levelGuid)
     {
-        var scripted = level.Scripted;
+        Message.text = WonMessage;
+        MedalsParent.SetActive(true);
 
-        Message.text = scripted ? TutorialMessage : LostMessage;
+        var levelSavedValue = Level.GetSavedValue(levelGuid);
+        
+        for (var i = 0; i < Medals.Length; i++)
+        {
+            var gotMedal = !string.IsNullOrEmpty(levelSavedValue) && levelSavedValue[i] == '1';
 
-        MedalsParent.SetActive(false);
+            foreach (var shadow in Medals[i].GetComponentsInChildren<Shadow>())
+            {
+                shadow.enabled = gotMedal;
+            }
 
-        BackButton.gameObject.SetActive(true);
-        RetryButton.gameObject.SetActive(!scripted);
-        ReplayButton.gameObject.SetActive(scripted);
+            Medals[i].transform.GetChild(1).GetComponent<Image>().enabled = gotMedal;
+            Medals[i].alpha = gotMedal ? 1f : UnobtainedOpacity;
+        }
+        
         NextButton.gameObject.SetActive(false);
+        BackButton.gameObject.SetActive(true);
+        RetryButton.gameObject.SetActive(true);
+        ReplayButton.gameObject.SetActive(false);
         ConfirmButton.gameObject.SetActive(false);
         PlayButton.gameObject.SetActive(false);
+
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
 
         Show();
-    }*/
-    
+    }
+
     public void UI_Back()
     {
-        LevelSelectionPanel.Instance.Show(instance);
+        if (_loadUserLevel)
+        {
+            UserLevelsPanel.Instance.ShowWithActivity(_userActivity);
+        }
+        else
+        {
+            LevelSelectionPanel.Instance.Show(instance);
+        }
     }
 
     public void UI_Retry()
@@ -206,6 +272,20 @@ public class PopupPanel : Panel
 
     public void UI_Confirm()
     {
-        MainManager.Instance.LoadLevel(_levelToLoad);
+        if (_loadUserLevel)
+        {
+            if (_userActivity == UserLevelsPanel.UserActivity.Play)
+            {
+                MainManager.Instance.LoadLevel(_userLevelToLoad);
+            }
+            else
+            {
+                LevelEditPanel.Instance.ShowAndLoadLevel(_userLevelToLoad);
+            }
+        }
+        else
+        {
+            MainManager.Instance.LoadLevel(_levelToLoad);
+        }
     }
 }

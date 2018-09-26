@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -8,6 +11,298 @@ using UnityEngine.UI;
 
 public class LevelEditPanel : Panel
 {
+    public class UserLevel
+    {
+        public bool Valid;
+        public string Guid;
+        public int ExpectedTime;
+        public int ExpectedMoves;
+
+        [HideInInspector] public bool Shifted;
+        [HideInInspector] public int NumberOfSolutions;
+        [HideInInspector] public int MinimumMoves;
+        [HideInInspector] public int MinimumMovesWithFlag;
+        [HideInInspector] public Vector2 StartNode;
+        [HideInInspector] public Vector2 EndNode;
+        [HideInInspector] public string[] Elements;
+
+        private GameObject levelPrefab;
+        public GameObject LevelPrefab
+        {
+            get
+            {
+                if (levelPrefab == null)
+                {
+                    levelPrefab = Resources.Load("Level", typeof(GameObject)) as GameObject;
+                }
+
+                return levelPrefab;
+            }
+        }
+
+        public Level InstantiateLevel()
+        {
+            var level = Instantiate(LevelPrefab).GetComponent<Level>();
+
+            for (var x = 0; x < KWidth; x++)
+            {
+                for (var y = 0; y < KHeight; y++)
+                {
+                    var element = Elements[x + y * KWidth];
+
+                    if (!string.IsNullOrEmpty(element))
+                    {
+                        var newElementGameObject = (GameObject)null;
+
+                        // Node
+                        if (element.Contains(EditableLevel.KNode))
+                        {
+                            newElementGameObject = Instantiate(level.NodePrefab, level.NodesContainer);
+                            var node = newElementGameObject.GetComponent<Node>();
+
+                            // Start node
+                            if (x == (int)StartNode.x && y == (int)StartNode.y)
+                            {
+                                level.StartNode = node;
+                                Instantiate(level.PlayerPrefab, level.StartNode.transform);
+                            }
+                            // End node
+                            else if (x == (int)EndNode.x && y == (int)EndNode.y)
+                            {
+                                level.EndNode = node;
+                                level.EndNode.gameObject.AddComponent<TutorialTagger>().Tag = TutorialManager.TutorialTag.EndNode;
+                            }
+
+                            // Collectables
+                            if (newElementGameObject != null)
+                            {
+                                // Key
+                                if (element.Contains(EditableLevel.KKey))
+                                {
+                                    Instantiate(level.KeyPrefab, newElementGameObject.transform);
+                                    var newKey = newElementGameObject.GetComponentInChildren<Key>();
+                                    var newKeyRenderer = newKey.GetComponent<SpriteRenderer>();
+
+                                    if (element.Contains(EditableLevel.KColorRed))
+                                    {
+                                        newKey.Color = Level.KeyLockColor.Red;
+                                        newKeyRenderer.sprite = newKey.Sprites.RedSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorGreen))
+                                    {
+                                        newKey.Color = Level.KeyLockColor.Green;
+                                        newKeyRenderer.sprite = newKey.Sprites.GreenSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorBlue))
+                                    {
+                                        newKey.Color = Level.KeyLockColor.Blue;
+                                        newKeyRenderer.sprite = newKey.Sprites.BlueSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorOrange))
+                                    {
+                                        newKey.Color = Level.KeyLockColor.Orange;
+                                        newKeyRenderer.sprite = newKey.Sprites.OrangeSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorPurple))
+                                    {
+                                        newKey.Color = Level.KeyLockColor.Purple;
+                                        newKeyRenderer.sprite = newKey.Sprites.PurpleSprite;
+                                    }
+                                }
+                                // Link
+                                if (element.Contains(EditableLevel.KLink))
+                                {
+                                    Instantiate(level.LinkPrefab, newElementGameObject.transform);
+                                    var newLink = newElementGameObject.GetComponentInChildren<Link>();
+                                    var newLinkRenderer = newLink.GetComponent<SpriteRenderer>();
+
+                                    if (element.Contains(EditableLevel.KColorRed))
+                                    {
+                                        newLink.Color = Level.KeyLockColor.Red;
+                                        newLinkRenderer.sprite = newLink.Sprites.RedSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorGreen))
+                                    {
+                                        newLink.Color = Level.KeyLockColor.Green;
+                                        newLinkRenderer.sprite = newLink.Sprites.GreenSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorBlue))
+                                    {
+                                        newLink.Color = Level.KeyLockColor.Blue;
+                                        newLinkRenderer.sprite = newLink.Sprites.BlueSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorOrange))
+                                    {
+                                        newLink.Color = Level.KeyLockColor.Orange;
+                                        newLinkRenderer.sprite = newLink.Sprites.OrangeSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorPurple))
+                                    {
+                                        newLink.Color = Level.KeyLockColor.Purple;
+                                        newLinkRenderer.sprite = newLink.Sprites.PurpleSprite;
+                                    }
+                                }
+                                // Flag
+                                else if (element.Contains(EditableLevel.KFlag))
+                                {
+                                    Instantiate(level.FlagPrefab, newElementGameObject.transform);
+                                }
+                            }
+                        }
+                        // Path
+                        else if (element.Contains(EditableLevel.KPath))
+                        {
+                            // Vertical path
+                            if (element.Contains(EditableLevel.KVertical))
+                            {
+                                newElementGameObject = Instantiate(level.VerticalPathPrefab, level.PathsContainer);
+                            }
+                            // Horizontal path
+                            else if (element.Contains(EditableLevel.KHorizontal))
+                            {
+                                newElementGameObject = Instantiate(level.HorizontalPathPrefab, level.PathsContainer);
+                            }
+
+                            // Obstacles
+                            if (newElementGameObject != null)
+                            {
+                                // Lock
+                                if (element.Contains(EditableLevel.KLock))
+                                {
+                                    Instantiate(level.LockPrefab, newElementGameObject.transform);
+                                    var newLock = newElementGameObject.GetComponentInChildren<Lock>();
+                                    var newLockRenderer = newLock.GetComponent<SpriteRenderer>();
+
+                                    if (element.Contains(EditableLevel.KColorRed))
+                                    {
+                                        newLock.Color = Level.KeyLockColor.Red;
+                                        newLockRenderer.sprite = newLock.Sprites.RedSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorGreen))
+                                    {
+                                        newLock.Color = Level.KeyLockColor.Green;
+                                        newLockRenderer.sprite = newLock.Sprites.GreenSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorBlue))
+                                    {
+                                        newLock.Color = Level.KeyLockColor.Blue;
+                                        newLockRenderer.sprite = newLock.Sprites.BlueSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorOrange))
+                                    {
+                                        newLock.Color = Level.KeyLockColor.Orange;
+                                        newLockRenderer.sprite = newLock.Sprites.OrangeSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KColorPurple))
+                                    {
+                                        newLock.Color = Level.KeyLockColor.Purple;
+                                        newLockRenderer.sprite = newLock.Sprites.PurpleSprite;
+                                    }
+                                }
+                                // Wall
+                                else if (element.Contains(EditableLevel.KWall))
+                                {
+                                    Instantiate(level.WallPrefab, newElementGameObject.transform);
+                                    var newWall = newElementGameObject.GetComponentInChildren<Wall>();
+                                    var newWallRenderer = newWall.GetComponent<SpriteRenderer>();
+
+                                    if (element.Contains(EditableLevel.KHorizontal))
+                                    {
+                                        newWallRenderer.sprite = newWall.Sprites.VerticalSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KVertical))
+                                    {
+                                        newWallRenderer.sprite = newWall.Sprites.HorizontalSprite;
+                                    }
+                                }
+                                // Crack
+                                else if (element.Contains(EditableLevel.KCrack))
+                                {
+                                    Instantiate(level.CrackPrefab, newElementGameObject.transform);
+                                }
+                                // Slide
+                                else if (element.Contains(EditableLevel.KSlide))
+                                {
+                                    Instantiate(level.SlidePrefab, newElementGameObject.transform);
+                                    var newSlide = newElementGameObject.GetComponentInChildren<Slide>();
+                                    var newSlideRenderer = newSlide.GetComponent<SpriteRenderer>();
+
+                                    if (element.Contains(EditableLevel.KDirectionUp))
+                                    {
+                                        newSlide.Direction = TraversalManager.TraversalMove.Up;
+                                        newSlideRenderer.sprite = newSlide.Sprites.UpSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KDirectionRight))
+                                    {
+                                        newSlide.Direction = TraversalManager.TraversalMove.Right;
+                                        newSlideRenderer.sprite = newSlide.Sprites.RightSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KDirectionDown))
+                                    {
+                                        newSlide.Direction = TraversalManager.TraversalMove.Down;
+                                        newSlideRenderer.sprite = newSlide.Sprites.DownSprite;
+                                    }
+                                    else if (element.Contains(EditableLevel.KDirectionLeft))
+                                    {
+                                        newSlide.Direction = TraversalManager.TraversalMove.Left;
+                                        newSlideRenderer.sprite = newSlide.Sprites.LeftSprite;
+                                    }
+                                }
+                            }
+                        }
+
+                        var halfPathLength = EditableLevel.KPathLength / 2;
+
+                        if (newElementGameObject == null)
+                        {
+                            newElementGameObject = Instantiate(level.EmptyElementPrefab, level.EmptyElementsContainer);
+                        }
+
+                        newElementGameObject.transform.localPosition = new Vector3(
+                            x * halfPathLength - ((KWidth - 1) * halfPathLength / 2),
+                            -y * halfPathLength + ((KHeight - 1) * halfPathLength / 2),
+                            0
+                        );
+
+                        // Traversal state
+                        var newTraversalStateGameObject = (GameObject)null;
+                        var newElement = newElementGameObject.GetComponent<Element>();
+
+                        if (element.Contains(EditableLevel.KTraversalStateCovered))
+                        {
+                            newElement.State = Element.TraversalState.Covered;
+                            newTraversalStateGameObject = Instantiate(level.CoveredPrefab, level.NodesContainer);
+
+                            var newMask = Instantiate(level.ModifierMaskPrefab, level.NodesContainer);
+                            newMask.transform.SetParent(newElementGameObject.transform, false);
+                        }
+                        else if (element.Contains(EditableLevel.KTraversalStateRevealed))
+                        {
+                            newElement.State = Element.TraversalState.Revealed;
+                            newTraversalStateGameObject = Instantiate(level.RevealedPrefab, level.NodesContainer);
+                        }
+
+                        if (newTraversalStateGameObject != null)
+                        {
+                            newTraversalStateGameObject.transform.SetParent(newElementGameObject.transform, false);
+                            var traversalStateObject = newTraversalStateGameObject.GetComponent<TraversalStateModifier>();
+
+                            newTraversalStateGameObject.GetComponent<SpriteRenderer>().color = new Color(
+                                UnityEngine.Random.Range(traversalStateObject.RandomColorFrom.r, traversalStateObject.RandomColorTo.r),
+                                UnityEngine.Random.Range(traversalStateObject.RandomColorFrom.g, traversalStateObject.RandomColorTo.g),
+                                UnityEngine.Random.Range(traversalStateObject.RandomColorFrom.b, traversalStateObject.RandomColorTo.b)
+                            );
+                        }
+                    }
+                }
+            }
+
+            level.Initiliaze(this);
+
+            return level;
+        }
+    }
+
     public const int KWidth = 7;
     public const int KHeight = 11;
     public const string KBase = "BASE";
@@ -56,8 +351,8 @@ public class LevelEditPanel : Panel
     public Sprite RevealedSprite;
     public Sprite DeleteSprite;
 
-    public Vector2Int? StartNodePosition { get; set; }
-    public Vector2Int? EndNodePosition { get; set; }
+    public Vector2? StartNodePosition { get; set; }
+    public Vector2? EndNodePosition { get; set; }
 
     private UserClickType _clickType;
     private LevelCell[] _levelCells;
@@ -67,15 +362,15 @@ public class LevelEditPanel : Panel
     private string _toggledBase;
     private string _toggledExtra;
     private string _toggledTraversalModifier;
+    private Guid _currentLevelGuid;
+    private bool _levelValid;
+    private bool _validationDirty = true;
+    private int _minimumMoves;
+    private int _minimumTime;
 
     void Awake()
     {
         Instance = this;
-    }
-
-    void Start()
-    {
-        SetupSounds();
 
         _longPressTimer = LongPressTime;
         _clickType = UserClickType.NONE;
@@ -103,7 +398,7 @@ public class LevelEditPanel : Panel
 
             trigger.triggers.Add(pointerDown);
 
-            var pointerUp = new EventTrigger.Entry{ eventID = EventTriggerType.PointerUp };
+            var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
             pointerUp.callback.AddListener((e) =>
             {
                 _cellClicked = EventSystem.current.currentSelectedGameObject.GetComponent<LevelCell>();
@@ -114,11 +409,16 @@ public class LevelEditPanel : Panel
             });
 
             trigger.triggers.Add(pointerUp);
-            
+
             levelCellList.Add(newLevelCell);
         }
 
         _levelCells = levelCellList.ToArray();
+    }
+
+    void Start()
+    {
+        SetupSounds();
     }
 
     void Update()
@@ -139,9 +439,123 @@ public class LevelEditPanel : Panel
         }
     }
 
+    public void ShowAndLoadLevel(UserLevel userLevel)
+    {
+        _currentLevelGuid = Guid.Parse(userLevel.Guid);
+
+        StartNodePosition = userLevel.StartNode;
+        EndNodePosition = userLevel.EndNode;
+
+        for (var i = 0; i < userLevel.Elements.Length; i++)
+        {
+            var levelCell = _levelCells[i];
+
+            levelCell.Content = userLevel.Elements[i];
+
+            // BASE
+            if (levelCell.Content.Contains(EditableLevel.KNode))
+            {
+                if (levelCell.Position == StartNodePosition)
+                {
+                    levelCell.ChangeSprite(StartNodeSprite, UserClickType.Base);
+                }
+                else if (levelCell.Position == EndNodePosition)
+                {
+                    levelCell.ChangeSprite(EndNodeSprite, UserClickType.Base);
+                }
+                else
+                {
+                    levelCell.ChangeSprite(NodeSprite, UserClickType.Base);
+                }
+            }
+            else if(levelCell.Content.Contains(EditableLevel.KPath))
+            {
+                if (levelCell.Content.Contains(EditableLevel.KHorizontal))
+                {
+                    levelCell.ChangeSprite(HorizontalPathSprite, UserClickType.Base);
+                }
+                else if (levelCell.Content.Contains(EditableLevel.KVertical))
+                {
+                    levelCell.ChangeSprite(VerticalPathSprite, UserClickType.Base);
+                }
+            }
+
+            // EXTRA
+            if (levelCell.Content.Contains(EditableLevel.KKey))
+            {
+                for (var j = 0; j < EditableLevel.Colors.Length; j++)
+                {
+                    if (levelCell.Content.Contains(EditableLevel.Colors[j]))
+                    {
+                        levelCell.ChangeSprite(levelCell.KeySprites[j], UserClickType.Extra);
+                    }
+                }
+            }
+            else if(levelCell.Content.Contains(EditableLevel.KFlag))
+            {
+                levelCell.ChangeSprite(levelCell.FlagSprite, UserClickType.Extra);
+            }
+            else if (levelCell.Content.Contains(EditableLevel.KLink))
+            {
+                for (var j = 0; j < EditableLevel.Colors.Length; j++)
+                {
+                    if (levelCell.Content.Contains(EditableLevel.Colors[j]))
+                    {
+                        levelCell.ChangeSprite(levelCell.LinkSprites[j], UserClickType.Extra);
+                    }
+                }
+            }
+            else if (levelCell.Content.Contains(EditableLevel.KLock))
+            {
+                for (var j = 0; j < EditableLevel.Colors.Length; j++)
+                {
+                    if (levelCell.Content.Contains(EditableLevel.Colors[j]))
+                    {
+                        levelCell.ChangeSprite(levelCell.LockSprites[j], UserClickType.Extra);
+                    }
+                }
+            }
+            else if (levelCell.Content.Contains(EditableLevel.KWall))
+            {
+                levelCell.ChangeSprite(levelCell.WallSprite, UserClickType.Extra);
+            }
+            else if (levelCell.Content.Contains(EditableLevel.KCrack))
+            {
+                levelCell.ChangeSprite(levelCell.CrackSprite, UserClickType.Extra);
+            }
+            else if (levelCell.Content.Contains(EditableLevel.KSlide))
+            {
+                for (var j = 0; j < EditableLevel.Colors.Length; j++)
+                {
+                    if (levelCell.Content.Contains(EditableLevel.Colors[j]))
+                    {
+                        levelCell.ChangeSprite(levelCell.SlideSprites[j], UserClickType.Extra);
+                    }
+                }
+            }
+
+            // TRAVERSAL MODIFIER
+            if (levelCell.Content.Contains(EditableLevel.KTraversalStateCovered))
+            {
+                levelCell.ChangeSprite(levelCell.CoveredSprite, UserClickType.TraversalModifier);
+            }
+            else if (levelCell.Content.Contains(EditableLevel.KTraversalStateRevealed))
+            {
+                levelCell.ChangeSprite(levelCell.RevealedSprite, UserClickType.TraversalModifier);
+            }
+        }
+
+        ToggleElement(true);
+
+        base.Show();
+    }
+
     public override void Show(Panel originPanel = null)
     {
         ToggleElement();
+
+        _currentLevelGuid = Guid.NewGuid();
+
         base.Show(originPanel);
     }
 
@@ -162,12 +576,44 @@ public class LevelEditPanel : Panel
 
     private void SaveLevel()
     {
-        // save to a json
+        var newUserLevel = new UserLevel
+        {
+            Guid = _currentLevelGuid.ToString(),
+            Valid = _levelValid,
+            StartNode = (Vector2) StartNodePosition,
+            EndNode = (Vector2) EndNodePosition,
+            Elements = _levelCells.Select(x => x.Content).ToArray(),
+            ExpectedMoves = _minimumMoves,
+            ExpectedTime = _minimumTime
+        };
+
+        var output = JsonUtility.ToJson(newUserLevel);
+
+        if (!Directory.Exists(Application.dataPath + "/UserLevels"))
+        {
+            Directory.CreateDirectory(Application.dataPath + "/UserLevels");
+        }
+
+        var filePath = Application.dataPath + "/UserLevels/" + _currentLevelGuid + ".json";
+
+        Debug.Log(Application.dataPath);
+
+        File.WriteAllText(filePath, output);
     }
 
-    private bool Validate()
+    private void Validate()
     {
-        return true;
+        if (!_validationDirty)
+        {
+            return;
+        }
+
+        // Do the validation
+
+        _minimumMoves = 2;  // TEMP
+        _minimumTime = 2;   // TEMP
+
+        _levelValid = true;
     }
     
     private void ClickOnCell()
@@ -197,6 +643,8 @@ public class LevelEditPanel : Panel
 
                 break;
         }
+
+        _validationDirty = true;
     }
 
     private void OpenContextMenu(UserClickType clickType)
@@ -209,10 +657,10 @@ public class LevelEditPanel : Panel
         ContextMenu.Activate(_cellClicked);
     }
 
-    private void CycleThroughBase()
+    private void CycleThroughBase(bool start = false)
     {
         var newIndex = 0;
-
+        
         var baseToCycleThrough = new string[2];
         baseToCycleThrough[0] = KBase;
         baseToCycleThrough[1] = KDelete;
@@ -222,18 +670,21 @@ public class LevelEditPanel : Panel
             StartNodeSprite,
             DeleteSprite
         };
-
-        if (!string.IsNullOrEmpty(_toggledBase))
+        
+        if (!start)
         {
-            for (var i = 0; i < baseToCycleThrough.Length; i++)
+            if (!string.IsNullOrEmpty(_toggledBase))
             {
-                if (baseToCycleThrough[i] == _toggledBase)
+                for (var i = 0; i < baseToCycleThrough.Length; i++)
                 {
-                    newIndex = i < baseToCycleThrough.Length - 1 ? i + 1 : 0;
+                    if (baseToCycleThrough[i] == _toggledBase)
+                    {
+                        newIndex = i < baseToCycleThrough.Length - 1 ? i + 1 : 0;
+                    }
                 }
             }
         }
-
+        
         _toggledBase = baseToCycleThrough[newIndex];
         ToggleElementButtonImage.sprite = baseSprites[newIndex];
     }
@@ -310,28 +761,48 @@ public class LevelEditPanel : Panel
         {
             levelCell.Clear();
         }
+
+        _validationDirty = true;
     }
 
     public void UI_Center()
     {
         // center the level according to the area occupied by its current elements
+
+        _validationDirty = true;
+    }
+
+    public void UI_Delete()
+    {
+        if (!Directory.Exists(Application.dataPath + "/UserLevels") && File.Exists(Application.dataPath + "/UserLevels/" + _currentLevelGuid + ".json"))
+        {
+            FileUtil.DeleteFileOrDirectory(Application.dataPath + "/UserLevels/" + _currentLevelGuid + ".json");
+        }
+
+        MessageBubble.SetActive(false);
+        MessageBubbleBackground.SetActive(false);
+        LevelEditorMenuPanel.instance.Show();
     }
 
     public void UI_Clear()
     {
         _cellClicked.Clear();
+
+        _validationDirty = true;
     }
 
     public void UI_ChangePathOrientation()
     {
         _cellClicked.ChangePathOrientation();
+
+        _validationDirty = true;
     }
 
     public void UI_MakeStartNode()
     {
         if (StartNodePosition.HasValue)
         {
-            var previousStartNode = GetCellByPosition(StartNodePosition.Value.x, StartNodePosition.Value.y);
+            var previousStartNode = GetCellByPosition((int)StartNodePosition.Value.x, (int)StartNodePosition.Value.y);
             if (previousStartNode != null && !string.IsNullOrEmpty(previousStartNode.Content) && previousStartNode.Content.Contains(EditableLevel.KNode))
             {
                 previousStartNode.ChangeSprite(NodeSprite, UserClickType.Base);
@@ -346,13 +817,14 @@ public class LevelEditPanel : Panel
         StartNodePosition = _cellClicked.Position;
         _cellClicked.ChangeSprite(StartNodeSprite, UserClickType.Base);
         
+        _validationDirty = true;
     }
 
     public void UI_MakeEndNode()
     {
         if (EndNodePosition.HasValue)
         {
-            var previousEndNode = GetCellByPosition(EndNodePosition.Value.x, EndNodePosition.Value.y);
+            var previousEndNode = GetCellByPosition((int)EndNodePosition.Value.x, (int)EndNodePosition.Value.y);
             if (previousEndNode != null && !string.IsNullOrEmpty(previousEndNode.Content) && previousEndNode.Content.Contains(EditableLevel.KNode))
             {
                 previousEndNode.ChangeSprite(NodeSprite, UserClickType.Base);
@@ -366,19 +838,31 @@ public class LevelEditPanel : Panel
             
         EndNodePosition = _cellClicked.Position;
         _cellClicked.ChangeSprite(EndNodeSprite, UserClickType.Base);
+
+        _validationDirty = true;
     }
 
-    public void UI_Validate()
+    public void UI_Info()
     {
-        var valid = Validate();
+        Validate();
 
         // open a popup containing validation info:
         // if valid, tell the player of the possible solutions
         // if invalid, tell the player why
     }
 
+    public void UI_Save()
+    {
+        Validate();
+        SaveLevel();
+
+        // tell the player whether the level is valid or not
+    }
+
     public void UI_Back()
     {
+        Validate();
+
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
         BackMessageText.text = BackMessage;
@@ -387,11 +871,20 @@ public class LevelEditPanel : Panel
         // tell the player whether the level is valid or not and ask for confirmation before leaving
     }
 
+    public void UI_BackAndSaveConfirmed()
+    {
+        Validate();
+        SaveLevel();
+
+        MessageBubble.SetActive(false);
+        MessageBubbleBackground.SetActive(false);
+        LevelEditorMenuPanel.instance.Show();
+    }
+
     public void UI_BackConfirmed()
     {
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        SaveLevel();
         LevelEditorMenuPanel.instance.Show();
     }
 
@@ -406,11 +899,11 @@ public class LevelEditPanel : Panel
         ToggleElement();
     }
 
-    private void ToggleElement()
+    private void ToggleElement(bool start = false)
     {
         if (_clickType == UserClickType.Base)
         {
-            CycleThroughBase();
+            CycleThroughBase(start);
             return;
         }
 
