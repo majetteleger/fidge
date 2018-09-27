@@ -17,14 +17,10 @@ public class LevelEditPanel : Panel
         public string Guid;
         public int ExpectedTime;
         public int ExpectedMoves;
-
-        [HideInInspector] public bool Shifted;
-        [HideInInspector] public int NumberOfSolutions;
-        [HideInInspector] public int MinimumMoves;
-        [HideInInspector] public int MinimumMovesWithFlag;
-        [HideInInspector] public Vector2 StartNode;
-        [HideInInspector] public Vector2 EndNode;
-        [HideInInspector] public string[] Elements;
+        public int MinimumMovesWithFlag;
+        public Vector2 StartNode;
+        public Vector2 EndNode;
+        public string[] Elements;
 
         private GameObject levelPrefab;
         public GameObject LevelPrefab
@@ -330,10 +326,17 @@ public class LevelEditPanel : Panel
     public LevelEditContextMenu ContextMenu;
     public GameObject MessageBubble;
     public GameObject MessageBubbleBackground;
+    public GameObject MessageBubbleConfirmButton;
+    public GameObject MessageBubbleCancelButton;
+    public GameObject MessageBubbleContinueButton;
+    public GameObject MessageBubbleSaveAndQuitButton;
     public Text BackMessageText;
     public float LongPressTime;
-    [TextArea] public string BackMessage;
-    
+    [TextArea] public string BackValidMessage;
+    [TextArea] public string BackInvalidMessage;
+    [TextArea] public string SaveValidMessage;
+    [TextArea] public string SaveInvalidMessage;
+
     [Header("Sprites")]
     public Sprite NodeSprite;
     public Sprite StartNodeSprite;
@@ -364,7 +367,6 @@ public class LevelEditPanel : Panel
     private string _toggledExtra;
     private string _toggledTraversalModifier;
     private Guid _currentLevelGuid;
-    private bool _levelValid;
     private bool _validationDirty = true;
     private UserLevel _currentUserLevel;
 
@@ -441,6 +443,8 @@ public class LevelEditPanel : Panel
 
     public void ShowAndLoadLevel(UserLevel userLevel)
     {
+        _currentUserLevel = userLevel;
+
         _currentLevelGuid = Guid.Parse(userLevel.Guid);
 
         StartNodePosition = userLevel.StartNode;
@@ -588,17 +592,16 @@ public class LevelEditPanel : Panel
         File.WriteAllText(filePath, output);
     }
 
-    private void Validate()
+    private string[] Validate()
     {
-        if (!_validationDirty)
+        if (_validationDirty)
         {
-            return;
+            return null;
         }
 
         _currentUserLevel = new UserLevel
         {
             Guid = _currentLevelGuid.ToString(),
-            Valid = _levelValid,
             StartNode = (Vector2)StartNodePosition,
             EndNode = (Vector2)EndNodePosition,
             Elements = _levelCells.Select(x => x.Content).ToArray()
@@ -608,6 +611,8 @@ public class LevelEditPanel : Panel
 
         var firstSolution = new UserHypotheticalSolution(_currentUserLevel);
         firstSolution.Solve();
+
+        _validationDirty = false;
 
         if (Solutions.Count > 0)
         {
@@ -644,24 +649,29 @@ public class LevelEditPanel : Panel
 
             if(minimumMoves < int.MaxValue && minimumMovesWithFlag < int.MaxValue)
             {
-                _currentUserLevel.MinimumMoves = minimumMoves / 2;
+                _currentUserLevel.ExpectedMoves = minimumMoves / 2;
                 _currentUserLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
-
-                _levelValid = true;
-
-                Debug.Log(string.Format("{0} solutions found, minimum: {1} moves, {2} moves with flag",
+                _currentUserLevel.ExpectedTime = Mathf.CeilToInt(minimumMoves / 2f);
+                _currentUserLevel.Valid = true;
+                
+                Debug.Log(string.Format("{0} solutions found, minimum: {1} moves, {2} moves with flag, {3} seconds",
                     Solutions.Count,
-                    _currentUserLevel.MinimumMoves,
-                    _currentUserLevel.MinimumMovesWithFlag)
+                    _currentUserLevel.ExpectedMoves,
+                    _currentUserLevel.MinimumMovesWithFlag,
+                    _currentUserLevel.ExpectedTime)
                 );
 
-                return;
+                return null;
             }
         }
-
-        _levelValid = false;
+        
+        _currentUserLevel.ExpectedMoves = 0;
+        _currentUserLevel.MinimumMovesWithFlag = 0;
+        _currentUserLevel.Valid = false;
 
         Debug.Log("No valid solution found");
+
+        return null;    // SHOULD RETURN A LIST OF WHATS MAKES IT INVALID
     }
     
     private void ClickOnCell()
@@ -894,17 +904,48 @@ public class LevelEditPanel : Panel
     {
         Validate();
 
-        // open a popup containing validation info:
-        // if valid, tell the player of the possible solutions
-        // if invalid, tell the player why
+        MessageBubble.SetActive(true);
+        MessageBubbleBackground.SetActive(true);
+
+        if (_currentUserLevel.Valid)
+        {
+            BackMessageText.text = string.Format(
+                "Your level is valid!\n\n" +
+                "Minimum moves : {0}\n" +
+                "Minimum time : {1}",
+                _currentUserLevel.ExpectedMoves,
+                _currentUserLevel.ExpectedTime
+            );
+        }
+        else
+        {
+            BackMessageText.text = "Your level is invalid.";
+        }
+
+        MessageBubbleConfirmButton.SetActive(false);
+        MessageBubbleCancelButton.SetActive(false);
+        MessageBubbleSaveAndQuitButton.SetActive(false);
+        MessageBubbleContinueButton.SetActive(true);
+
+        ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
 
     public void UI_Save()
     {
         Validate();
+
         SaveLevel();
 
-        // tell the player whether the level is valid or not
+        MessageBubble.SetActive(true);
+        MessageBubbleBackground.SetActive(true);
+        BackMessageText.text = _currentUserLevel.Valid ? SaveValidMessage : SaveInvalidMessage;
+
+        MessageBubbleConfirmButton.SetActive(false);
+        MessageBubbleCancelButton.SetActive(false);
+        MessageBubbleSaveAndQuitButton.SetActive(false);
+        MessageBubbleContinueButton.SetActive(true);
+
+        ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
 
     public void UI_Back()
@@ -913,10 +954,14 @@ public class LevelEditPanel : Panel
 
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
-        BackMessageText.text = BackMessage;
+        BackMessageText.text = _currentUserLevel.Valid ? BackValidMessage : BackInvalidMessage;
+
+        MessageBubbleConfirmButton.SetActive(true);
+        MessageBubbleCancelButton.SetActive(true);
+        MessageBubbleSaveAndQuitButton.SetActive(true);
+        MessageBubbleContinueButton.SetActive(false);
+
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
-        
-        // tell the player whether the level is valid or not and ask for confirmation before leaving
     }
 
     public void UI_BackAndSaveConfirmed()

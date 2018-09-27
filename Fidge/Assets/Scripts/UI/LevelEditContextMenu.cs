@@ -55,6 +55,8 @@ public class LevelEditContextMenu : MonoBehaviour
         gameObject.SetActive(true);
         ButtonGroup.anchoredPosition = cellClicked.transform.localPosition;
         ButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
+
+        // POSITION IS WEIRD
     }
 
     public void Activate(Button buttonClicked)

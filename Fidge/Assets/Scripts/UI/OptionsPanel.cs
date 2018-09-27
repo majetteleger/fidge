@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -64,6 +65,22 @@ public class OptionsPanel : Panel
         for (var i = 0; i < MainManager.Instance.Levels.Length; i++)
         {
             PlayerPrefs.SetString("Level" + i, "000");
+        }
+
+        foreach (var filePath in Directory.GetFiles(Application.dataPath + "/UserLevels"))
+        {
+            if (filePath.Contains(".meta"))
+            {
+                continue;
+            }
+            
+            var fileContent = File.ReadAllText(filePath);
+            var userLevel = JsonUtility.FromJson<LevelEditPanel.UserLevel>(fileContent);
+
+            if (PlayerPrefs.GetString(userLevel.Guid) != null)
+            {
+                PlayerPrefs.SetString(userLevel.Guid, "000");
+            }
         }
 
         PlayerPrefs.Save();
