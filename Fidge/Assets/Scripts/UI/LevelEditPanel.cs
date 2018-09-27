@@ -353,6 +353,7 @@ public class LevelEditPanel : Panel
 
     public Vector2? StartNodePosition { get; set; }
     public Vector2? EndNodePosition { get; set; }
+    public List<UserHypotheticalSolution> Solutions { get; set; }
 
     private UserClickType _clickType;
     private LevelCell[] _levelCells;
@@ -365,8 +366,7 @@ public class LevelEditPanel : Panel
     private Guid _currentLevelGuid;
     private bool _levelValid;
     private bool _validationDirty = true;
-    private int _minimumMoves;
-    private int _minimumTime;
+    private UserLevel _currentUserLevel;
 
     void Awake()
     {
@@ -576,18 +576,7 @@ public class LevelEditPanel : Panel
 
     private void SaveLevel()
     {
-        var newUserLevel = new UserLevel
-        {
-            Guid = _currentLevelGuid.ToString(),
-            Valid = _levelValid,
-            StartNode = (Vector2) StartNodePosition,
-            EndNode = (Vector2) EndNodePosition,
-            Elements = _levelCells.Select(x => x.Content).ToArray(),
-            ExpectedMoves = _minimumMoves,
-            ExpectedTime = _minimumTime
-        };
-
-        var output = JsonUtility.ToJson(newUserLevel);
+        var output = JsonUtility.ToJson(_currentUserLevel);
 
         if (!Directory.Exists(Application.dataPath + "/UserLevels"))
         {
@@ -595,9 +584,7 @@ public class LevelEditPanel : Panel
         }
 
         var filePath = Application.dataPath + "/UserLevels/" + _currentLevelGuid + ".json";
-
-        Debug.Log(Application.dataPath);
-
+        
         File.WriteAllText(filePath, output);
     }
 
@@ -608,12 +595,73 @@ public class LevelEditPanel : Panel
             return;
         }
 
-        // Do the validation
+        _currentUserLevel = new UserLevel
+        {
+            Guid = _currentLevelGuid.ToString(),
+            Valid = _levelValid,
+            StartNode = (Vector2)StartNodePosition,
+            EndNode = (Vector2)EndNodePosition,
+            Elements = _levelCells.Select(x => x.Content).ToArray()
+        };
 
-        _minimumMoves = 2;  // TEMP
-        _minimumTime = 2;   // TEMP
+        Solutions = new List<UserHypotheticalSolution>();
 
-        _levelValid = true;
+        var firstSolution = new UserHypotheticalSolution(_currentUserLevel);
+        firstSolution.Solve();
+
+        if (Solutions.Count > 0)
+        {
+            var minimumMoves = int.MaxValue;
+            var minimumMovesWithFlag = int.MaxValue;
+
+            for (var i = 0; i < Solutions.Count; i++)
+            {
+                if (Solutions[i].CollectedCollectables.Contains(EditableLevel.KFlag) &&
+                    Solutions[i].Movements.Count < minimumMovesWithFlag)
+                {
+                    var lingeringFlag = false;
+
+                    for (var j = 0; j < Solutions[i].Elements.Length; j++)
+                    {
+                        var element = Solutions[i].Elements[j];
+
+                        if (element != null && element.Contains(EditableLevel.KFlag))
+                        {
+                            lingeringFlag = true;
+                        }
+                    }
+
+                    if (!lingeringFlag)
+                    {
+                        minimumMovesWithFlag = Solutions[i].Movements.Count;
+                    }
+                }
+                if (Solutions[i].Movements.Count < minimumMoves)
+                {
+                    minimumMoves = Solutions[i].Movements.Count;
+                }
+            }
+
+            if(minimumMoves < int.MaxValue && minimumMovesWithFlag < int.MaxValue)
+            {
+                _currentUserLevel.MinimumMoves = minimumMoves / 2;
+                _currentUserLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
+
+                _levelValid = true;
+
+                Debug.Log(string.Format("{0} solutions found, minimum: {1} moves, {2} moves with flag",
+                    Solutions.Count,
+                    _currentUserLevel.MinimumMoves,
+                    _currentUserLevel.MinimumMovesWithFlag)
+                );
+
+                return;
+            }
+        }
+
+        _levelValid = false;
+
+        Debug.Log("No valid solution found");
     }
     
     private void ClickOnCell()

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class HypotheticalSolution
+public class UserHypotheticalSolution
 {
     public int Id;
     public string[] Elements;
@@ -32,31 +32,31 @@ public class HypotheticalSolution
             collectedCollectables = value;
         }
     }
-    
-    public HypotheticalSolution(EditableLevel editableLevel)
-    {
-        Id = LevelEditor.Solutions.Count;
-        LevelEditor.Solutions.Add(this);
 
-        Elements = new string[editableLevel.Elements.Length];
+    public UserHypotheticalSolution(LevelEditPanel.UserLevel userLevel)
+    {
+        Id = LevelEditPanel.Instance.Solutions.Count;
+        LevelEditPanel.Instance.Solutions.Add(this);
+
+        Elements = new string[userLevel.Elements.Length];
 
         for (var i = 0; i < Elements.Length; i++)
         {
-            Elements[i] = editableLevel.Elements[i];
+            Elements[i] = userLevel.Elements[i];
         }
-        
-        StartNode = new Vector2(editableLevel.StartNode.x, editableLevel.StartNode.y);
-        EndNode = new Vector2(editableLevel.EndNode.x, editableLevel.EndNode.y);
+
+        StartNode = new Vector2(userLevel.StartNode.x, userLevel.StartNode.y);
+        EndNode = new Vector2(userLevel.EndNode.x, userLevel.EndNode.y);
         Movements = new List<TraversalManager.TraversalMove>();
         VisitedElements = new List<Vector2>();
         CollectedCollectables = new List<string>();
-        EndNodeBypasses = editableLevel.AllowedEndNodeBypasses;
+        EndNodeBypasses = 1;    // TEMP
     }
-
-    public HypotheticalSolution(HypotheticalSolution otherSolution)
+    
+    public UserHypotheticalSolution(UserHypotheticalSolution otherSolution)
     {
-        Id = LevelEditor.Solutions.Count;
-        LevelEditor.Solutions.Add(this);
+        Id = LevelEditPanel.Instance.Solutions.Count;
+        LevelEditPanel.Instance.Solutions.Add(this);
         
         Elements = new string[otherSolution.Elements.Length];
 
@@ -124,9 +124,9 @@ public class HypotheticalSolution
                 }
             }
 
-            for (var x = 0; x < EditableLevel.KWidth; x++)
+            for (var x = 0; x < LevelEditPanel.KWidth; x++)
             {
-                for (var y = 0; y < EditableLevel.KHeight; y++)
+                for (var y = 0; y < LevelEditPanel.KHeight; y++)
                 {
                     var newPosition = new Vector2(x, y);
                     var newElement = GetElement(x, y);
@@ -165,7 +165,7 @@ public class HypotheticalSolution
 
             EndNodeVisited++;
             
-            var newSolution = new HypotheticalSolution(this);
+            var newSolution = new UserHypotheticalSolution(this);
             newSolution.Solve(currentPosition);
         }
         
@@ -191,17 +191,17 @@ public class HypotheticalSolution
 
         if (possibleMoves.Count == 0)
         {
-            LevelEditor.Solutions.Remove(this);
+            LevelEditPanel.Instance.Solutions.Remove(this);
             return;
         }
 
-        var solutions = new HypotheticalSolution[possibleMoves.Count];
+        var solutions = new UserHypotheticalSolution[possibleMoves.Count];
 
         for (var i = 0; i < solutions.Length; i++)
         {
             if (i > 0)
             {
-                var newSolution = new HypotheticalSolution(this);
+                var newSolution = new UserHypotheticalSolution(this);
                 solutions[i] = newSolution;
             }
             else
@@ -384,13 +384,13 @@ public class HypotheticalSolution
     {
         var position = GetNextPosition(new Vector2(x, y), move);
 
-        if((int)position.x + (int)position.y * EditableLevel.KWidth >= Elements.Length ||
-           (int)position.x + (int)position.y * EditableLevel.KWidth < 0)
+        if((int)position.x + (int)position.y * LevelEditPanel.KWidth >= Elements.Length ||
+           (int)position.x + (int)position.y * LevelEditPanel.KWidth < 0)
         {
             return string.Empty;
         }
 
-        return Elements[(int)position.x + (int)position.y * EditableLevel.KWidth];
+        return Elements[(int)position.x + (int)position.y * LevelEditPanel.KWidth];
     }
 
     private string GetElement(float x, float y, TraversalManager.TraversalMove move = TraversalManager.TraversalMove.NONE)
@@ -405,16 +405,16 @@ public class HypotheticalSolution
 
     private void SetElement(int x, int y, string newElement)
     {
-        Elements[x + y * EditableLevel.KWidth] = newElement;
+        Elements[x + y * LevelEditPanel.KWidth] = newElement;
     }
 
     private void RemoveFromElement(int x, int y, string contentToRemove)
     {
-        var oldElement = Elements[x + y * EditableLevel.KWidth];
+        var oldElement = Elements[x + y * LevelEditPanel.KWidth];
 
         if (oldElement != null)
         {
-            Elements[x + y * EditableLevel.KWidth] = oldElement.Replace(contentToRemove, string.Empty);
+            Elements[x + y * LevelEditPanel.KWidth] = oldElement.Replace(contentToRemove, string.Empty);
         }
     }
 
