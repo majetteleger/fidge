@@ -29,7 +29,15 @@ public class LevelCell : MonoBehaviour
     public string Content { get; set; }
 
     public bool PositionIsOdd { get { return (Position.x + Position.y) % 2 == 0; } }
-    
+
+    public void ResetCell()
+    {
+        ChangeSprite(null, LevelEditPanel.UserClickType.Base);
+        ChangeSprite(null, LevelEditPanel.UserClickType.Extra);
+        ChangeSprite(null, LevelEditPanel.UserClickType.TraversalModifier);
+        Content = null;
+    }
+
     public void ChangePathOrientation()
     {
         var oldContent = Content;
@@ -90,14 +98,14 @@ public class LevelCell : MonoBehaviour
             RemoveFromElement(EditableLevel.Colors);
             RemoveFromElement(EditableLevel.Directions);
 
-            if (LevelEditPanel.Instance.StartNodePosition == Position)
+            if (LevelEditPanel.Instance.CurrentUserLevel.StartNode == Position)
             {
-                LevelEditPanel.Instance.StartNodePosition = null;
+                LevelEditPanel.Instance.CurrentUserLevel.StartNode = -Vector2.one;
             }
 
-            if (LevelEditPanel.Instance.EndNodePosition == Position)
+            if (LevelEditPanel.Instance.CurrentUserLevel.EndNode == Position)
             {
-                LevelEditPanel.Instance.EndNodePosition = null;
+                LevelEditPanel.Instance.CurrentUserLevel.EndNode = -Vector2.one;
             }
 
             ChangeSprite(null, LevelEditPanel.UserClickType.Base);
@@ -338,14 +346,14 @@ public class LevelCell : MonoBehaviour
         ChangeSprite(null, LevelEditPanel.UserClickType.Extra);
         ChangeSprite(null, LevelEditPanel.UserClickType.TraversalModifier);
 
-        if (LevelEditPanel.Instance.StartNodePosition == Position)
+        if (LevelEditPanel.Instance.CurrentUserLevel.StartNode == Position)
         {
-            LevelEditPanel.Instance.StartNodePosition = null;
+            LevelEditPanel.Instance.CurrentUserLevel.StartNode = -Vector2.one;
         }
 
-        if (LevelEditPanel.Instance.EndNodePosition == Position)
+        if (LevelEditPanel.Instance.CurrentUserLevel.EndNode == Position)
         {
-            LevelEditPanel.Instance.EndNodePosition = null;
+            LevelEditPanel.Instance.CurrentUserLevel.EndNode = -Vector2.one;
         }
     }
 

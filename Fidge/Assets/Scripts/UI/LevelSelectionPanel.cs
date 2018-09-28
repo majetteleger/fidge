@@ -51,12 +51,12 @@ public class LevelSelectionPanel : Panel
 
                 if (sectionTutorial != null)
                 {
-                    tutorialButton.GetComponentInParent<CanvasGroup>().alpha = 1;
+                    tutorialButton.GetComponentsInParent<CanvasGroup>(true)[0].alpha = 1;
                     tutorialButton.onClick.AddListener(() => { PopupPanel.instance.ShowConfirm(sectionTutorial); });
                 }
                 else
                 {
-                    tutorialButton.GetComponentInParent<CanvasGroup>().alpha = 0;
+                    tutorialButton.GetComponentsInParent<CanvasGroup>(true)[0].alpha = 0;
                     tutorialButton.onClick.RemoveAllListeners();
                 }
 
@@ -104,12 +104,16 @@ public class LevelSelectionPanel : Panel
             SetupSounds();
 
             _initialized = true;
+
+            LevelButtonScroll.verticalNormalizedPosition = 1;
         }
     }
 
     public override void Show(Panel originPanel = null)
     {
         AudioManager.Instance.PlayBackgroundMusic(AudioManager.Instance.MenuMusic);
+
+        Update();
 
         UpdateLevelButtons();
 
@@ -143,6 +147,7 @@ public class LevelSelectionPanel : Panel
             _levelButtons[i].interactable = unlocked;
             _levelButtons[i].transform.GetChild(1).gameObject.SetActive(unlocked);
             _levelButtons[i].transform.GetChild(2).gameObject.SetActive(!unlocked);
+            _levelButtons[i].transform.GetChild(3).gameObject.SetActive(false);
 
             if (_levelButtons[i].interactable)
             {

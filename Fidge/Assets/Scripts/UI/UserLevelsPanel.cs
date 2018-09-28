@@ -22,6 +22,8 @@ public class UserLevelsPanel : Panel
     public Text Header;
     [TextArea] public string EditHeader;
     [TextArea] public string PlayHeader;
+    public Sprite ValidSprite;
+    public Sprite InvalidSprite;
 
     private UserActivity _activity;
 
@@ -65,14 +67,14 @@ public class UserLevelsPanel : Panel
             Destroy(buttonRow.gameObject);
         }
 
-        if (!Directory.Exists(Application.dataPath + "/UserLevels"))
+        if (!Directory.Exists(MainManager.Instance.UserLevelPath))
         {
             return;
         }
 
         var userLevelList = new List<LevelEditPanel.UserLevel>();
 
-        foreach (var filePath in Directory.GetFiles(Application.dataPath + "/UserLevels"))
+        foreach (var filePath in Directory.GetFiles(MainManager.Instance.UserLevelPath))
         {
             if (filePath.Contains(".meta"))
             {
@@ -86,6 +88,8 @@ public class UserLevelsPanel : Panel
 
         var row = (Transform)null;
 
+        var instantiatedLevelButtonIndex = 0;
+
         for (var i = 0; i < userLevelList.Count; i++)
         {
             var level = userLevelList[i];
@@ -95,21 +99,27 @@ public class UserLevelsPanel : Panel
                 continue;
             }
             
-            if (i % ButtonsPerRow == 0)
+            if (instantiatedLevelButtonIndex % ButtonsPerRow == 0)
             {
                 row = Instantiate(LevelButtonRowPrefab, LevelButtonContainer).transform;
             }
             
             var button = Instantiate(LevelButtonPrefab, row).GetComponent<Button>();
-            button.GetComponentInChildren<Text>().text = (i + 1).ToString();
+            button.GetComponentInChildren<Text>().text = (instantiatedLevelButtonIndex + 1).ToString();
             button.onClick.AddListener(() =>
             {
                 PopupPanel.instance.ShowConfirm(level, _activity);
             });
 
-            button.transform.GetChild(1).gameObject.SetActive(true);
+            button.transform.GetChild(1).gameObject.SetActive(_activity == UserActivity.Play);
             button.transform.GetChild(2).gameObject.SetActive(false);
+            button.transform.GetChild(3).gameObject.SetActive(_activity == UserActivity.Edit);
 
+            if (_activity == UserActivity.Edit)
+            {
+                button.transform.GetChild(3).GetComponent<Image>().sprite = level.Valid ? ValidSprite : InvalidSprite;
+            }
+            
             var medals = button.transform.GetChild(1).GetComponentsInChildren<Image>();
             var savedMedals = Level.GetSavedValue(level.Guid);
 
@@ -118,7 +128,7 @@ public class UserLevelsPanel : Panel
                 medals[j].color = !string.IsNullOrEmpty(savedMedals) && savedMedals[j] == '1' ? Color.black : new Color(0, 0, 0, 0.25f);
             }
 
-            // add the validity indicator
+            instantiatedLevelButtonIndex++;
         }
     }
 

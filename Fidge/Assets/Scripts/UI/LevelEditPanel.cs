@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -353,11 +352,10 @@ public class LevelEditPanel : Panel
     public Sprite CoveredSprite;
     public Sprite RevealedSprite;
     public Sprite DeleteSprite;
-
-    public Vector2? StartNodePosition { get; set; }
-    public Vector2? EndNodePosition { get; set; }
+    
     public List<UserHypotheticalSolution> Solutions { get; set; }
-
+    public UserLevel CurrentUserLevel { get; set; }
+    
     private UserClickType _clickType;
     private LevelCell[] _levelCells;
     private bool _cellPressed;
@@ -366,10 +364,8 @@ public class LevelEditPanel : Panel
     private string _toggledBase;
     private string _toggledExtra;
     private string _toggledTraversalModifier;
-    private Guid _currentLevelGuid;
-    private bool _validationDirty = true;
-    private UserLevel _currentUserLevel;
-
+    private bool _validationDirty;
+    
     void Awake()
     {
         Instance = this;
@@ -443,13 +439,8 @@ public class LevelEditPanel : Panel
 
     public void ShowAndLoadLevel(UserLevel userLevel)
     {
-        _currentUserLevel = userLevel;
-
-        _currentLevelGuid = Guid.Parse(userLevel.Guid);
-
-        StartNodePosition = userLevel.StartNode;
-        EndNodePosition = userLevel.EndNode;
-
+        CurrentUserLevel = userLevel;
+        
         for (var i = 0; i < userLevel.Elements.Length; i++)
         {
             var levelCell = _levelCells[i];
@@ -459,11 +450,11 @@ public class LevelEditPanel : Panel
             // BASE
             if (levelCell.Content.Contains(EditableLevel.KNode))
             {
-                if (levelCell.Position == StartNodePosition)
+                if (levelCell.Position == CurrentUserLevel.StartNode)
                 {
                     levelCell.ChangeSprite(StartNodeSprite, UserClickType.Base);
                 }
-                else if (levelCell.Position == EndNodePosition)
+                else if (levelCell.Position == CurrentUserLevel.EndNode)
                 {
                     levelCell.ChangeSprite(EndNodeSprite, UserClickType.Base);
                 }
@@ -551,6 +542,8 @@ public class LevelEditPanel : Panel
 
         ToggleElement(true);
 
+        _validationDirty = true;
+
         base.Show();
     }
 
@@ -558,8 +551,21 @@ public class LevelEditPanel : Panel
     {
         ToggleElement();
 
-        _currentLevelGuid = Guid.NewGuid();
+        _validationDirty = true;
 
+        for (var i = 0; i < _levelCells.Length; i++)
+        {
+            _levelCells[i].ResetCell();
+        }
+
+        CurrentUserLevel = new UserLevel
+        {
+            Guid = Guid.NewGuid().ToString(),
+            StartNode = -Vector2.one,
+            EndNode = -Vector2.one,
+            Elements = _levelCells.Select(x => x.Content).ToArray()
+        };
+        
         base.Show(originPanel);
     }
 
@@ -580,36 +586,30 @@ public class LevelEditPanel : Panel
 
     private void SaveLevel()
     {
-        var output = JsonUtility.ToJson(_currentUserLevel);
-
-        if (!Directory.Exists(Application.dataPath + "/UserLevels"))
+        var output = JsonUtility.ToJson(CurrentUserLevel);
+        
+        if (!Directory.Exists(MainManager.Instance.UserLevelPath))
         {
-            Directory.CreateDirectory(Application.dataPath + "/UserLevels");
+            Directory.CreateDirectory(MainManager.Instance.UserLevelPath);
         }
 
-        var filePath = Application.dataPath + "/UserLevels/" + _currentLevelGuid + ".json";
+        var filePath = MainManager.Instance.UserLevelPath + "/" + CurrentUserLevel.Guid + ".json";
         
         File.WriteAllText(filePath, output);
     }
 
     private string[] Validate()
     {
-        if (_validationDirty)
+        if (!_validationDirty)
         {
             return null;
         }
 
-        _currentUserLevel = new UserLevel
-        {
-            Guid = _currentLevelGuid.ToString(),
-            StartNode = (Vector2)StartNodePosition,
-            EndNode = (Vector2)EndNodePosition,
-            Elements = _levelCells.Select(x => x.Content).ToArray()
-        };
+        CurrentUserLevel.Elements = _levelCells.Select(x => x.Content).ToArray();
 
         Solutions = new List<UserHypotheticalSolution>();
 
-        var firstSolution = new UserHypotheticalSolution(_currentUserLevel);
+        var firstSolution = new UserHypotheticalSolution(CurrentUserLevel);
         firstSolution.Solve();
 
         _validationDirty = false;
@@ -649,25 +649,25 @@ public class LevelEditPanel : Panel
 
             if(minimumMoves < int.MaxValue && minimumMovesWithFlag < int.MaxValue)
             {
-                _currentUserLevel.ExpectedMoves = minimumMoves / 2;
-                _currentUserLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
-                _currentUserLevel.ExpectedTime = Mathf.CeilToInt(minimumMoves / 2f);
-                _currentUserLevel.Valid = true;
+                CurrentUserLevel.ExpectedMoves = minimumMoves / 2;
+                CurrentUserLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
+                CurrentUserLevel.ExpectedTime = Mathf.CeilToInt(minimumMoves / 2f);
+                CurrentUserLevel.Valid = true;
                 
                 Debug.Log(string.Format("{0} solutions found, minimum: {1} moves, {2} moves with flag, {3} seconds",
                     Solutions.Count,
-                    _currentUserLevel.ExpectedMoves,
-                    _currentUserLevel.MinimumMovesWithFlag,
-                    _currentUserLevel.ExpectedTime)
+                    CurrentUserLevel.ExpectedMoves,
+                    CurrentUserLevel.MinimumMovesWithFlag,
+                    CurrentUserLevel.ExpectedTime)
                 );
 
                 return null;
             }
         }
         
-        _currentUserLevel.ExpectedMoves = 0;
-        _currentUserLevel.MinimumMovesWithFlag = 0;
-        _currentUserLevel.Valid = false;
+        CurrentUserLevel.ExpectedMoves = 0;
+        CurrentUserLevel.MinimumMovesWithFlag = 0;
+        CurrentUserLevel.Valid = false;
 
         Debug.Log("No valid solution found");
 
@@ -832,9 +832,9 @@ public class LevelEditPanel : Panel
 
     public void UI_Delete()
     {
-        if (!Directory.Exists(Application.dataPath + "/UserLevels") && File.Exists(Application.dataPath + "/UserLevels/" + _currentLevelGuid + ".json"))
+        if (!Directory.Exists(MainManager.Instance.UserLevelPath) && File.Exists(MainManager.Instance.UserLevelPath + "/ " + CurrentUserLevel.Guid + ".json"))
         {
-            FileUtil.DeleteFileOrDirectory(Application.dataPath + "/UserLevels/" + _currentLevelGuid + ".json");
+            File.Delete(MainManager.Instance.UserLevelPath + "/" + CurrentUserLevel.Guid + ".json");
         }
 
         MessageBubble.SetActive(false);
@@ -858,21 +858,21 @@ public class LevelEditPanel : Panel
 
     public void UI_MakeStartNode()
     {
-        if (StartNodePosition.HasValue)
+        if (CurrentUserLevel.StartNode != -Vector2.one)
         {
-            var previousStartNode = GetCellByPosition((int)StartNodePosition.Value.x, (int)StartNodePosition.Value.y);
+            var previousStartNode = GetCellByPosition((int)CurrentUserLevel.StartNode.x, (int)CurrentUserLevel.StartNode.y);
             if (previousStartNode != null && !string.IsNullOrEmpty(previousStartNode.Content) && previousStartNode.Content.Contains(EditableLevel.KNode))
             {
                 previousStartNode.ChangeSprite(NodeSprite, UserClickType.Base);
             }
 
-            if (EndNodePosition == _cellClicked.Position)
+            if (CurrentUserLevel.EndNode == _cellClicked.Position)
             {
-                EndNodePosition = null;
+                CurrentUserLevel.EndNode = -Vector2.one;
             }
         }
-        
-        StartNodePosition = _cellClicked.Position;
+
+        CurrentUserLevel.StartNode = _cellClicked.Position;
         _cellClicked.ChangeSprite(StartNodeSprite, UserClickType.Base);
         
         _validationDirty = true;
@@ -880,21 +880,21 @@ public class LevelEditPanel : Panel
 
     public void UI_MakeEndNode()
     {
-        if (EndNodePosition.HasValue)
+        if (CurrentUserLevel.EndNode != -Vector2.one)
         {
-            var previousEndNode = GetCellByPosition((int)EndNodePosition.Value.x, (int)EndNodePosition.Value.y);
+            var previousEndNode = GetCellByPosition((int)CurrentUserLevel.EndNode.x, (int)CurrentUserLevel.EndNode.y);
             if (previousEndNode != null && !string.IsNullOrEmpty(previousEndNode.Content) && previousEndNode.Content.Contains(EditableLevel.KNode))
             {
                 previousEndNode.ChangeSprite(NodeSprite, UserClickType.Base);
             }
 
-            if (StartNodePosition == _cellClicked.Position)
+            if (CurrentUserLevel.StartNode == _cellClicked.Position)
             {
-                StartNodePosition = null;
+                CurrentUserLevel.StartNode = -Vector2.one;
             }
         }
-            
-        EndNodePosition = _cellClicked.Position;
+
+        CurrentUserLevel.EndNode = _cellClicked.Position;
         _cellClicked.ChangeSprite(EndNodeSprite, UserClickType.Base);
 
         _validationDirty = true;
@@ -907,14 +907,14 @@ public class LevelEditPanel : Panel
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
 
-        if (_currentUserLevel.Valid)
+        if (CurrentUserLevel.Valid)
         {
             BackMessageText.text = string.Format(
                 "Your level is valid!\n\n" +
                 "Minimum moves : {0}\n" +
                 "Minimum time : {1}",
-                _currentUserLevel.ExpectedMoves,
-                _currentUserLevel.ExpectedTime
+                CurrentUserLevel.ExpectedMoves,
+                CurrentUserLevel.ExpectedTime
             );
         }
         else
@@ -938,7 +938,7 @@ public class LevelEditPanel : Panel
 
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
-        BackMessageText.text = _currentUserLevel.Valid ? SaveValidMessage : SaveInvalidMessage;
+        BackMessageText.text = CurrentUserLevel.Valid ? SaveValidMessage : SaveInvalidMessage;
 
         MessageBubbleConfirmButton.SetActive(false);
         MessageBubbleCancelButton.SetActive(false);
@@ -954,7 +954,7 @@ public class LevelEditPanel : Panel
 
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
-        BackMessageText.text = _currentUserLevel.Valid ? BackValidMessage : BackInvalidMessage;
+        BackMessageText.text = CurrentUserLevel.Valid ? BackValidMessage : BackInvalidMessage;
 
         MessageBubbleConfirmButton.SetActive(true);
         MessageBubbleCancelButton.SetActive(true);

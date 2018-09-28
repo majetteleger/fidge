@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -67,7 +66,7 @@ public class OptionsPanel : Panel
             PlayerPrefs.SetString("Level" + i, "000");
         }
 
-        foreach (var filePath in Directory.GetFiles(Application.dataPath + "/UserLevels"))
+        foreach (var filePath in Directory.GetFiles(MainManager.Instance.UserLevelPath))
         {
             if (filePath.Contains(".meta"))
             {

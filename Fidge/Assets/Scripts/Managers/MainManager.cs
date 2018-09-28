@@ -113,7 +113,19 @@ public class MainManager : MonoBehaviour
             medals = value; 
         }
     }
-    
+
+    public string UserLevelPath
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return Application.dataPath + "/UserLevels";
+#else
+            return Application.persistentDataPath + "/UserLevels";
+#endif
+        }
+    }
+
     private void Awake()
     {
         if (Instance == null)

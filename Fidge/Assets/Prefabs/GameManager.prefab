@@ -13294,6 +13294,8 @@ MonoBehaviour:
   PlayHeader: 'Play Your
 
     Levels'
+  ValidSprite: {fileID: 21300000, guid: f662b0523444e294a8d3b139531afebb, type: 3}
+  InvalidSprite: {fileID: 21300000, guid: 96332d51afecadf48be726312fd49916, type: 3}
 --- !u!114 &114670334689122776
 MonoBehaviour:
   m_ObjectHideFlags: 1
