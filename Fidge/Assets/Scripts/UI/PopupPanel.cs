@@ -15,6 +15,7 @@ public class PopupPanel : Panel
     public Button ConfirmButton;
     public Button PlayButton;
     public GameObject MedalsParent;
+    public RectTransform MedalsAndTextContainer;
     public CanvasGroup[] Medals;
     public Text Message;
     public Text MedalsObtainedText;
@@ -75,6 +76,13 @@ public class PopupPanel : Panel
         }
     }
 
+    public override void Show(Panel originPanel = null)
+    {
+        base.Show(originPanel);
+
+        ForceLayoutRebuilding(MedalsAndTextContainer);
+    }
+    
     public void ShowConfirm(EditableLevel level)
     {
         _loadUserLevel = false;
@@ -252,7 +260,7 @@ public class PopupPanel : Panel
     {
         if (_loadUserLevel)
         {
-            UserLevelsPanel.Instance.ShowWithActivity(_userActivity);
+            UserLevelsPanel.Instance.ShowWithActivity(_userActivity, instance);
         }
         else
         {

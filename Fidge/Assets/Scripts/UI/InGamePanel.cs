@@ -215,11 +215,11 @@ public class InGamePanel : Panel
 
         if (activeLevelWasUserMade)
         {
-            UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Play);
+            UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Play, instance);
         }
         else
         {
-            LevelSelectionPanel.Instance.Show();
+            LevelSelectionPanel.Instance.Show(instance);
         }
     }
 

@@ -298,6 +298,11 @@ public class LevelCell : MonoBehaviour
 
     public void ChangeTraversalModifier(string selectedTraversalModifier)
     {
+        if (LevelEditPanel.Instance.CurrentUserLevel.StartNode == Position || LevelEditPanel.Instance.CurrentUserLevel.EndNode == Position)
+        {
+            return;
+        }
+
         if (selectedTraversalModifier == LevelEditPanel.KDelete)
         {
             RemoveFromElement(EditableLevel.TraversalStates);

@@ -549,7 +549,7 @@ public class LevelEditPanel : Panel
 
     public override void Show(Panel originPanel = null)
     {
-        ToggleElement();
+        ToggleElement(true);
 
         _validationDirty = true;
 
@@ -605,6 +605,21 @@ public class LevelEditPanel : Panel
             return null;
         }
 
+        var errorList = new List<string>();
+
+        var startCell = GetCellByPosition((int) CurrentUserLevel.StartNode.x, (int) CurrentUserLevel.StartNode.y);
+        var endCell = GetCellByPosition((int) CurrentUserLevel.EndNode.x, (int) CurrentUserLevel.EndNode.y);
+
+        if (startCell == null)
+        {
+            errorList.Add("No start node was found");
+        }
+
+        if (endCell == null)
+        {
+            errorList.Add("No end node was found");
+        }
+        
         CurrentUserLevel.Elements = _levelCells.Select(x => x.Content).ToArray();
 
         Solutions = new List<UserHypotheticalSolution>();
@@ -668,10 +683,10 @@ public class LevelEditPanel : Panel
         CurrentUserLevel.ExpectedMoves = 0;
         CurrentUserLevel.MinimumMovesWithFlag = 0;
         CurrentUserLevel.Valid = false;
+        
+        errorList.Add("No valid solution found");
 
-        Debug.Log("No valid solution found");
-
-        return null;    // SHOULD RETURN A LIST OF WHATS MAKES IT INVALID
+        return errorList.Count == 0 ? null : errorList.ToArray();
     }
     
     private void ClickOnCell()
@@ -832,7 +847,7 @@ public class LevelEditPanel : Panel
 
     public void UI_Delete()
     {
-        if (!Directory.Exists(MainManager.Instance.UserLevelPath) && File.Exists(MainManager.Instance.UserLevelPath + "/ " + CurrentUserLevel.Guid + ".json"))
+        if (Directory.Exists(MainManager.Instance.UserLevelPath) && File.Exists(MainManager.Instance.UserLevelPath + "/" + CurrentUserLevel.Guid + ".json"))
         {
             File.Delete(MainManager.Instance.UserLevelPath + "/" + CurrentUserLevel.Guid + ".json");
         }

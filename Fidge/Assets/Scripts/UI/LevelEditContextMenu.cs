@@ -8,6 +8,7 @@ public class LevelEditContextMenu : MonoBehaviour
 {
     public RectTransform ButtonGroup;
 
+    public Transform CanvasTransform;
     public GameObject CancelButton;
     public GameObject MakeStartNodeButton;
     public GameObject MakeEndNodeButton;
@@ -22,18 +23,28 @@ public class LevelEditContextMenu : MonoBehaviour
     public void Activate(LevelCell cellClicked)
     {
         _buttons = GetComponentsInChildren<Button>(true).Where(x => x.gameObject != gameObject).Select(x => x.gameObject).ToArray();
-        
+
+        var traversalModified = cellClicked.Content.Contains(EditableLevel.KTraversalStateCovered) || cellClicked.Content.Contains(EditableLevel.KTraversalStateRevealed);
+        var containsCollectable = cellClicked.Content.Contains(EditableLevel.KKey) || cellClicked.Content.Contains(EditableLevel.KLink) || cellClicked.Content.Contains(EditableLevel.KFlag);
+
+        var activeButtons = 0;
+
         if (cellClicked.Content.Contains(EditableLevel.KNode))
         {
             foreach (var button in _buttons)
             {
                 var buttonActive = 
-                    button == MakeStartNodeButton ||
-                    button == MakeEndNodeButton ||
+                    (button == MakeStartNodeButton && !traversalModified && !containsCollectable) ||
+                    (button == MakeEndNodeButton && !traversalModified && !containsCollectable) ||
                     button == CancelButton ||
                     button == ClearButton;
 
                 button.SetActive(buttonActive);
+
+                if (buttonActive)
+                {
+                    activeButtons++;
+                }
             }
         }
         else if (cellClicked.Content.Contains(EditableLevel.KPath))
@@ -46,6 +57,11 @@ public class LevelEditContextMenu : MonoBehaviour
                     button == ClearButton;
 
                 button.SetActive(buttonActive);
+
+                if (buttonActive)
+                {
+                    activeButtons++;
+                }
             }
         }
 
@@ -53,15 +69,23 @@ public class LevelEditContextMenu : MonoBehaviour
         var right = Camera.main.ScreenToViewportPoint(cellClicked.transform.position).x < 0.5f;
 
         gameObject.SetActive(true);
-        ButtonGroup.anchoredPosition = cellClicked.transform.localPosition;
-        ButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
+        
+        var position = CanvasTransform.InverseTransformPoint(cellClicked.transform.position);
+        var buttonHeight = _buttons[0].GetComponent<RectTransform>().sizeDelta.y;
+        var halfHeight = ((buttonHeight + 8) * activeButtons) / 2f;
+        var halfWidth = _buttons[0].GetComponent<RectTransform>().sizeDelta.x / 2f;
+        
+        position.y += top ? halfHeight : -halfHeight;
+        position.x += right ? halfWidth : -halfWidth;
 
-        // POSITION IS WEIRD
+        ButtonGroup.localPosition = position;
     }
 
     public void Activate(Button buttonClicked)
     {
         _buttons = GetComponentsInChildren<Button>(true).Where(x => x.gameObject != gameObject).Select(x => x.gameObject).ToArray();
+
+        var activeButtons = 0;
 
         if (buttonClicked == LevelEditPanel.Instance.OtherOptionsButton)
         {
@@ -73,6 +97,11 @@ public class LevelEditContextMenu : MonoBehaviour
                     button == DeleteButton;
 
                 button.SetActive(buttonActive);
+
+                if (buttonActive)
+                {
+                    activeButtons++;
+                }
             }
         }
 
@@ -80,8 +109,16 @@ public class LevelEditContextMenu : MonoBehaviour
         var right = Camera.main.ScreenToViewportPoint(buttonClicked.transform.position).x < 0.5f;
 
         gameObject.SetActive(true);
-        ButtonGroup.anchoredPosition = buttonClicked.transform.localPosition;
-        ButtonGroup.pivot = new Vector2(right ? 0f : 1f, top ? 0.5f : 1.5f);
+
+        var position = CanvasTransform.InverseTransformPoint(buttonClicked.transform.position);
+        var buttonHeight = _buttons[0].GetComponent<RectTransform>().sizeDelta.y;
+        var halfHeight = ((buttonHeight + 8) * activeButtons) / 2f;
+        var halfWidth = _buttons[0].GetComponent<RectTransform>().sizeDelta.x / 2f;
+        
+        position.y += top ? halfHeight : -halfHeight;
+        position.x += right ? halfWidth : -halfWidth;
+
+        ButtonGroup.localPosition = position;
     }
 
     public void UI_Close()

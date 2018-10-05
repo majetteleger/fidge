@@ -104,8 +104,6 @@ public class LevelSelectionPanel : Panel
             SetupSounds();
 
             _initialized = true;
-
-            LevelButtonScroll.verticalNormalizedPosition = 1;
         }
     }
 
@@ -117,12 +115,12 @@ public class LevelSelectionPanel : Panel
 
         UpdateLevelButtons();
 
-        if (originPanel != PopupPanel.instance)
+        base.Show(originPanel);
+
+        if (originPanel != PopupPanel.instance && originPanel != InGamePanel.instance)
         {
             LevelButtonScroll.verticalNormalizedPosition = 1;
         }
-        
-        base.Show();
     }
 
     public void UpdateSectionBlockers()
@@ -134,8 +132,6 @@ public class LevelSelectionPanel : Panel
             section.Gap.gameObject.SetActive(!MainManager.Instance.Paid);
             section.Blocker.gameObject.SetActive(!MainManager.Instance.Paid);
         }
-
-        LevelButtonScroll.verticalNormalizedPosition = 1;
     }
 
     private void UpdateLevelButtons()

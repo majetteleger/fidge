@@ -48,14 +48,14 @@ public class LevelEditorMenuPanel : Panel
     {
         // DISABLE IF NO USER LEVEL
 
-        UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Edit);
+        UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Edit, instance);
     }
 
     public void UI_Play()
     {
         // DISABLE IF NO USER LEVEL
 
-        UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Play);
+        UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Play, instance);
     }
 
     public void UI_Back()
