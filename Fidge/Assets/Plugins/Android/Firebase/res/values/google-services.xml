@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources tools:keep="@string/firebase_database_url,@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_web_client_id" xmlns:tools="http://schemas.android.com/tools">
+  <string name="firebase_database_url" translatable="false">https://fidge-219217.firebaseio.com</string>
+  <string name="gcm_defaultSenderId" translatable="false">222640850908</string>
+  <string name="google_storage_bucket" translatable="false">fidge-219217.appspot.com</string>
+  <string name="project_id" translatable="false">fidge-219217</string>
+  <string name="google_api_key" translatable="false">AIzaSyAVcmgSnvycvC6CUB9Vcuz0czeszb-Xrmc</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAVcmgSnvycvC6CUB9Vcuz0czeszb-Xrmc</string>
+  <string name="google_app_id" translatable="false">1:222640850908:android:8711ecbee75295d6</string>
+  <string name="default_web_client_id" translatable="false">222640850908-r6dph8as91qrna918lgo3oc85uugplju.apps.googleusercontent.com</string>
+</resources>

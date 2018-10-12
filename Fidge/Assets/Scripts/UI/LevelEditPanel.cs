@@ -596,6 +596,10 @@ public class LevelEditPanel : Panel
         var filePath = MainManager.Instance.UserLevelPath + "/" + CurrentUserLevel.Guid + ".json";
         
         File.WriteAllText(filePath, output);
+
+        // FIREBASE
+        
+        MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).SetRawJsonValueAsync(output);
     }
 
     private string[] Validate()

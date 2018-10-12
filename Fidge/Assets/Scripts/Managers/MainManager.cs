@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Firebase.Database;
+using Firebase.Unity.Editor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -36,6 +38,7 @@ public class MainManager : MonoBehaviour
     public EditableLevel LastLoadedLevel { get; private set; }
     public LevelEditPanel.UserLevel LastLoadedUserLevel { get; private set; }
     public bool DirtyMedals { get; set; }
+    public DatabaseReference DatabaseReference { get; set; }
 
     private bool _lastLevelWasUserMade;
 
@@ -138,6 +141,50 @@ public class MainManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
+
+        // // FIREBASE
+
+        Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == Firebase.DependencyStatus.Available)
+            {
+                // Create and hold a reference to your FirebaseApp, i.e.
+                //   app = Firebase.FirebaseApp.DefaultInstance;
+                // where app is a Firebase.FirebaseApp property of your application class.
+
+                // Set a flag here indicating that Firebase is ready to use by your
+                // application.
+            }
+            else
+            {
+                UnityEngine.Debug.LogError(System.String.Format(
+                    "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+                // Firebase Unity SDK is not safe to use here.
+            }
+        });
+
+        // Set up the Editor before calling into the realtime database.
+        Firebase.FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://fidge-219217.firebaseio.com/");
+
+        // Get the root reference location of the database.
+        DatabaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+
+        DatabaseReference
+            .GetValueAsync().ContinueWith(task => {
+                if (task.IsFaulted)
+                {
+                    // Handle the error...
+                }
+                else if (task.IsCompleted)
+                {
+                    DataSnapshot snapshot = task.Result;
+
+                    foreach (var child in snapshot.Children)
+                    {
+                        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(child.GetRawJsonValue());
+                    }
+                }
+            });
 
         // Load levels
 

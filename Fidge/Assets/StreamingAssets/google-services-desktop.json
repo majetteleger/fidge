@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "222640850908",
+    "firebase_url": "https://fidge-219217.firebaseio.com",
+    "project_id": "fidge-219217",
+    "storage_bucket": "fidge-219217.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:222640850908:android:8711ecbee75295d6",
+        "android_client_info": {
+          "package_name": "com.majetteleger.Fidge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "222640850908-r6dph8as91qrna918lgo3oc85uugplju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVcmgSnvycvC6CUB9Vcuz0czeszb-Xrmc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
