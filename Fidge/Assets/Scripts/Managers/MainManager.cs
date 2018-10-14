@@ -148,12 +148,28 @@ public class MainManager : MonoBehaviour
             var dependencyStatus = task.Result;
             if (dependencyStatus == Firebase.DependencyStatus.Available)
             {
-                // Create and hold a reference to your FirebaseApp, i.e.
-                //   app = Firebase.FirebaseApp.DefaultInstance;
-                // where app is a Firebase.FirebaseApp property of your application class.
+                // Set up the Editor before calling into the realtime database.
+                Firebase.FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://fidge-219217.firebaseio.com/");
 
-                // Set a flag here indicating that Firebase is ready to use by your
-                // application.
+                // Get the root reference location of the database.
+                DatabaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+
+                DatabaseReference
+                    .GetValueAsync().ContinueWith(referenceTask => {
+                        if (referenceTask.IsFaulted)
+                        {
+                            // Handle the error...
+                        }
+                        else if (referenceTask.IsCompleted)
+                        {
+                            DataSnapshot snapshot = referenceTask.Result;
+
+                            foreach (var child in snapshot.Children)
+                            {
+                                var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(child.GetRawJsonValue());
+                            }
+                        }
+                    });
             }
             else
             {
@@ -162,30 +178,7 @@ public class MainManager : MonoBehaviour
                 // Firebase Unity SDK is not safe to use here.
             }
         });
-
-        // Set up the Editor before calling into the realtime database.
-        Firebase.FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://fidge-219217.firebaseio.com/");
-
-        // Get the root reference location of the database.
-        DatabaseReference = FirebaseDatabase.DefaultInstance.RootReference;
-
-        DatabaseReference
-            .GetValueAsync().ContinueWith(task => {
-                if (task.IsFaulted)
-                {
-                    // Handle the error...
-                }
-                else if (task.IsCompleted)
-                {
-                    DataSnapshot snapshot = task.Result;
-
-                    foreach (var child in snapshot.Children)
-                    {
-                        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(child.GetRawJsonValue());
-                    }
-                }
-            });
-
+        
         // Load levels
 
         var editableLevels = new List<SequentialLevel>();
