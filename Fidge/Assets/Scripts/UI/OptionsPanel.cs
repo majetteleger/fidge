@@ -7,8 +7,6 @@ using UnityEngine.UI;
 
 public class OptionsPanel : Panel
 {
-    public static OptionsPanel instance = null;
-
     public GameObject ResetConfirmationPopup;
     public Button PayButton;
     public Image MusicImage;
@@ -19,15 +17,7 @@ public class OptionsPanel : Panel
     public Sprite MusicOffSprite;
     public Sprite SoundOnSprite;
     public Sprite SoundOffSprite;
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
-
+    
     void Start()
     {
         SetupSounds();
@@ -37,7 +27,7 @@ public class OptionsPanel : Panel
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            MainMenuPanel.instance.Show();
+            UIManager.Instance.MainMenuPanel.Show();
         }
     }
 
@@ -156,18 +146,18 @@ public class OptionsPanel : Panel
 
     public void UI_Pay()
     {
-        PurchasePanel.instance.Show();
+        UIManager.Instance.PurchasePanel.Show();
     }
 
     public void UI_ResetPay()
     {
         MainManager.Instance.Paid = false;
-        LevelSelectionPanel.Instance.UpdateSectionBlockers();
+        UIManager.Instance.LevelSelectionPanel.UpdateSectionBlockers();
         UpdatePayButton();
     }
 
     public void UI_Back()
     {
-        MainMenuPanel.instance.Show();
+        UIManager.Instance.MainMenuPanel.Show();
     }
 }

@@ -11,7 +11,7 @@ public class Panel : MonoBehaviour
 	{
 		gameObject.SetActive(true);
         
-        foreach (var panel in UIManager.instance.Panels)
+        foreach (var panel in UIManager.Instance.Panels)
         {
             if(panel == this || CoexistsWith.Contains(panel))
             {
@@ -33,9 +33,9 @@ public class Panel : MonoBehaviour
 
         foreach (var button in buttons)
         {
-            if (InGamePanel.instance != null && button.transform.parent == InGamePanel.instance.TraversalInput.transform)
+            if (UIManager.Instance.InGamePanel != null && button.transform.parent == UIManager.Instance.InGamePanel.TraversalInput.transform)
             {
-                if(button == InGamePanel.instance.GoButton)
+                if(button == UIManager.Instance.InGamePanel.GoButton)
                 {
                     button.onClick.AddListener(() => { AudioManager.Instance.PlaySoundEffect(AudioManager.Instance.InputGo); });
                 }

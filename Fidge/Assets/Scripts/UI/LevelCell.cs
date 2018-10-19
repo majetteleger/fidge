@@ -98,14 +98,14 @@ public class LevelCell : MonoBehaviour
             RemoveFromElement(EditableLevel.Colors);
             RemoveFromElement(EditableLevel.Directions);
 
-            if (LevelEditPanel.Instance.CurrentUserLevel.StartNode == Position)
+            if (UIManager.Instance.LevelEditPanel.CurrentUserLevel.StartNode == Position)
             {
-                LevelEditPanel.Instance.CurrentUserLevel.StartNode = -Vector2.one;
+                UIManager.Instance.LevelEditPanel.CurrentUserLevel.StartNode = -Vector2.one;
             }
 
-            if (LevelEditPanel.Instance.CurrentUserLevel.EndNode == Position)
+            if (UIManager.Instance.LevelEditPanel.CurrentUserLevel.EndNode == Position)
             {
-                LevelEditPanel.Instance.CurrentUserLevel.EndNode = -Vector2.one;
+                UIManager.Instance.LevelEditPanel.CurrentUserLevel.EndNode = -Vector2.one;
             }
 
             ChangeSprite(null, LevelEditPanel.UserClickType.Base);
@@ -139,8 +139,8 @@ public class LevelCell : MonoBehaviour
 
             Content = EditableLevel.KPath;
 
-            var upCell = LevelEditPanel.Instance.GetCellByPosition((int)Position.x, (int)Position.y + 1);
-            var downCell = LevelEditPanel.Instance.GetCellByPosition((int)Position.x, (int)Position.y - 1);
+            var upCell = UIManager.Instance.LevelEditPanel.GetCellByPosition((int)Position.x, (int)Position.y + 1);
+            var downCell = UIManager.Instance.LevelEditPanel.GetCellByPosition((int)Position.x, (int)Position.y - 1);
             var upIsNode = upCell != null && !string.IsNullOrEmpty(upCell.Content) &&
                            upCell.Content.Contains(EditableLevel.KNode);
             var downIsNode = downCell != null && !string.IsNullOrEmpty(downCell.Content) &&
@@ -298,7 +298,7 @@ public class LevelCell : MonoBehaviour
 
     public void ChangeTraversalModifier(string selectedTraversalModifier)
     {
-        if (LevelEditPanel.Instance.CurrentUserLevel.StartNode == Position || LevelEditPanel.Instance.CurrentUserLevel.EndNode == Position)
+        if (UIManager.Instance.LevelEditPanel.CurrentUserLevel.StartNode == Position || UIManager.Instance.LevelEditPanel.CurrentUserLevel.EndNode == Position)
         {
             return;
         }
@@ -351,14 +351,14 @@ public class LevelCell : MonoBehaviour
         ChangeSprite(null, LevelEditPanel.UserClickType.Extra);
         ChangeSprite(null, LevelEditPanel.UserClickType.TraversalModifier);
 
-        if (LevelEditPanel.Instance.CurrentUserLevel.StartNode == Position)
+        if (UIManager.Instance.LevelEditPanel.CurrentUserLevel.StartNode == Position)
         {
-            LevelEditPanel.Instance.CurrentUserLevel.StartNode = -Vector2.one;
+            UIManager.Instance.LevelEditPanel.CurrentUserLevel.StartNode = -Vector2.one;
         }
 
-        if (LevelEditPanel.Instance.CurrentUserLevel.EndNode == Position)
+        if (UIManager.Instance.LevelEditPanel.CurrentUserLevel.EndNode == Position)
         {
-            LevelEditPanel.Instance.CurrentUserLevel.EndNode = -Vector2.one;
+            UIManager.Instance.LevelEditPanel.CurrentUserLevel.EndNode = -Vector2.one;
         }
     }
 

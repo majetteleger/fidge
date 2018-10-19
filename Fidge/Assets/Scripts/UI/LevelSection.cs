@@ -10,6 +10,6 @@ public class LevelSection : MonoBehaviour
     
     public void UI_Pay()
     {
-        PurchasePanel.instance.Show();
+        UIManager.Instance.PurchasePanel.Show();
     }
 }

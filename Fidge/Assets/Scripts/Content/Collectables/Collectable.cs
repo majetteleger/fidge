@@ -9,6 +9,6 @@ public abstract class Collectable : Content
         transform.SetParent(MainManager.Instance.Player.transform, false);
         GetComponent<SpriteRenderer>().enabled = false;
 
-        InGamePanel.instance.UpdateCollectables(MainManager.Instance.Player.GetCollectables());
+        UIManager.Instance.InGamePanel.UpdateCollectables(MainManager.Instance.Player.GetCollectables());
     }
 }

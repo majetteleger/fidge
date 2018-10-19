@@ -14,21 +14,11 @@ public class CreditsPanel : Panel
         public string[] Entries;
     }
 
-    public static CreditsPanel instance = null;
-
     public GameObject SubtitlePrefab;
     public GameObject EntryPrefab;
     public Transform Content;
     public CreditsSection[] Sections;
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
-
+    
     void Start()
     {
         LoadEntries();
@@ -41,7 +31,7 @@ public class CreditsPanel : Panel
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            MainMenuPanel.instance.Show();
+            UIManager.Instance.MainMenuPanel.Show();
         }
     }
     
@@ -62,6 +52,6 @@ public class CreditsPanel : Panel
 
     public void UI_Back()
     {
-        MainMenuPanel.instance.Show();
+        UIManager.Instance.MainMenuPanel.Show();
     }
 }

@@ -35,8 +35,8 @@ public class UserHypotheticalSolution
 
     public UserHypotheticalSolution(LevelEditPanel.UserLevel userLevel)
     {
-        Id = LevelEditPanel.Instance.Solutions.Count;
-        LevelEditPanel.Instance.Solutions.Add(this);
+        Id = UIManager.Instance.LevelEditPanel.Solutions.Count;
+        UIManager.Instance.LevelEditPanel.Solutions.Add(this);
 
         Elements = new string[userLevel.Elements.Length];
 
@@ -55,8 +55,8 @@ public class UserHypotheticalSolution
     
     public UserHypotheticalSolution(UserHypotheticalSolution otherSolution)
     {
-        Id = LevelEditPanel.Instance.Solutions.Count;
-        LevelEditPanel.Instance.Solutions.Add(this);
+        Id = UIManager.Instance.LevelEditPanel.Solutions.Count;
+        UIManager.Instance.LevelEditPanel.Solutions.Add(this);
         
         Elements = new string[otherSolution.Elements.Length];
 
@@ -191,7 +191,7 @@ public class UserHypotheticalSolution
 
         if (possibleMoves.Count == 0)
         {
-            LevelEditPanel.Instance.Solutions.Remove(this);
+            UIManager.Instance.LevelEditPanel.Solutions.Remove(this);
             return;
         }
 

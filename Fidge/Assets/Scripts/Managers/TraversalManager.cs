@@ -48,23 +48,23 @@ public class TraversalManager : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
                 {
-                    SimulateButtonPress(InGamePanel.instance.UpButton);
+                    SimulateButtonPress(UIManager.Instance.InGamePanel.UpButton);
                 }
                 if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
                 {
-                    SimulateButtonPress(InGamePanel.instance.RightButton);
+                    SimulateButtonPress(UIManager.Instance.InGamePanel.RightButton);
                 }
                 if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
                 {
-                    SimulateButtonPress(InGamePanel.instance.DownButton);
+                    SimulateButtonPress(UIManager.Instance.InGamePanel.DownButton);
                 }
                 if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
                 {
-                    SimulateButtonPress(InGamePanel.instance.LeftButton);
+                    SimulateButtonPress(UIManager.Instance.InGamePanel.LeftButton);
                 }
                 if (IsPlanningTraversal && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)))
                 {
-                    SimulateButtonPress(InGamePanel.instance.GoButton);
+                    SimulateButtonPress(UIManager.Instance.InGamePanel.GoButton);
                 }
             }
             
@@ -78,7 +78,7 @@ public class TraversalManager : MonoBehaviour
         if(IsPlanningTraversal)
         {
             _currentTraversalTime += Time.deltaTime;
-            InGamePanel.instance.UpdateTimer(_currentTraversalTime);
+            UIManager.Instance.InGamePanel.UpdateTimer(_currentTraversalTime);
         }
     }
 
@@ -109,7 +109,7 @@ public class TraversalManager : MonoBehaviour
         IsPlanningTraversal = false;
         Traversal = StartCoroutine(ExecuteTraversal());
 
-        InGamePanel.instance.ToggleTraversalInputs(false);
+        UIManager.Instance.InGamePanel.ToggleTraversalInputs(false);
     }
 
     public void CancelTraversal()
@@ -132,8 +132,8 @@ public class TraversalManager : MonoBehaviour
 
         if(MainManager.Instance.ActiveLevel != null)
         {
-            InGamePanel.instance.UpdateMoves(_currentTraversalMoves);
-            InGamePanel.instance.UpdateTimer(_currentTraversalTime);
+            UIManager.Instance.InGamePanel.UpdateMoves(_currentTraversalMoves);
+            UIManager.Instance.InGamePanel.UpdateTimer(_currentTraversalTime);
         }
     }
 
@@ -147,7 +147,7 @@ public class TraversalManager : MonoBehaviour
         TraversalMoves.Add(traversalMove);
         _currentTraversalMoves++;
 
-        InGamePanel.instance.UpdateMoves(_currentTraversalMoves);
+        UIManager.Instance.InGamePanel.UpdateMoves(_currentTraversalMoves);
     }
 
     /*public void SimulateTraversalPlanning(TraversalMove[] traversalScript)
@@ -358,7 +358,7 @@ public class TraversalManager : MonoBehaviour
 
         MainManager.Instance.ReloadLevel();
 
-        InGamePanel.instance.ToggleTraversalInputs(true);
+        UIManager.Instance.InGamePanel.ToggleTraversalInputs(true);
     }
 
     private void Clear(bool timeMedal, bool movesMedal, bool flagMedal)
@@ -382,11 +382,11 @@ public class TraversalManager : MonoBehaviour
 
         if (MainManager.Instance.ActiveLevel.UserMade)
         {
-            PopupPanel.instance.ShowWon(MainManager.Instance.ActiveLevel.Guid);
+            UIManager.Instance.PopupPanel.ShowWon(MainManager.Instance.ActiveLevel.Guid);
         }
         else
         {
-            PopupPanel.instance.ShowWon(MainManager.Instance.ActiveLevel.Index >= 0 ? MainManager.Instance.Levels[MainManager.Instance.ActiveLevel.Index].Level : null);
+            UIManager.Instance.PopupPanel.ShowWon(MainManager.Instance.ActiveLevel.Index >= 0 ? MainManager.Instance.Levels[MainManager.Instance.ActiveLevel.Index].Level : null);
         }
         
         Destroy(MainManager.Instance.ActiveLevel.gameObject);

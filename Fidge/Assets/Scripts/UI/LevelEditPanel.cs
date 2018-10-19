@@ -312,9 +312,7 @@ public class LevelEditPanel : Panel
         TraversalModifier,
         NONE
     }
-
-    public static LevelEditPanel Instance;
-
+    
     public GameObject LevelCellPrefab;
     public Transform LevelCellContainer;
     public Button ToggleElementButton;
@@ -370,8 +368,6 @@ public class LevelEditPanel : Panel
     
     void Awake()
     {
-        Instance = this;
-
         _longPressTimer = LongPressTime;
         _clickType = UserClickType.NONE;
         _toggledBase = KBase;
@@ -425,7 +421,7 @@ public class LevelEditPanel : Panel
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            MainMenuPanel.instance.Show();
+            UIManager.Instance.MainMenuPanel.Show();
         }
 
         if (_cellPressed && _longPressTimer > 0)
@@ -862,7 +858,7 @@ public class LevelEditPanel : Panel
 
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        LevelEditorMenuPanel.Instance.Show();
+        UIManager.Instance.LevelEditorMenuPanel.Show();
     }
 
     public void UI_Clear()
@@ -994,14 +990,14 @@ public class LevelEditPanel : Panel
 
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        LevelEditorMenuPanel.Instance.Show();
+        UIManager.Instance.LevelEditorMenuPanel.Show();
     }
 
     public void UI_BackConfirmed()
     {
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        LevelEditorMenuPanel.Instance.Show();
+        UIManager.Instance.LevelEditorMenuPanel.Show();
     }
 
     public void UI_BackCanceled()

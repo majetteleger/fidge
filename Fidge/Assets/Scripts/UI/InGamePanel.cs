@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class InGamePanel : Panel
 {
-    public static InGamePanel instance = null;
-
     public Transform CollectablesContainer;
     public GameObject CollectablePrefab;
     public CanvasGroup ObjectiveBars;
@@ -35,11 +33,6 @@ public class InGamePanel : Panel
 
     void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
-
         _maxObjectiveWidth = Timer.sizeDelta.x;
         _minObjectiveWidth = Timer.sizeDelta.y;
 
@@ -215,11 +208,11 @@ public class InGamePanel : Panel
 
         if (activeLevelWasUserMade)
         {
-            UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Play, instance);
+            UIManager.Instance.UserLevelsPanel.ShowWithActivity(UserLevelsPanel.UserActivity.Play, this);
         }
         else
         {
-            LevelSelectionPanel.Instance.Show(instance);
+            UIManager.Instance.LevelSelectionPanel.Show(this);
         }
     }
 

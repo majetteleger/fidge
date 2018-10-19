@@ -9,8 +9,6 @@ using UnityEngine.UI;
 
 public class TutorialPanel : Panel
 {
-    public static TutorialPanel Instance = null;
-    
     public GameObject AdvanceButton;
     public GameObject TutorialBubble;
     public UILine TutorialLine;
@@ -28,15 +26,7 @@ public class TutorialPanel : Panel
     public float TutorialBubbleDistance;
 
     private List<GameObject> _tempMasks;
-
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-    }
-
+    
     void Start()
     {
         SetupSounds();

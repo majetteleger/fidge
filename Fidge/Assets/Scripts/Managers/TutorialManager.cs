@@ -60,7 +60,7 @@ public class TutorialManager : MonoBehaviour
             }
 
             ReorderTutorials();
-            TutorialPanel.Instance.AdvanceTutorial();
+            UIManager.Instance.TutorialPanel.AdvanceTutorial();
         }
     }
 

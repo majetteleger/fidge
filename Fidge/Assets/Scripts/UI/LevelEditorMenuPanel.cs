@@ -10,19 +10,9 @@ using UnityEngine.UI;
 
 public class LevelEditorMenuPanel : Panel
 {
-    public static LevelEditorMenuPanel Instance;
-
     public Button EditButton;
     public Button PlayButton;
-
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-    }
-
+    
     void Start()
     {
         SetupSounds();
@@ -32,7 +22,7 @@ public class LevelEditorMenuPanel : Panel
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            MainMenuPanel.instance.Show();
+            UIManager.Instance.MainMenuPanel.Show();
         }
     }
 
@@ -84,25 +74,21 @@ public class LevelEditorMenuPanel : Panel
 
     public void UI_New()
     {
-        LevelEditPanel.Instance.Show();
+        UIManager.Instance.LevelEditPanel.Show();
     }
 
     public void UI_Edit()
     {
-        // DISABLE IF NO USER LEVEL
-
-        UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Edit, Instance);
+        UIManager.Instance.UserLevelsPanel.ShowWithActivity(UserLevelsPanel.UserActivity.Edit, this);
     }
 
     public void UI_Play()
     {
-        // DISABLE IF NO USER LEVEL
-
-        UserLevelsPanel.Instance.ShowWithActivity(UserLevelsPanel.UserActivity.Play, Instance);
+        UIManager.Instance.UserLevelsPanel.ShowWithActivity(UserLevelsPanel.UserActivity.Play, this);
     }
 
     public void UI_Back()
     {
-        MainMenuPanel.instance.Show();
+        UIManager.Instance.MainMenuPanel.Show();
     }
 }

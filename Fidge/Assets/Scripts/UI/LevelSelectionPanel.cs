@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class LevelSelectionPanel : Panel
 {
-    public static LevelSelectionPanel Instance;
-
     public GameObject LevelButtonPrefab;
     public GameObject LevelButtonRowPrefab;
     public GameObject LevelSectionPrefab;
@@ -20,104 +18,39 @@ public class LevelSelectionPanel : Panel
 
     private Button[] _levelButtons;
     private Button[] _payButtons;
-    private bool _initialized;
+    private CanvasGroup _canvasGroup;
 
-    void Awake()
+    void Start()
     {
-        Instance = this;
+        SetupSounds();
     }
-    
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            MainMenuPanel.instance.Show();
-        }
-
-        if (MainManager.Instance != null && !_initialized)
-        {
-            _levelButtons = new Button[MainManager.Instance.Levels.Length];
-
-            var tempLevelIndex = 0;
-
-            for (var i = 0; i < MainManager.Instance.Sections.Length; i++)
-            {
-                var levelSection = MainManager.Instance.Sections[i];
-                var sectionTitle = Instantiate(LevelSectionTitlePrefab, LevelButtonContainer);
-                sectionTitle.GetComponentInChildren<Text>().text = levelSection.Title;
-
-                var sectionTutorial = levelSection.Tutorial;
-                var tutorialButton = sectionTitle.GetComponentInChildren<Button>();
-
-                if (sectionTutorial != null)
-                {
-                    tutorialButton.GetComponentsInParent<CanvasGroup>(true)[0].alpha = 1;
-                    tutorialButton.onClick.AddListener(() => { PopupPanel.instance.ShowConfirm(sectionTutorial); });
-                }
-                else
-                {
-                    tutorialButton.GetComponentsInParent<CanvasGroup>(true)[0].alpha = 0;
-                    tutorialButton.onClick.RemoveAllListeners();
-                }
-
-                var section = Instantiate(LevelSectionPrefab, LevelButtonContainer).GetComponent<LevelSection>();
-                var numberOfRows = 0;
-                var rowHeight = 0f;
-                var row = (Transform)null;
-
-                for (var j = 0; j < levelSection.Levels.Length; j++)
-                {
-                    if (j % ButtonsPerRow == 0)
-                    {
-                        row = Instantiate(LevelButtonRowPrefab, section.transform).transform;
-                        rowHeight = row.GetComponent<RectTransform>().sizeDelta.y;
-                        numberOfRows++;
-                    }
-
-                    var level = levelSection.Levels[j];
-
-                    var button = Instantiate(LevelButtonPrefab, row).GetComponent<Button>();
-                    button.GetComponentInChildren<Text>().text = (level.Index + 1).ToString();
-                    button.onClick.AddListener(() => { PopupPanel.instance.ShowConfirm(level); });
-
-                    _levelButtons[tempLevelIndex] = button;
-
-                    tempLevelIndex++;
-                }
-
-                section.Blocker.SetAsLastSibling();
-
-                var sectionSpacing = section.GetComponent<VerticalLayoutGroup>().spacing;
-                var oldBlockerSize = section.Blocker.sizeDelta;
-                var gapIndex = i == 0 ? FreeRows : 0;
-
-                section.Gap.transform.SetSiblingIndex(gapIndex);
-
-                var newBlockHeight = (numberOfRows - gapIndex) * rowHeight;
-                newBlockHeight += (numberOfRows - (gapIndex + 1)) * sectionSpacing;
-                newBlockHeight += (numberOfRows - gapIndex) * 24;
-                newBlockHeight += (3 - (numberOfRows - gapIndex)) * 16;
-
-                section.Blocker.sizeDelta = new Vector2(oldBlockerSize.x, newBlockHeight);
-            }
-
-            SetupSounds();
-
-            _initialized = true;
+            UIManager.Instance.MainMenuPanel.Show();
         }
     }
 
+    public void Initialize()
+    {
+        _canvasGroup = GetComponent<CanvasGroup>();
+        _canvasGroup.alpha = 0;
+        gameObject.SetActive(true);
+
+        StartCoroutine(DoInitialize());
+    }
+    
     public override void Show(Panel originPanel = null)
     {
         AudioManager.Instance.PlayBackgroundMusic(AudioManager.Instance.MenuMusic);
-
-        Update();
-
+        
         UpdateLevelButtons();
 
         base.Show(originPanel);
 
-        if (originPanel != PopupPanel.instance && originPanel != InGamePanel.instance)
+        if (originPanel != UIManager.Instance.PopupPanel && originPanel != UIManager.Instance.InGamePanel)
         {
             LevelButtonScroll.verticalNormalizedPosition = 1;
         }
@@ -132,6 +65,81 @@ public class LevelSelectionPanel : Panel
             section.Gap.gameObject.SetActive(!MainManager.Instance.Paid);
             section.Blocker.gameObject.SetActive(!MainManager.Instance.Paid);
         }
+    }
+
+    private IEnumerator DoInitialize()
+    {
+        _levelButtons = new Button[MainManager.Instance.Levels.Length];
+
+        var tempLevelIndex = 0;
+
+        for (var i = 0; i < MainManager.Instance.Sections.Length; i++)
+        {
+            var levelSection = MainManager.Instance.Sections[i];
+            var sectionTitle = Instantiate(LevelSectionTitlePrefab, LevelButtonContainer);
+            sectionTitle.GetComponentInChildren<Text>().text = levelSection.Title;
+
+            var sectionTutorial = levelSection.Tutorial;
+            var tutorialButton = sectionTitle.GetComponentInChildren<Button>();
+
+            if (sectionTutorial != null)
+            {
+                tutorialButton.GetComponentsInParent<CanvasGroup>(true)[0].alpha = 1;
+                tutorialButton.onClick.AddListener(() => { UIManager.Instance.PopupPanel.ShowConfirm(sectionTutorial); });
+            }
+            else
+            {
+                tutorialButton.GetComponentsInParent<CanvasGroup>(true)[0].alpha = 0;
+                tutorialButton.onClick.RemoveAllListeners();
+            }
+
+            var section = Instantiate(LevelSectionPrefab, LevelButtonContainer).GetComponent<LevelSection>();
+            var numberOfRows = 0;
+            var rowHeight = 0f;
+            var row = (Transform)null;
+
+            for (var j = 0; j < levelSection.Levels.Length; j++)
+            {
+                if (j % ButtonsPerRow == 0)
+                {
+                    row = Instantiate(LevelButtonRowPrefab, section.transform).transform;
+                    rowHeight = row.GetComponent<RectTransform>().sizeDelta.y;
+                    numberOfRows++;
+                }
+
+                var level = levelSection.Levels[j];
+
+                var button = Instantiate(LevelButtonPrefab, row).GetComponent<Button>();
+                button.GetComponentInChildren<Text>().text = (level.Index + 1).ToString();
+                button.onClick.AddListener(() => { UIManager.Instance.PopupPanel.ShowConfirm(level); });
+
+                _levelButtons[tempLevelIndex] = button;
+
+                tempLevelIndex++;
+            }
+
+            section.Blocker.SetAsLastSibling();
+
+            var sectionSpacing = section.GetComponent<VerticalLayoutGroup>().spacing;
+            var oldBlockerSize = section.Blocker.sizeDelta;
+            var gapIndex = i == 0 ? FreeRows : 0;
+
+            section.Gap.transform.SetSiblingIndex(gapIndex);
+
+            var newBlockHeight = (numberOfRows - gapIndex) * rowHeight;
+            newBlockHeight += (numberOfRows - (gapIndex + 1)) * sectionSpacing;
+            newBlockHeight += (numberOfRows - gapIndex) * 24;
+            newBlockHeight += (3 - (numberOfRows - gapIndex)) * 16;
+
+            section.Blocker.sizeDelta = new Vector2(oldBlockerSize.x, newBlockHeight);
+        }
+
+        yield return new WaitForEndOfFrame();
+
+        ForceLayoutRebuilding(LevelButtonContainer.GetComponent<RectTransform>());
+
+        gameObject.SetActive(false);
+        _canvasGroup.alpha = 1;
     }
 
     private void UpdateLevelButtons()
@@ -169,6 +177,6 @@ public class LevelSelectionPanel : Panel
     
     public void UI_Back()
     {
-        MainMenuPanel.instance.Show();
+        UIManager.Instance.MainMenuPanel.Show();
     }
 }

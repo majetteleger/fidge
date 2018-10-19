@@ -117,8 +117,8 @@ public class Level : MonoBehaviour
     
     void Start()
     {
-        InGamePanel.instance.UpdateTimer();
-        InGamePanel.instance.UpdateMoves();
+        UIManager.Instance.InGamePanel.UpdateTimer();
+        UIManager.Instance.InGamePanel.UpdateMoves();
     }
 
     public void Save(bool timeMedal, bool movesMedal, bool flagMedal)

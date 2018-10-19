@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class PopupPanel : Panel
 {
-    public static PopupPanel instance = null;
-
     public Button BackButton;
     public Button RetryButton;
     public Button ReplayButton;
@@ -28,15 +26,7 @@ public class PopupPanel : Panel
     private bool _loadUserLevel;
     private EditableLevel _levelToLoad;
     private LevelEditPanel.UserLevel _userLevelToLoad;
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
-
+    
     void Start()
     {
         SetupSounds();
@@ -46,13 +36,13 @@ public class PopupPanel : Panel
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            LevelSelectionPanel.Instance.Show(instance);
+            UIManager.Instance.LevelSelectionPanel.Show(this);
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (ConfirmButton.IsActive())
             {
-                InGamePanel.instance.Show();
+                UIManager.Instance.InGamePanel.Show();
 
                 if (_loadUserLevel)
                 {
@@ -65,12 +55,12 @@ public class PopupPanel : Panel
             }
             else if (NextButton.IsActive())
             {
-                InGamePanel.instance.Show();
+                UIManager.Instance.InGamePanel.Show();
                 MainManager.Instance.LoadNextLevel();
             }
             else if (RetryButton.IsActive())
             {
-                InGamePanel.instance.Show();
+                UIManager.Instance.InGamePanel.Show();
                 MainManager.Instance.ReloadLevel();
             }
         }
@@ -260,11 +250,11 @@ public class PopupPanel : Panel
     {
         if (_loadUserLevel)
         {
-            UserLevelsPanel.Instance.ShowWithActivity(_userActivity, instance);
+            UIManager.Instance.UserLevelsPanel.ShowWithActivity(_userActivity, this);
         }
         else
         {
-            LevelSelectionPanel.Instance.Show(instance);
+            UIManager.Instance.LevelSelectionPanel.Show(this);
         }
     }
 
@@ -288,7 +278,7 @@ public class PopupPanel : Panel
             }
             else
             {
-                LevelEditPanel.Instance.ShowAndLoadLevel(_userLevelToLoad);
+                UIManager.Instance.LevelEditPanel.ShowAndLoadLevel(_userLevelToLoad);
             }
         }
         else

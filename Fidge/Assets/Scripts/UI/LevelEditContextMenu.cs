@@ -87,7 +87,7 @@ public class LevelEditContextMenu : MonoBehaviour
 
         var activeButtons = 0;
 
-        if (buttonClicked == LevelEditPanel.Instance.OtherOptionsButton)
+        if (buttonClicked == UIManager.Instance.LevelEditPanel.OtherOptionsButton)
         {
             foreach (var button in _buttons)
             {

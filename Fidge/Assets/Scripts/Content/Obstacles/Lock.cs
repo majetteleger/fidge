@@ -47,6 +47,6 @@ public class Lock : Obstacle
         }
 
         DestroyImmediate(gameObject);
-        InGamePanel.instance.UpdateCollectables(MainManager.Instance.Player.GetCollectables());
+        UIManager.Instance.InGamePanel.UpdateCollectables(MainManager.Instance.Player.GetCollectables());
     }
 }

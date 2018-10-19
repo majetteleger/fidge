@@ -242,66 +242,6 @@ public class MainManager : MonoBehaviour
         DirtyMedals = true;
     }
     
-    void HandleChildAdded(object sender, ChildChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-
-        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(args.Snapshot.GetRawJsonValue());
-        
-        var sameLevelInList = UserLevels.FirstOrDefault(x => x.Guid == level.Guid);
-
-        if (sameLevelInList != null)
-        {
-            Debug.Log("Level " + level.Guid + " changed");
-
-            var levelIndex = UserLevels.IndexOf(sameLevelInList);
-            UserLevels.Remove(sameLevelInList);
-            UserLevels.Insert(levelIndex, level);
-
-            if (Directory.Exists(UserLevelPath) && File.Exists(UserLevelPath + "/" + sameLevelInList.Guid + ".json"))
-            {
-                File.Delete(UserLevelPath + "/" + sameLevelInList.Guid + ".json");
-            }
-
-            SaveLevelToDevice(level);
-        }
-        else
-        {
-            Debug.Log("Level " + level.Guid + " added");
-
-            UserLevels.Add(level);
-            SaveLevelToDevice(level);
-        }
-    }
-    
-    void HandleChildRemoved(object sender, ChildChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-
-        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(args.Snapshot.GetRawJsonValue());
-        Debug.Log("Level " + level.Guid + " removed");
-
-        var sameLevelInList = UserLevels.FirstOrDefault(x => x.Guid == level.Guid);
-
-        if (sameLevelInList != null)
-        {
-            UserLevels.Remove(sameLevelInList);
-        }
-
-        if (Directory.Exists(UserLevelPath) && File.Exists(UserLevelPath + "/" + level.Guid + ".json"))
-        {
-            File.Delete(UserLevelPath + "/" + level.Guid + ".json");
-        }
-    }
-
     public string SaveLevelToDevice(LevelEditPanel.UserLevel level)
     {
         var output = JsonUtility.ToJson(level);
@@ -320,7 +260,8 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
-        MainMenuPanel.instance.Show();
+        UIManager.Instance.MainMenuPanel.Show();
+        UIManager.Instance.LevelSelectionPanel.Initialize();
     }
 
     public void ReloadLevel()
@@ -358,7 +299,7 @@ public class MainManager : MonoBehaviour
         {
             TutorialManager.Instance.ListeningForTutorialChecks = true;
 
-            InGamePanel.instance.ShowLevel(editableLevel);
+            UIManager.Instance.InGamePanel.ShowLevel(editableLevel);
             var level = editableLevel.InstantiateLevel();
             
             level.Index = editableLevel.Index;
@@ -375,7 +316,7 @@ public class MainManager : MonoBehaviour
         }
         else
         {
-            LevelSelectionPanel.Instance.Show();
+            UIManager.Instance.LevelSelectionPanel.Show();
         }
     }
 
@@ -392,7 +333,7 @@ public class MainManager : MonoBehaviour
         {
             TutorialManager.Instance.ListeningForTutorialChecks = true;
 
-            InGamePanel.instance.ShowLevel(userLevel);
+            UIManager.Instance.InGamePanel.ShowLevel(userLevel);
             var level = userLevel.InstantiateLevel();
 
             level.Guid = userLevel.Guid;
@@ -409,7 +350,7 @@ public class MainManager : MonoBehaviour
         }
         else
         {
-            LevelSelectionPanel.Instance.Show();
+            UIManager.Instance.LevelSelectionPanel.Show();
         }
     }
 
@@ -417,7 +358,67 @@ public class MainManager : MonoBehaviour
     {
         Paid = true;
 
-        LevelSelectionPanel.Instance.UpdateSectionBlockers();
-        OptionsPanel.instance.UpdatePayButton();
+        UIManager.Instance.LevelSelectionPanel.UpdateSectionBlockers();
+        UIManager.Instance.OptionsPanel.UpdatePayButton();
+    }
+
+    private void HandleChildAdded(object sender, ChildChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+
+        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(args.Snapshot.GetRawJsonValue());
+
+        var sameLevelInList = UserLevels.FirstOrDefault(x => x.Guid == level.Guid);
+
+        if (sameLevelInList != null)
+        {
+            Debug.Log("Level " + level.Guid + " changed");
+
+            var levelIndex = UserLevels.IndexOf(sameLevelInList);
+            UserLevels.Remove(sameLevelInList);
+            UserLevels.Insert(levelIndex, level);
+
+            if (Directory.Exists(UserLevelPath) && File.Exists(UserLevelPath + "/" + sameLevelInList.Guid + ".json"))
+            {
+                File.Delete(UserLevelPath + "/" + sameLevelInList.Guid + ".json");
+            }
+
+            SaveLevelToDevice(level);
+        }
+        else
+        {
+            Debug.Log("Level " + level.Guid + " added");
+
+            UserLevels.Add(level);
+            SaveLevelToDevice(level);
+        }
+    }
+
+    private void HandleChildRemoved(object sender, ChildChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+
+        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(args.Snapshot.GetRawJsonValue());
+        Debug.Log("Level " + level.Guid + " removed");
+
+        var sameLevelInList = UserLevels.FirstOrDefault(x => x.Guid == level.Guid);
+
+        if (sameLevelInList != null)
+        {
+            UserLevels.Remove(sameLevelInList);
+        }
+
+        if (Directory.Exists(UserLevelPath) && File.Exists(UserLevelPath + "/" + level.Guid + ".json"))
+        {
+            File.Delete(UserLevelPath + "/" + level.Guid + ".json");
+        }
     }
 }

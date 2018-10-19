@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class PurchasePanel : Panel
 {
-    public static PurchasePanel instance = null;
-
     public Text MessageText;
     public Button CancelButton;
     public Button ConfirmButton;
@@ -15,14 +13,6 @@ public class PurchasePanel : Panel
     [TextArea] public string ThankYouMessage;
 
     private bool _forceRebuild;
-    
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
     
     public override void Show(Panel originPanel = null)
     {

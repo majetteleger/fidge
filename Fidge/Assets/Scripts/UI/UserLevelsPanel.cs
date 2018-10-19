@@ -12,9 +12,7 @@ public class UserLevelsPanel : Panel
         Edit,
         Play
     }
-
-    public static UserLevelsPanel Instance;
-
+    
     public GameObject LevelButtonPrefab;
     public GameObject LevelButtonRowPrefab;
     public Transform LevelSection;
@@ -29,11 +27,6 @@ public class UserLevelsPanel : Panel
 
     private UserActivity _activity;
     private RectTransform _section;
-
-    void Awake()
-    {
-        Instance = this;
-    }
     
     void Start()
     {
@@ -44,7 +37,7 @@ public class UserLevelsPanel : Panel
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            MainMenuPanel.instance.Show();
+            UIManager.Instance.MainMenuPanel.Show();
         }
     }
 
@@ -64,7 +57,7 @@ public class UserLevelsPanel : Panel
 
         ForceLayoutRebuilding(_section);
 
-        if (originPanel != PopupPanel.instance && originPanel != InGamePanel.instance)
+        if (originPanel != UIManager.Instance.PopupPanel && originPanel != UIManager.Instance.InGamePanel)
         {
             LevelButtonScroll.verticalNormalizedPosition = 1;
         }
@@ -99,7 +92,7 @@ public class UserLevelsPanel : Panel
             button.GetComponentInChildren<Text>().text = (i + 1).ToString();
             button.onClick.AddListener(() =>
             {
-                PopupPanel.instance.ShowConfirm(level, _activity);
+                UIManager.Instance.PopupPanel.ShowConfirm(level, _activity);
             });
 
             button.transform.GetChild(1).gameObject.SetActive(_activity == UserActivity.Play);
@@ -123,6 +116,6 @@ public class UserLevelsPanel : Panel
 
     public void UI_Back()
     {
-        LevelEditorMenuPanel.Instance.Show();
+        UIManager.Instance.LevelEditorMenuPanel.Show();
     }
 }
