@@ -307,23 +307,23 @@ public class TraversalManager : MonoBehaviour
             switch (traversalScript[i])
             {
                 case TraversalMove.Up:
-                    SimulateButtonPress(InGamePanel.instance.UpButton);
+                    SimulateButtonPress(InGamePanel.Instance.UpButton);
                     break;
                 case TraversalMove.Right:
-                    SimulateButtonPress(InGamePanel.instance.RightButton);
+                    SimulateButtonPress(InGamePanel.Instance.RightButton);
                     break;
                 case TraversalMove.Down:
-                    SimulateButtonPress(InGamePanel.instance.DownButton);
+                    SimulateButtonPress(InGamePanel.Instance.DownButton);
                     break;
                 case TraversalMove.Left:
-                    SimulateButtonPress(InGamePanel.instance.LeftButton);
+                    SimulateButtonPress(InGamePanel.Instance.LeftButton);
                     break;
             }
 
             yield return new WaitForSeconds(TraversalSpeed);
         }
         
-        SimulateButtonPress(InGamePanel.instance.GoButton);
+        SimulateButtonPress(InGamePanel.Instance.GoButton);
     }*/
 
     private void SimulateButtonPress(Button button)

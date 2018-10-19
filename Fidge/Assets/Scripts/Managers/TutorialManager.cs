@@ -23,7 +23,8 @@ public class TutorialManager : MonoBehaviour
         Key,
         Link,
         Covered,
-        Revealed
+        Revealed,
+        COUNT
     }
 
     [Serializable]

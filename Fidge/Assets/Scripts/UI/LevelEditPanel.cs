@@ -13,7 +13,9 @@ public class LevelEditPanel : Panel
     public class UserLevel
     {
         public bool Valid;
+        public bool Uploaded;
         public string Guid;
+        public string UserId;
         public int ExpectedTime;
         public int ExpectedMoves;
         public int MinimumMovesWithFlag;
@@ -561,6 +563,7 @@ public class LevelEditPanel : Panel
         CurrentUserLevel = new UserLevel
         {
             Guid = Guid.NewGuid().ToString(),
+            UserId = MainManager.Instance.UserId,
             StartNode = -Vector2.one,
             EndNode = -Vector2.one,
             Elements = _levelCells.Select(x => x.Content).ToArray()
@@ -586,20 +589,19 @@ public class LevelEditPanel : Panel
 
     private void SaveLevel()
     {
-        var output = JsonUtility.ToJson(CurrentUserLevel);
+        var output = MainManager.Instance.SaveLevelToDevice(CurrentUserLevel);
         
-        if (!Directory.Exists(MainManager.Instance.UserLevelPath))
-        {
-            Directory.CreateDirectory(MainManager.Instance.UserLevelPath);
-        }
+        // Mark it as uploaded only if successful, since we'll need to prune it out if it is removed from the database offline OR keep it if not in the database but on device
 
-        var filePath = MainManager.Instance.UserLevelPath + "/" + CurrentUserLevel.Guid + ".json";
-        
-        File.WriteAllText(filePath, output);
-
-        // FIREBASE
-        
-        MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).SetRawJsonValueAsync(output);
+        MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).SetRawJsonValueAsync(output).ContinueWith(x => {
+            if (x.IsCompleted)
+            {
+                Debug.Log("level " + CurrentUserLevel.Guid + " uploaded");
+                CurrentUserLevel.Uploaded = true;
+                MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).Child("Uploaded").SetValueAsync(true);
+                MainManager.Instance.SaveLevelToDevice(CurrentUserLevel);
+            }
+        });
     }
 
     private string[] Validate()
@@ -856,9 +858,11 @@ public class LevelEditPanel : Panel
             File.Delete(MainManager.Instance.UserLevelPath + "/" + CurrentUserLevel.Guid + ".json");
         }
 
+        MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).RemoveValueAsync();
+
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        LevelEditorMenuPanel.instance.Show();
+        LevelEditorMenuPanel.Instance.Show();
     }
 
     public void UI_Clear()
@@ -990,14 +994,14 @@ public class LevelEditPanel : Panel
 
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        LevelEditorMenuPanel.instance.Show();
+        LevelEditorMenuPanel.Instance.Show();
     }
 
     public void UI_BackConfirmed()
     {
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
-        LevelEditorMenuPanel.instance.Show();
+        LevelEditorMenuPanel.Instance.Show();
     }
 
     public void UI_BackCanceled()

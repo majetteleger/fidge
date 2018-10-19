@@ -12819,6 +12819,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CoexistsWith: []
+  EditButton: {fileID: 114206318079554198}
+  PlayButton: {fileID: 114315863318995574}
 --- !u!114 &114613576354861294
 MonoBehaviour:
   m_ObjectHideFlags: 1

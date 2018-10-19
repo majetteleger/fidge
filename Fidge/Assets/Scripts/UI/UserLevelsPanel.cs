@@ -77,32 +77,13 @@ public class UserLevelsPanel : Panel
             Destroy(buttonRow.gameObject);
         }
 
-        if (!Directory.Exists(MainManager.Instance.UserLevelPath))
-        {
-            return;
-        }
-        
-        var userLevelList = new List<LevelEditPanel.UserLevel>();
-
-        foreach (var filePath in Directory.GetFiles(MainManager.Instance.UserLevelPath))
-        {
-            if (filePath.Contains(".meta"))
-            {
-                continue;
-            }
-
-            var fileContent = File.ReadAllText(filePath);
-
-            userLevelList.Add(JsonUtility.FromJson<LevelEditPanel.UserLevel>(fileContent));
-        }
-
         _section = LevelSection.GetComponent<RectTransform>();
 
         var row = (Transform)null;
         
-        for (var i = 0; i < userLevelList.Count; i++)
+        for (var i = 0; i < MainManager.Instance.UserLevels.Count; i++)
         {
-            var level = userLevelList[i];
+            var level = MainManager.Instance.UserLevels[i];
 
             if (_activity == UserActivity.Play && !level.Valid)
             {
@@ -142,6 +123,6 @@ public class UserLevelsPanel : Panel
 
     public void UI_Back()
     {
-        LevelEditorMenuPanel.instance.Show();
+        LevelEditorMenuPanel.Instance.Show();
     }
 }

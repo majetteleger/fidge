@@ -53,6 +53,6 @@ public class MainMenuPanel : Panel
 
     public void UI_Editor()
     {
-        LevelEditorMenuPanel.instance.Show();
+        LevelEditorMenuPanel.Instance.Show();
     }
 }

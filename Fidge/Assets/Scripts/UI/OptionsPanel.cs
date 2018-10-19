@@ -66,16 +66,13 @@ public class OptionsPanel : Panel
             PlayerPrefs.SetString("Level" + i, "000");
         }
 
-        foreach (var filePath in Directory.GetFiles(MainManager.Instance.UserLevelPath))
+        for (var i = 0; i < (int)TutorialManager.TutorialTag.COUNT; i++)
         {
-            if (filePath.Contains(".meta"))
-            {
-                continue;
-            }
-            
-            var fileContent = File.ReadAllText(filePath);
-            var userLevel = JsonUtility.FromJson<LevelEditPanel.UserLevel>(fileContent);
+            TutorialManager.Instance.SaveTutorial((TutorialManager.TutorialTag)i, false);
+        }
 
+        foreach (var userLevel in MainManager.Instance.UserLevels)
+        {
             if (PlayerPrefs.GetString(userLevel.Guid) != null)
             {
                 PlayerPrefs.SetString(userLevel.Guid, "000");

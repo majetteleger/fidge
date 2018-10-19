@@ -6,6 +6,7 @@ using Firebase.Database;
 using Firebase.Unity.Editor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class MainManager : MonoBehaviour
 {
@@ -33,14 +34,17 @@ public class MainManager : MonoBehaviour
     public float LevelUnlockMultiplier;
 
     public static MainManager Instance;
-    
+
+    public List<LevelEditPanel.UserLevel> UserLevels { get; set; }
     public SequentialLevel[] Levels { get; set; }
     public EditableLevel LastLoadedLevel { get; private set; }
     public LevelEditPanel.UserLevel LastLoadedUserLevel { get; private set; }
     public bool DirtyMedals { get; set; }
     public DatabaseReference DatabaseReference { get; set; }
+    public string UserLevelPath { get; set; }
 
     private bool _lastLevelWasUserMade;
+    private List<LevelEditPanel.UserLevel> _userLevelsOnDevice;
 
     public bool Paid
     {
@@ -54,7 +58,24 @@ public class MainManager : MonoBehaviour
             PlayerPrefs.Save();
         }
     }
-    
+
+    private string userId;
+    public string UserId
+    {
+        get
+        {
+            userId = PlayerPrefs.GetString("UserId");
+
+            if (userId == null)
+            {
+                userId = Guid.NewGuid().ToString();
+                PlayerPrefs.SetString("UserId", userId);
+            }
+
+            return userId;
+        }
+    }
+
     private Player player;
     public Player Player
     {
@@ -116,19 +137,7 @@ public class MainManager : MonoBehaviour
             medals = value; 
         }
     }
-
-    public string UserLevelPath
-    {
-        get
-        {
-#if UNITY_EDITOR
-            return Application.dataPath + "/UserLevels";
-#else
-            return Application.persistentDataPath + "/UserLevels";
-#endif
-        }
-    }
-
+    
     private void Awake()
     {
         if (Instance == null)
@@ -140,42 +149,58 @@ public class MainManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+#if UNITY_EDITOR
+        UserLevelPath = Application.dataPath + "/UserLevels";
+#else
+        UserLevelPath = Application.persistentDataPath + "/UserLevels";
+#endif
+
         DontDestroyOnLoad(gameObject);
 
-        // // FIREBASE
+        _userLevelsOnDevice = new List<LevelEditPanel.UserLevel>();
+        UserLevels = new List<LevelEditPanel.UserLevel>();
+
+        if (!Directory.Exists(UserLevelPath))
+        {
+            return;
+        }
+
+        foreach (var filePath in Directory.GetFiles(UserLevelPath))
+        {
+            if (filePath.Contains(".meta"))
+            {
+                continue;
+            }
+
+            var fileContent = File.ReadAllText(filePath);
+
+            _userLevelsOnDevice.Add(JsonUtility.FromJson<LevelEditPanel.UserLevel>(fileContent));
+        }
+
+        // FIREBASE
 
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
             var dependencyStatus = task.Result;
             if (dependencyStatus == Firebase.DependencyStatus.Available)
             {
-                // Set up the Editor before calling into the realtime database.
+                Debug.Log("Database loaded successfully");
+
                 Firebase.FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://fidge-219217.firebaseio.com/");
-
-                // Get the root reference location of the database.
+                
                 DatabaseReference = FirebaseDatabase.DefaultInstance.RootReference;
-
-                DatabaseReference
-                    .GetValueAsync().ContinueWith(referenceTask => {
-                        if (referenceTask.IsFaulted)
-                        {
-                            // Handle the error...
-                        }
-                        else if (referenceTask.IsCompleted)
-                        {
-                            DataSnapshot snapshot = referenceTask.Result;
-
-                            foreach (var child in snapshot.Children)
-                            {
-                                var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(child.GetRawJsonValue());
-                            }
-                        }
-                    });
+                
+                DatabaseReference.ChildAdded += HandleChildAdded;
+                DatabaseReference.ChildChanged += HandleChildAdded;
+                DatabaseReference.ChildRemoved += HandleChildRemoved;
             }
             else
             {
-                UnityEngine.Debug.LogError(System.String.Format(
-                    "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
-                // Firebase Unity SDK is not safe to use here.
+                Debug.Log("Can't access database, loading from device snapshot");
+
+                foreach (var userLevel in _userLevelsOnDevice)
+                {
+                    UserLevels.Add(userLevel);
+                }
             }
         });
         
@@ -215,6 +240,82 @@ public class MainManager : MonoBehaviour
         Levels = editableLevels.ToArray();
 
         DirtyMedals = true;
+    }
+    
+    void HandleChildAdded(object sender, ChildChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+
+        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(args.Snapshot.GetRawJsonValue());
+        
+        var sameLevelInList = UserLevels.FirstOrDefault(x => x.Guid == level.Guid);
+
+        if (sameLevelInList != null)
+        {
+            Debug.Log("Level " + level.Guid + " changed");
+
+            var levelIndex = UserLevels.IndexOf(sameLevelInList);
+            UserLevels.Remove(sameLevelInList);
+            UserLevels.Insert(levelIndex, level);
+
+            if (Directory.Exists(UserLevelPath) && File.Exists(UserLevelPath + "/" + sameLevelInList.Guid + ".json"))
+            {
+                File.Delete(UserLevelPath + "/" + sameLevelInList.Guid + ".json");
+            }
+
+            SaveLevelToDevice(level);
+        }
+        else
+        {
+            Debug.Log("Level " + level.Guid + " added");
+
+            UserLevels.Add(level);
+            SaveLevelToDevice(level);
+        }
+    }
+    
+    void HandleChildRemoved(object sender, ChildChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+
+        var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(args.Snapshot.GetRawJsonValue());
+        Debug.Log("Level " + level.Guid + " removed");
+
+        var sameLevelInList = UserLevels.FirstOrDefault(x => x.Guid == level.Guid);
+
+        if (sameLevelInList != null)
+        {
+            UserLevels.Remove(sameLevelInList);
+        }
+
+        if (Directory.Exists(UserLevelPath) && File.Exists(UserLevelPath + "/" + level.Guid + ".json"))
+        {
+            File.Delete(UserLevelPath + "/" + level.Guid + ".json");
+        }
+    }
+
+    public string SaveLevelToDevice(LevelEditPanel.UserLevel level)
+    {
+        var output = JsonUtility.ToJson(level);
+
+        if (!Directory.Exists(UserLevelPath))
+        {
+            Directory.CreateDirectory(UserLevelPath);
+        }
+
+        var filePath = UserLevelPath + "/" + level.Guid + ".json";
+
+        File.WriteAllText(filePath, output);
+
+        return output;
     }
 
     private void Start()
