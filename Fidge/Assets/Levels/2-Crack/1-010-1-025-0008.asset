@@ -19,10 +19,11 @@ MonoBehaviour:
   ExpectedMoves: 5
   ResetTutorials: 
   Shifted: 0
-  Index: 70
+  Index: 39
   NumberOfSolutions: 8
   MinimumMoves: 4
   MinimumMovesWithFlag: 6
+  Difficulty: 95
   StartNode: {x: 0, y: 6}
   EndNode: {x: 8, y: 6}
   Elements:

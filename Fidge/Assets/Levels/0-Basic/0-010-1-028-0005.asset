@@ -23,6 +23,7 @@ MonoBehaviour:
   NumberOfSolutions: 5
   MinimumMoves: 4
   MinimumMovesWithFlag: 6
+  Difficulty: 88
   StartNode: {x: 3, y: 7}
   EndNode: {x: 5, y: 9}
   Elements:

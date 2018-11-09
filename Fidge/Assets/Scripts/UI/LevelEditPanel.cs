@@ -19,6 +19,7 @@ public class LevelEditPanel : Panel
         public int ExpectedTime;
         public int ExpectedMoves;
         public int MinimumMovesWithFlag;
+        public int Difficulty;
         public Vector2 StartNode;
         public Vector2 EndNode;
         public string[] Elements;
@@ -298,6 +299,8 @@ public class LevelEditPanel : Panel
 
             return level;
         }
+
+
     }
 
     public const int KWidth = 7;
@@ -631,11 +634,11 @@ public class LevelEditPanel : Panel
 
         _validationDirty = false;
 
+        var minimumMoves = int.MaxValue;
+        var minimumMovesWithFlag = int.MaxValue;
+
         if (Solutions.Count > 0)
         {
-            var minimumMoves = int.MaxValue;
-            var minimumMovesWithFlag = int.MaxValue;
-
             for (var i = 0; i < Solutions.Count; i++)
             {
                 if (Solutions[i].CollectedCollectables.Contains(EditableLevel.KFlag) &&
@@ -678,6 +681,50 @@ public class LevelEditPanel : Panel
                     CurrentUserLevel.ExpectedTime)
                 );
 
+                var numberOfElements = 0;
+                var numberOfFlags = 0;
+                string[] mechanics = {
+                    EditableLevel.KSlide,
+                    EditableLevel.KWall,
+                    EditableLevel.KCrack,
+                    EditableLevel.KLock,
+                    EditableLevel.KLink,
+                    EditableLevel.KTraversalStateCovered,
+                    EditableLevel.KTraversalStateRevealed
+                };
+
+                bool[] differentMechanics = new bool[mechanics.Length];
+                var numberOfDifferentMechanics = 0;
+
+                for (var i = 0; i < CurrentUserLevel.Elements.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(CurrentUserLevel.Elements[i]))
+                    {
+                        numberOfElements++;
+
+                        if (CurrentUserLevel.Elements[i].Contains(EditableLevel.KFlag))
+                        {
+                            numberOfFlags++;
+                        }
+
+                        for (var j = 0; j < mechanics.Length; j++)
+                        {
+                            if (!differentMechanics[j] && CurrentUserLevel.Elements[i].Contains(mechanics[j]))
+                            {
+                                differentMechanics[j] = true;
+                                numberOfDifferentMechanics++;
+                            }
+                        }
+                    }
+                }
+
+                CurrentUserLevel.Difficulty =
+                    numberOfDifferentMechanics * 10 +
+                    minimumMoves * 5 +
+                    minimumMovesWithFlag * 5 +
+                    numberOfFlags * 10 +
+                    numberOfElements;
+
                 return null;
             }
         }
@@ -685,7 +732,8 @@ public class LevelEditPanel : Panel
         CurrentUserLevel.ExpectedMoves = 0;
         CurrentUserLevel.MinimumMovesWithFlag = 0;
         CurrentUserLevel.Valid = false;
-        
+        CurrentUserLevel.Difficulty = 0;
+
         errorList.Add("No valid solution found");
 
         return errorList.Count == 0 ? null : errorList.ToArray();

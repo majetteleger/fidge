@@ -13,18 +13,32 @@ public class GlobalEditor : MonoBehaviour
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
     }
-    
-    /*[MenuItem("Tools/Unlock all levels")]
-    public static void UnlockAllLevels()
+
+    public static T[] GetAllInstances<T>() where T : ScriptableObject
     {
-        MainManager mainManager = (MainManager) AssetDatabase.LoadAssetAtPath("Assets/Prefabs/GameManager.prefab", typeof(MainManager));
-
-        for (var i = 0; i < mainManager.Levels.Length; i++)
+        string[] guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);  //FindAssets uses tags check documentation for more info
+        T[] a = new T[guids.Length];
+        for (int i = 0; i < guids.Length; i++)         //probably could get optimized 
         {
-            PlayerPrefs.SetString("Level" + i, "111");
+            string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+            a[i] = AssetDatabase.LoadAssetAtPath<T>(path);
         }
-    }*/
 
+        return a;
+
+    }
+
+    [MenuItem("Tools/Save All Levels")]
+    public static void SaveAllLevels()
+    {
+        var editableLevels = GetAllInstances<EditableLevel>();
+
+        foreach (var editableLevel in editableLevels)
+        {
+            LevelEditor.ComputeSolution(editableLevel);
+        }
+    }
+    
     /*[MenuItem("Tools/Rewrite")]
     public static void Rewrite()
     {

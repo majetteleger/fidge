@@ -54,6 +54,7 @@ public class EditableLevel : ScriptableObject
     [HideInInspector] public int NumberOfSolutions;
     [HideInInspector] public int MinimumMoves;
     [HideInInspector] public int MinimumMovesWithFlag;
+    [HideInInspector] public int Difficulty;
     [HideInInspector] public Vector2 StartNode;
     [HideInInspector] public Vector2 EndNode;
     [HideInInspector] public string[] Elements;

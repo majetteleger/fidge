@@ -840,6 +840,13 @@ public class LevelEditor : Editor
             }
         }
 
+        editableLevel.Difficulty =
+            numberOfDifferentMechanics * 10 +
+            editableLevel.MinimumMoves * 5 +
+            editableLevel.MinimumMovesWithFlag * 5 +
+            numberOfFlags * 10 +
+            numberOfElements;
+
         var newName = string.Format("{0}-{1}-{2}-{3}-{4}",
             numberOfDifferentMechanics,
             (editableLevel.MinimumMoves + editableLevel.MinimumMovesWithFlag).ToString("D3"), 

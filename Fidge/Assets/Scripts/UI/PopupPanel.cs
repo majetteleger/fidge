@@ -21,12 +21,104 @@ public class PopupPanel : Panel
     public string WonMessage;
     public string LostMessage;
     public float UnobtainedOpacity;
+    public GameObject PreviewContainer;
+    public GameObject Spacer;
+    public GameObject LevelPreviewContainer;
+    public GameObject UserLevelPreviewContainer;
+    public Image[] LevelPreviewCells;
+    public Image[] UserLevelPreviewCells;
+    public RectTransform DifficultyBar;
+    public RectTransform LengthBar;
+    public Sprite NodeSprite;
+    public Sprite HorizontalPathSprite;
+    public Sprite VerticalPathSprite;
 
     private UserLevelsPanel.UserActivity _userActivity;
     private bool _loadUserLevel;
     private EditableLevel _levelToLoad;
     private LevelEditPanel.UserLevel _userLevelToLoad;
+
+    private int _maxLevelDifficulty
+    {
+        get
+        {
+            if (maxLevelDifficulty == 0)
+            {
+                foreach (var level in MainManager.Instance.Levels)
+                {
+                    if (level.Level.Difficulty > maxLevelDifficulty)
+                    {
+                        maxLevelDifficulty = level.Level.Difficulty;
+                    }
+                }
+            }
+
+            return maxLevelDifficulty;
+        }
+    }
+
+    private int _maxLevelLength
+    {
+        get
+        {
+            if (maxLevelLength == 0)
+            {
+                foreach (var level in MainManager.Instance.Levels)
+                {
+                    if (level.Level.MinimumMovesWithFlag > maxLevelLength)
+                    {
+                        maxLevelLength = level.Level.MinimumMovesWithFlag;
+                    }
+                }
+            }
+
+            return maxLevelLength;
+        }
+    }
+
+    private int _maxUserLevelDifficulty
+    {
+        get
+        {
+            if (maxUserLevelDifficulty == 0)
+            {
+                foreach (var level in MainManager.Instance.UserLevels)
+                {
+                    if (level.Difficulty > maxUserLevelDifficulty)
+                    {
+                        maxUserLevelDifficulty = level.Difficulty;
+                    }
+                }
+            }
+
+            return maxUserLevelDifficulty;
+        }
+    }
+
+    private int _maxUserLevelLength
+    {
+        get
+        {
+            if (maxUserLevelLength == 0)
+            {
+                foreach (var level in MainManager.Instance.UserLevels)
+                {
+                    if (level.MinimumMovesWithFlag > maxUserLevelLength)
+                    {
+                        maxUserLevelLength = level.MinimumMovesWithFlag;
+                    }
+                }
+            }
+
+            return maxUserLevelLength;
+        }
+    }
     
+    private int maxLevelDifficulty;
+    private int maxLevelLength;
+    private int maxUserLevelDifficulty;
+    private int maxUserLevelLength;
+
     void Start()
     {
         SetupSounds();
@@ -110,6 +202,53 @@ public class PopupPanel : Panel
         PlayButton.gameObject.SetActive(scripted);
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
 
+        PreviewContainer.SetActive(true);
+        Spacer.SetActive(false);
+        LevelPreviewContainer.SetActive(true);
+        UserLevelPreviewContainer.SetActive(false);
+
+        for (var i = 0; i < level.Elements.Length; i++)
+        {
+            var element = level.Elements[i];
+
+            var spriteUsed = (Sprite)null;
+
+            if (!element.Contains(EditableLevel.KTraversalStateRevealed))
+            {
+                if (element.Contains(EditableLevel.KNode))
+                {
+                    spriteUsed = NodeSprite;
+                }
+                else if (element.Contains(EditableLevel.KPath))
+                {
+                    if (element.Contains(EditableLevel.KHorizontal))
+                    {
+                        spriteUsed = HorizontalPathSprite;
+                    }
+                    else if (element.Contains(EditableLevel.KVertical))
+                    {
+                        spriteUsed = VerticalPathSprite;
+                    }
+                }
+            }
+
+            if (spriteUsed != null)
+            {
+                LevelPreviewCells[i].enabled = true;
+                LevelPreviewCells[i].sprite = spriteUsed;
+            }
+            else
+            {
+                LevelPreviewCells[i].enabled = false;
+            }
+        }
+
+        var difficultyValue = (float)level.Difficulty / (float)_maxLevelDifficulty * 200f;
+        DifficultyBar.sizeDelta = new Vector2(difficultyValue, DifficultyBar.sizeDelta.y);
+
+        var lengthValue = (float)level.MinimumMovesWithFlag / (float)_maxLevelLength * 200f;
+        LengthBar.sizeDelta = new Vector2(lengthValue, DifficultyBar.sizeDelta.y);
+
         Show();
     }
 
@@ -148,6 +287,53 @@ public class PopupPanel : Panel
         ConfirmButton.gameObject.SetActive(true);
         PlayButton.gameObject.SetActive(false);
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
+
+        PreviewContainer.SetActive(true);
+        Spacer.SetActive(false);
+        LevelPreviewContainer.SetActive(false);
+        UserLevelPreviewContainer.SetActive(true);
+
+        for (var i = 0; i < level.Elements.Length; i++)
+        {
+            var element = level.Elements[i];
+            
+            var spriteUsed = (Sprite)null;
+
+            if (!element.Contains(EditableLevel.KTraversalStateRevealed))
+            {
+                if (element.Contains(EditableLevel.KNode))
+                {
+                    spriteUsed = NodeSprite;
+                }
+                else if (element.Contains(EditableLevel.KPath))
+                {
+                    if (element.Contains(EditableLevel.KHorizontal))
+                    {
+                        spriteUsed = HorizontalPathSprite;
+                    }
+                    else if (element.Contains(EditableLevel.KVertical))
+                    {
+                        spriteUsed = VerticalPathSprite;
+                    }
+                }
+            }
+
+            if (spriteUsed != null)
+            {
+                UserLevelPreviewCells[i].enabled = true;
+                UserLevelPreviewCells[i].sprite = spriteUsed;
+            }
+            else
+            {
+                UserLevelPreviewCells[i].enabled = false;
+            }
+        }
+
+        var difficultyValue = (float)level.Difficulty / (float)_maxUserLevelDifficulty * 200f;
+        DifficultyBar.sizeDelta = new Vector2(difficultyValue, DifficultyBar.sizeDelta.y);
+
+        var lengthValue = (float)level.MinimumMovesWithFlag / (float)_maxUserLevelLength * 200f;
+        LengthBar.sizeDelta = new Vector2(lengthValue, DifficultyBar.sizeDelta.y);
 
         Show();
     }
@@ -211,6 +397,11 @@ public class PopupPanel : Panel
         MedalsObtainedText.transform.parent.gameObject.SetActive(true);
         MedalsObtainedText.text = MainManager.Instance.Medals.ToString();
 
+        PreviewContainer.SetActive(false);
+        Spacer.SetActive(true);
+        LevelPreviewContainer.SetActive(false);
+        UserLevelPreviewContainer.SetActive(false);
+        
         Show();
     }
 
@@ -242,6 +433,11 @@ public class PopupPanel : Panel
         PlayButton.gameObject.SetActive(false);
 
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
+
+        PreviewContainer.SetActive(false);
+        Spacer.SetActive(true);
+        LevelPreviewContainer.SetActive(false);
+        UserLevelPreviewContainer.SetActive(false);
 
         Show();
     }

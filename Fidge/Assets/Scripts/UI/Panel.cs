@@ -63,7 +63,7 @@ public class Panel : MonoBehaviour
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(transformToRebuild);
         LayoutRebuilder.MarkLayoutForRebuild(transformToRebuild);
-        Canvas.ForceUpdateCanvases();
+        //Canvas.ForceUpdateCanvases();
 
         layoutGroup.CalculateLayoutInputVertical();
         layoutGroup.SetLayoutVertical();
