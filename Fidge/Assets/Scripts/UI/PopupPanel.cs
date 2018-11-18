@@ -22,6 +22,7 @@ public class PopupPanel : Panel
     public string LostMessage;
     public float UnobtainedOpacity;
     public GameObject PreviewContainer;
+    public GameObject StatsContainer;
     public GameObject Spacer;
     public GameObject LevelPreviewContainer;
     public GameObject UserLevelPreviewContainer;
@@ -203,6 +204,7 @@ public class PopupPanel : Panel
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
 
         PreviewContainer.SetActive(true);
+        StatsContainer.SetActive(true);
         Spacer.SetActive(false);
         LevelPreviewContainer.SetActive(true);
         UserLevelPreviewContainer.SetActive(false);
@@ -289,6 +291,7 @@ public class PopupPanel : Panel
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
 
         PreviewContainer.SetActive(true);
+        StatsContainer.SetActive(level.Valid);
         Spacer.SetActive(false);
         LevelPreviewContainer.SetActive(false);
         UserLevelPreviewContainer.SetActive(true);

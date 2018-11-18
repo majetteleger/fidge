@@ -12,7 +12,7 @@ public class LevelEditorMenuPanel : Panel
 {
     public Button EditButton;
     public Button PlayButton;
-    
+
     void Start()
     {
         SetupSounds();
@@ -23,6 +23,12 @@ public class LevelEditorMenuPanel : Panel
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             UIManager.Instance.MainMenuPanel.Show();
+        }
+
+        if (MainManager.Instance.AdjustUserLevelButtons)
+        {
+            AdjustButtons();
+            MainManager.Instance.AdjustUserLevelButtons = false;
         }
     }
 
@@ -61,8 +67,7 @@ public class LevelEditorMenuPanel : Panel
             }
         }
 
-        EditButton.interactable = MainManager.Instance.UserLevels.Any(x => x.UserId == MainManager.Instance.UserId);
-        PlayButton.interactable = MainManager.Instance.UserLevels.Any(x => x.Valid);
+        AdjustButtons();
 
         base.Show(originPanel);
     }
@@ -70,6 +75,12 @@ public class LevelEditorMenuPanel : Panel
     public override void Hide()
     {
         base.Hide();
+    }
+
+    public void AdjustButtons()
+    {
+        EditButton.interactable = MainManager.Instance.UserLevels.Any(x => x.UserId == MainManager.Instance.UserId);
+        PlayButton.interactable = MainManager.Instance.UserLevels.Any(x => x.Valid);
     }
 
     public void UI_New()

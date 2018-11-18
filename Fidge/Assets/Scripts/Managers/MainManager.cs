@@ -42,6 +42,7 @@ public class MainManager : MonoBehaviour
     public bool DirtyMedals { get; set; }
     public DatabaseReference DatabaseReference { get; set; }
     public string UserLevelPath { get; set; }
+    public bool AdjustUserLevelButtons { get; set; }
 
     private bool _lastLevelWasUserMade;
     private List<LevelEditPanel.UserLevel> _userLevelsOnDevice;
@@ -404,6 +405,8 @@ public class MainManager : MonoBehaviour
             UserLevels.Add(level);
             SaveLevelToDevice(level);
         }
+
+        AdjustUserLevelButtons = true;
     }
 
     private void HandleChildRemoved(object sender, ChildChangedEventArgs args)
@@ -428,5 +431,7 @@ public class MainManager : MonoBehaviour
         {
             File.Delete(UserLevelPath + "/" + level.Guid + ".json");
         }
+
+        AdjustUserLevelButtons = true;
     }
 }
