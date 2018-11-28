@@ -28,8 +28,10 @@ public class PopupPanel : Panel
     public GameObject UserLevelPreviewContainer;
     public Image[] LevelPreviewCells;
     public Image[] UserLevelPreviewCells;
-    public RectTransform DifficultyBar;
-    public RectTransform LengthBar;
+    public Image[] DifficultyTicks;
+    public Image[] LengthTicks;
+    public float InactiveTickAlpha;
+    public float StatsSmoothing;
     public Sprite NodeSprite;
     public Sprite HorizontalPathSprite;
     public Sprite VerticalPathSprite;
@@ -38,88 +40,7 @@ public class PopupPanel : Panel
     private bool _loadUserLevel;
     private EditableLevel _levelToLoad;
     private LevelEditPanel.UserLevel _userLevelToLoad;
-
-    private int _maxLevelDifficulty
-    {
-        get
-        {
-            if (maxLevelDifficulty == 0)
-            {
-                foreach (var level in MainManager.Instance.Levels)
-                {
-                    if (level.Level.Difficulty > maxLevelDifficulty)
-                    {
-                        maxLevelDifficulty = level.Level.Difficulty;
-                    }
-                }
-            }
-
-            return maxLevelDifficulty;
-        }
-    }
-
-    private int _maxLevelLength
-    {
-        get
-        {
-            if (maxLevelLength == 0)
-            {
-                foreach (var level in MainManager.Instance.Levels)
-                {
-                    if (level.Level.MinimumMovesWithFlag > maxLevelLength)
-                    {
-                        maxLevelLength = level.Level.MinimumMovesWithFlag;
-                    }
-                }
-            }
-
-            return maxLevelLength;
-        }
-    }
-
-    private int _maxUserLevelDifficulty
-    {
-        get
-        {
-            if (maxUserLevelDifficulty == 0)
-            {
-                foreach (var level in MainManager.Instance.UserLevels)
-                {
-                    if (level.Difficulty > maxUserLevelDifficulty)
-                    {
-                        maxUserLevelDifficulty = level.Difficulty;
-                    }
-                }
-            }
-
-            return maxUserLevelDifficulty;
-        }
-    }
-
-    private int _maxUserLevelLength
-    {
-        get
-        {
-            if (maxUserLevelLength == 0)
-            {
-                foreach (var level in MainManager.Instance.UserLevels)
-                {
-                    if (level.MinimumMovesWithFlag > maxUserLevelLength)
-                    {
-                        maxUserLevelLength = level.MinimumMovesWithFlag;
-                    }
-                }
-            }
-
-            return maxUserLevelLength;
-        }
-    }
     
-    private int maxLevelDifficulty;
-    private int maxLevelLength;
-    private int maxUserLevelDifficulty;
-    private int maxUserLevelLength;
-
     void Start()
     {
         SetupSounds();
@@ -245,11 +166,29 @@ public class PopupPanel : Panel
             }
         }
 
-        var difficultyValue = (float)level.Difficulty / (float)_maxLevelDifficulty * 200f;
-        DifficultyBar.sizeDelta = new Vector2(difficultyValue, DifficultyBar.sizeDelta.y);
+        for (var i = 0; i < DifficultyTicks.Length; i++)
+        {
+            var tickEnabled = (float)level.Difficulty / (float)MainManager.Instance.MaxLevelDifficulty > i / 3f;
 
-        var lengthValue = (float)level.MinimumMovesWithFlag / (float)_maxLevelLength * 200f;
-        LengthBar.sizeDelta = new Vector2(lengthValue, DifficultyBar.sizeDelta.y);
+            DifficultyTicks[i].GetComponentsInChildren<Image>()[1].enabled = tickEnabled;
+
+            var newColor = DifficultyTicks[i].color;
+            newColor.a = tickEnabled ? 1f : InactiveTickAlpha;
+
+            DifficultyTicks[i].color = newColor;
+        }
+
+        for (var i = 0; i < LengthTicks.Length; i++)
+        {
+            var tickEnabled = (float)level.MinimumMovesWithFlag / (float)MainManager.Instance.MaxLevelLength > i / 3f;
+
+            LengthTicks[i].GetComponentsInChildren<Image>()[1].enabled = tickEnabled;
+
+            var newColor = LengthTicks[i].color;
+            newColor.a = tickEnabled ? 1f : InactiveTickAlpha;
+
+            LengthTicks[i].color = newColor;
+        }
 
         Show();
     }
@@ -332,11 +271,29 @@ public class PopupPanel : Panel
             }
         }
 
-        var difficultyValue = (float)level.Difficulty / (float)_maxUserLevelDifficulty * 200f;
-        DifficultyBar.sizeDelta = new Vector2(difficultyValue, DifficultyBar.sizeDelta.y);
+        for (var i = 0; i < DifficultyTicks.Length; i++)
+        {
+            var tickEnabled = (float)level.Difficulty / (float)MainManager.Instance.MaxUserLevelDifficulty > i / 3f;
 
-        var lengthValue = (float)level.MinimumMovesWithFlag / (float)_maxUserLevelLength * 200f;
-        LengthBar.sizeDelta = new Vector2(lengthValue, DifficultyBar.sizeDelta.y);
+            DifficultyTicks[i].GetComponentsInChildren<Image>()[1].enabled = tickEnabled;
+
+            var newColor = DifficultyTicks[i].color;
+            newColor.a = tickEnabled ? 1f : InactiveTickAlpha;
+
+            DifficultyTicks[i].color = newColor;
+        }
+
+        for (var i = 0; i < LengthTicks.Length; i++)
+        {
+            var tickEnabled = (float)level.MinimumMovesWithFlag / (float)MainManager.Instance.MaxUserLevelLength > i / 3f;
+
+            LengthTicks[i].GetComponentsInChildren<Image>()[1].enabled = tickEnabled;
+
+            var newColor = LengthTicks[i].color;
+            newColor.a = tickEnabled ? 1f : InactiveTickAlpha;
+
+            LengthTicks[i].color = newColor;
+        }
 
         Show();
     }

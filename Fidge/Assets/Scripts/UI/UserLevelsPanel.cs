@@ -18,6 +18,10 @@ public class UserLevelsPanel : Panel
     public Transform LevelSection;
     public Transform LevelButtonContainer;
     public ScrollRect LevelButtonScroll;
+    public GameObject FiltersContainer; 
+    public Image[] DifficultyTicks;
+    public Image[] LengthTicks;
+    public float InactiveTickAlpha;
     public int ButtonsPerRow;
     public Text Header;
     [TextArea] public string EditHeader;
@@ -27,7 +31,10 @@ public class UserLevelsPanel : Panel
 
     private UserActivity _activity;
     private RectTransform _section;
-    
+    private int _difficultyFilterLevel;
+    private int _lengthFilterLevel;
+    private Dictionary<Button, LevelEditPanel.UserLevel> _buttons;
+
     void Start()
     {
         SetupSounds();
@@ -50,6 +57,7 @@ public class UserLevelsPanel : Panel
     public override void Show(Panel originPanel = null)
     {
         Header.text = _activity == UserActivity.Edit ? EditHeader : PlayHeader;
+        FiltersContainer.SetActive(_activity == UserActivity.Play);
 
         UpdateLevelButtons();
 
@@ -60,6 +68,18 @@ public class UserLevelsPanel : Panel
         if (originPanel != UIManager.Instance.PopupPanel && originPanel != UIManager.Instance.InGamePanel)
         {
             LevelButtonScroll.verticalNormalizedPosition = 1;
+
+            if (_activity == UserActivity.Play)
+            {
+                _difficultyFilterLevel = 0;
+                _lengthFilterLevel = 0;
+            }
+        }
+
+        if (_activity == UserActivity.Play)
+        {
+            AdjustDifficulty();
+            AdjustLength();
         }
     }
 
@@ -69,6 +89,8 @@ public class UserLevelsPanel : Panel
         {
             Destroy(buttonRow.gameObject);
         }
+
+        _buttons = new Dictionary<Button, LevelEditPanel.UserLevel>();
 
         _section = LevelSection.GetComponent<RectTransform>();
 
@@ -111,7 +133,76 @@ public class UserLevelsPanel : Panel
             {
                 medals[j].color = !string.IsNullOrEmpty(savedMedals) && savedMedals[j] == '1' ? Color.black : new Color(0, 0, 0, 0.25f);
             }
+
+            _buttons.Add(button, level);
         }
+    }
+
+    private void AdjustLength()
+    {
+        for (var i = 0; i < LengthTicks.Length; i++)
+        {
+            var newColor = LengthTicks[i].color;
+            newColor.a = i < _lengthFilterLevel ? 1f : InactiveTickAlpha;
+
+            LengthTicks[i].color = newColor;
+        }
+
+        foreach (var pair in _buttons)
+        {
+            AdjustButton(pair.Key, pair.Value);
+        }
+    }
+
+    private void AdjustDifficulty()
+    {
+        for (var i = 0; i < DifficultyTicks.Length; i++)
+        {
+            var newColor = DifficultyTicks[i].color;
+            newColor.a = i < _difficultyFilterLevel ? 1f : InactiveTickAlpha;
+
+            DifficultyTicks[i].color = newColor;
+        }
+
+        foreach (var pair in _buttons)
+        {
+            AdjustButton(pair.Key, pair.Value);
+        }
+    }
+
+    private void AdjustButton(Button button, LevelEditPanel.UserLevel level)
+    {
+        var lengthRatio = (float)level.MinimumMovesWithFlag / (float)MainManager.Instance.MaxUserLevelLength;
+        var difficultyRatio = (float)level.Difficulty / (float)MainManager.Instance.MaxUserLevelDifficulty;
+
+        var buttonEnabled = (_lengthFilterLevel == 0 || (lengthRatio > (_lengthFilterLevel - 1) / 3f && lengthRatio < (_lengthFilterLevel / 3f) + 0.01f)) &&
+                            (_difficultyFilterLevel == 0 || (difficultyRatio > (_difficultyFilterLevel - 1) / 3f && difficultyRatio < (_difficultyFilterLevel / 3f) + 0.01f));
+
+        button.GetComponent<Image>().color = buttonEnabled ? button.colors.normalColor : button.colors.disabledColor;
+    }
+
+    public void UI_CycleDifficulty()
+    {
+        _difficultyFilterLevel++;
+
+        if (_difficultyFilterLevel > 3)
+        {
+            _difficultyFilterLevel = 0;
+        }
+
+        AdjustDifficulty();
+    }
+
+    public void UI_CycleLength()
+    {
+        _lengthFilterLevel++;
+
+        if (_lengthFilterLevel > 3)
+        {
+            _lengthFilterLevel = 0;
+        }
+
+        AdjustLength();
     }
 
     public void UI_Back()

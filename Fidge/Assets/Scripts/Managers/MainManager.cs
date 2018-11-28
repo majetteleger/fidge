@@ -138,7 +138,88 @@ public class MainManager : MonoBehaviour
             medals = value; 
         }
     }
-    
+
+    public int MaxLevelDifficulty
+    {
+        get
+        {
+            if (maxLevelDifficulty == 0)
+            {
+                foreach (var level in MainManager.Instance.Levels)
+                {
+                    if (level.Level.Difficulty > maxLevelDifficulty)
+                    {
+                        maxLevelDifficulty = level.Level.Difficulty;
+                    }
+                }
+            }
+
+            return maxLevelDifficulty;
+        }
+    }
+
+    public int MaxLevelLength
+    {
+        get
+        {
+            if (maxLevelLength == 0)
+            {
+                foreach (var level in MainManager.Instance.Levels)
+                {
+                    if (level.Level.MinimumMovesWithFlag > maxLevelLength)
+                    {
+                        maxLevelLength = level.Level.MinimumMovesWithFlag;
+                    }
+                }
+            }
+
+            return maxLevelLength;
+        }
+    }
+
+    public int MaxUserLevelDifficulty
+    {
+        get
+        {
+            if (maxUserLevelDifficulty == 0)
+            {
+                foreach (var level in MainManager.Instance.UserLevels)
+                {
+                    if (level.Difficulty > maxUserLevelDifficulty)
+                    {
+                        maxUserLevelDifficulty = level.Difficulty;
+                    }
+                }
+            }
+
+            return maxUserLevelDifficulty;
+        }
+    }
+
+    public int MaxUserLevelLength
+    {
+        get
+        {
+            if (maxUserLevelLength == 0)
+            {
+                foreach (var level in MainManager.Instance.UserLevels)
+                {
+                    if (level.MinimumMovesWithFlag > maxUserLevelLength)
+                    {
+                        maxUserLevelLength = level.MinimumMovesWithFlag;
+                    }
+                }
+            }
+
+            return maxUserLevelLength;
+        }
+    }
+
+    private int maxLevelDifficulty;
+    private int maxLevelLength;
+    private int maxUserLevelDifficulty;
+    private int maxUserLevelLength;
+
     private void Awake()
     {
         if (Instance == null)
