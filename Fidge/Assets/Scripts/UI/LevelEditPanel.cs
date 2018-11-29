@@ -332,12 +332,14 @@ public class LevelEditPanel : Panel
     public GameObject MessageBubbleCancelButton;
     public GameObject MessageBubbleContinueButton;
     public GameObject MessageBubbleSaveAndQuitButton;
+    public GameObject MessageBubbleDeleteConfirmButton;
     public Text BackMessageText;
     public float LongPressTime;
     [TextArea] public string BackValidMessage;
     [TextArea] public string BackInvalidMessage;
     [TextArea] public string SaveValidMessage;
     [TextArea] public string SaveInvalidMessage;
+    [TextArea] public string DeleteMessage;
 
     [Header("Sprites")]
     public Sprite NodeSprite;
@@ -368,7 +370,8 @@ public class LevelEditPanel : Panel
     private string _toggledExtra;
     private string _toggledTraversalModifier;
     private bool _validationDirty;
-    
+    private bool _saveDirty;
+
     void Awake()
     {
         _longPressTimer = LongPressTime;
@@ -543,7 +546,8 @@ public class LevelEditPanel : Panel
 
         ToggleElement(true);
 
-        _validationDirty = true;
+        _validationDirty = false;
+        _saveDirty = false;
 
         base.Show();
     }
@@ -552,7 +556,8 @@ public class LevelEditPanel : Panel
     {
         ToggleElement(true);
 
-        _validationDirty = true;
+        _validationDirty = false;
+        _saveDirty = false;
 
         for (var i = 0; i < _levelCells.Length; i++)
         {
@@ -588,6 +593,11 @@ public class LevelEditPanel : Panel
 
     private void SaveLevel()
     {
+        if (!_saveDirty)
+        {
+            return;
+        }
+
         var output = MainManager.Instance.SaveLevelToDevice(CurrentUserLevel);
         
         // Mark it as uploaded only if successful, since we'll need to prune it out if it is removed from the database offline OR keep it if not in the database but on device
@@ -601,11 +611,13 @@ public class LevelEditPanel : Panel
                 MainManager.Instance.SaveLevelToDevice(CurrentUserLevel);
             }
         });
+
+        _saveDirty = false;
     }
 
     private string[] Validate()
     {
-        if (!_validationDirty)
+        if (CurrentUserLevel.Valid && !_validationDirty)
         {
             return null;
         }
@@ -627,63 +639,86 @@ public class LevelEditPanel : Panel
         
         CurrentUserLevel.Elements = _levelCells.Select(x => x.Content).ToArray();
 
-        Solutions = new List<UserHypotheticalSolution>();
+        var atLeastOneFlag = false;
 
-        var firstSolution = new UserHypotheticalSolution(CurrentUserLevel);
-        firstSolution.Solve();
-
-        _validationDirty = false;
-
-        var minimumMoves = int.MaxValue;
-        var minimumMovesWithFlag = int.MaxValue;
-
-        if (Solutions.Count > 0)
+        foreach (var element in CurrentUserLevel.Elements)
         {
-            for (var i = 0; i < Solutions.Count; i++)
+            if (element != null && element.Contains(EditableLevel.KFlag))
             {
-                if (Solutions[i].CollectedCollectables.Contains(EditableLevel.KFlag) &&
-                    Solutions[i].Movements.Count < minimumMovesWithFlag)
+                atLeastOneFlag = true;
+                break;
+            }
+        }
+
+        if (!atLeastOneFlag)
+        {
+            errorList.Add("No star was found");
+        }
+
+        if (errorList.Count == 0)
+        {
+            Solutions = new List<UserHypotheticalSolution>();
+
+            var firstSolution = new UserHypotheticalSolution(CurrentUserLevel);
+            firstSolution.Solve();
+
+            _validationDirty = false;
+
+            var minimumMoves = int.MaxValue;
+            var minimumMovesWithFlag = int.MaxValue;
+
+            if (Solutions.Count > 0)
+            {
+                for (var i = 0; i < Solutions.Count; i++)
                 {
-                    var lingeringFlag = false;
-
-                    for (var j = 0; j < Solutions[i].Elements.Length; j++)
+                    if (Solutions[i].CollectedCollectables.Contains(EditableLevel.KFlag) &&
+                        Solutions[i].Movements.Count < minimumMovesWithFlag)
                     {
-                        var element = Solutions[i].Elements[j];
+                        var lingeringFlag = false;
 
-                        if (element != null && element.Contains(EditableLevel.KFlag))
+                        for (var j = 0; j < Solutions[i].Elements.Length; j++)
                         {
-                            lingeringFlag = true;
+                            var element = Solutions[i].Elements[j];
+
+                            if (element != null && element.Contains(EditableLevel.KFlag))
+                            {
+                                lingeringFlag = true;
+                            }
+                        }
+
+                        if (!lingeringFlag)
+                        {
+                            minimumMovesWithFlag = Solutions[i].Movements.Count;
                         }
                     }
-
-                    if (!lingeringFlag)
+                    if (Solutions[i].Movements.Count < minimumMoves)
                     {
-                        minimumMovesWithFlag = Solutions[i].Movements.Count;
+                        minimumMoves = Solutions[i].Movements.Count;
                     }
                 }
-                if (Solutions[i].Movements.Count < minimumMoves)
+
+                if (minimumMovesWithFlag == int.MaxValue)
                 {
-                    minimumMoves = Solutions[i].Movements.Count;
+                    errorList.Add("Not all stars are accessible");
                 }
-            }
+                else if (minimumMoves < int.MaxValue && minimumMovesWithFlag < int.MaxValue)
+                {
+                    CurrentUserLevel.ExpectedMoves = minimumMoves / 2;
+                    CurrentUserLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
+                    CurrentUserLevel.ExpectedTime = Mathf.CeilToInt(minimumMoves / 2f);
+                    CurrentUserLevel.Valid = true;
 
-            if(minimumMoves < int.MaxValue && minimumMovesWithFlag < int.MaxValue)
-            {
-                CurrentUserLevel.ExpectedMoves = minimumMoves / 2;
-                CurrentUserLevel.MinimumMovesWithFlag = minimumMovesWithFlag / 2;
-                CurrentUserLevel.ExpectedTime = Mathf.CeilToInt(minimumMoves / 2f);
-                CurrentUserLevel.Valid = true;
-                
-                Debug.Log(string.Format("{0} solutions found, minimum: {1} moves, {2} moves with flag, {3} seconds",
-                    Solutions.Count,
-                    CurrentUserLevel.ExpectedMoves,
-                    CurrentUserLevel.MinimumMovesWithFlag,
-                    CurrentUserLevel.ExpectedTime)
-                );
+                    Debug.Log(string.Format("{0} solutions found, minimum: {1} moves, {2} moves with flag, {3} seconds",
+                        Solutions.Count,
+                        CurrentUserLevel.ExpectedMoves,
+                        CurrentUserLevel.MinimumMovesWithFlag,
+                        CurrentUserLevel.ExpectedTime)
+                    );
 
-                var numberOfElements = 0;
-                var numberOfFlags = 0;
-                string[] mechanics = {
+                    var numberOfElements = 0;
+                    var numberOfFlags = 0;
+                    string[] mechanics =
+                    {
                     EditableLevel.KSlide,
                     EditableLevel.KWall,
                     EditableLevel.KCrack,
@@ -693,39 +728,44 @@ public class LevelEditPanel : Panel
                     EditableLevel.KTraversalStateRevealed
                 };
 
-                bool[] differentMechanics = new bool[mechanics.Length];
-                var numberOfDifferentMechanics = 0;
+                    bool[] differentMechanics = new bool[mechanics.Length];
+                    var numberOfDifferentMechanics = 0;
 
-                for (var i = 0; i < CurrentUserLevel.Elements.Length; i++)
-                {
-                    if (!string.IsNullOrEmpty(CurrentUserLevel.Elements[i]))
+                    for (var i = 0; i < CurrentUserLevel.Elements.Length; i++)
                     {
-                        numberOfElements++;
-
-                        if (CurrentUserLevel.Elements[i].Contains(EditableLevel.KFlag))
+                        if (!string.IsNullOrEmpty(CurrentUserLevel.Elements[i]))
                         {
-                            numberOfFlags++;
-                        }
+                            numberOfElements++;
 
-                        for (var j = 0; j < mechanics.Length; j++)
-                        {
-                            if (!differentMechanics[j] && CurrentUserLevel.Elements[i].Contains(mechanics[j]))
+                            if (CurrentUserLevel.Elements[i].Contains(EditableLevel.KFlag))
                             {
-                                differentMechanics[j] = true;
-                                numberOfDifferentMechanics++;
+                                numberOfFlags++;
+                            }
+
+                            for (var j = 0; j < mechanics.Length; j++)
+                            {
+                                if (!differentMechanics[j] && CurrentUserLevel.Elements[i].Contains(mechanics[j]))
+                                {
+                                    differentMechanics[j] = true;
+                                    numberOfDifferentMechanics++;
+                                }
                             }
                         }
                     }
+
+                    CurrentUserLevel.Difficulty =
+                        numberOfDifferentMechanics * 10 +
+                        minimumMoves * 5 +
+                        minimumMovesWithFlag * 5 +
+                        numberOfFlags * 10 +
+                        numberOfElements;
+
+                    return null;
                 }
-
-                CurrentUserLevel.Difficulty =
-                    numberOfDifferentMechanics * 10 +
-                    minimumMoves * 5 +
-                    minimumMovesWithFlag * 5 +
-                    numberOfFlags * 10 +
-                    numberOfElements;
-
-                return null;
+            }
+            else
+            {
+                errorList.Add("No valid solution found");
             }
         }
         
@@ -733,9 +773,7 @@ public class LevelEditPanel : Panel
         CurrentUserLevel.MinimumMovesWithFlag = 0;
         CurrentUserLevel.Valid = false;
         CurrentUserLevel.Difficulty = 0;
-
-        errorList.Add("No valid solution found");
-
+        
         return errorList.Count == 0 ? null : errorList.ToArray();
     }
     
@@ -768,6 +806,7 @@ public class LevelEditPanel : Panel
         }
 
         _validationDirty = true;
+        _saveDirty = true;
     }
 
     private void OpenContextMenu(UserClickType clickType)
@@ -886,6 +925,7 @@ public class LevelEditPanel : Panel
         }
 
         _validationDirty = true;
+        _saveDirty = true;
     }
 
     public void UI_Center()
@@ -893,6 +933,22 @@ public class LevelEditPanel : Panel
         // center the level according to the area occupied by its current elements
 
         _validationDirty = true;
+        _saveDirty = true;
+    }
+
+    public void UI_TryDelete()
+    {
+        MessageBubble.SetActive(true);
+        MessageBubbleBackground.SetActive(true);
+        BackMessageText.text = DeleteMessage;
+
+        MessageBubbleConfirmButton.SetActive(false);
+        MessageBubbleCancelButton.SetActive(true);
+        MessageBubbleSaveAndQuitButton.SetActive(false);
+        MessageBubbleContinueButton.SetActive(false);
+        MessageBubbleDeleteConfirmButton.SetActive(true);
+
+        ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
 
     public void UI_Delete()
@@ -914,13 +970,20 @@ public class LevelEditPanel : Panel
         _cellClicked.Clear();
 
         _validationDirty = true;
+        _saveDirty = true;
     }
 
     public void UI_ChangePathOrientation()
     {
         _cellClicked.ChangePathOrientation();
 
+        _cellClicked.ChangeSprite(
+            _cellClicked.Content.Contains(EditableLevel.KVertical)
+                ? VerticalPathSprite
+                : HorizontalPathSprite, UserClickType.Base);
+
         _validationDirty = true;
+        _saveDirty = true;
     }
 
     public void UI_MakeStartNode()
@@ -943,6 +1006,7 @@ public class LevelEditPanel : Panel
         _cellClicked.ChangeSprite(StartNodeSprite, UserClickType.Base);
         
         _validationDirty = true;
+        _saveDirty = true;
     }
 
     public void UI_MakeEndNode()
@@ -965,11 +1029,12 @@ public class LevelEditPanel : Panel
         _cellClicked.ChangeSprite(EndNodeSprite, UserClickType.Base);
 
         _validationDirty = true;
+        _saveDirty = true;
     }
 
     public void UI_Info()
     {
-        Validate();
+        var errors = Validate();
 
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
@@ -986,47 +1051,93 @@ public class LevelEditPanel : Panel
         }
         else
         {
-            BackMessageText.text = "Your level is invalid.";
+            var errorsString = string.Empty;
+
+            foreach (var error in errors)
+            {
+                errorsString += "\n- " + error;
+            }
+
+            BackMessageText.text = "Your level is invalid\n" + errorsString;
         }
 
         MessageBubbleConfirmButton.SetActive(false);
         MessageBubbleCancelButton.SetActive(false);
         MessageBubbleSaveAndQuitButton.SetActive(false);
         MessageBubbleContinueButton.SetActive(true);
+        MessageBubbleDeleteConfirmButton.SetActive(false);
 
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
 
     public void UI_Save()
     {
-        Validate();
+        var errors = Validate();
 
         SaveLevel();
 
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
-        BackMessageText.text = CurrentUserLevel.Valid ? SaveValidMessage : SaveInvalidMessage;
+
+        if (CurrentUserLevel.Valid)
+        {
+            BackMessageText.text = SaveValidMessage;
+        }
+        else
+        {
+            var errorsString = "\n";
+
+            foreach (var error in errors)
+            {
+                errorsString += "\n- " + error;
+            }
+
+            BackMessageText.text = SaveInvalidMessage + errorsString;
+        }
 
         MessageBubbleConfirmButton.SetActive(false);
         MessageBubbleCancelButton.SetActive(false);
         MessageBubbleSaveAndQuitButton.SetActive(false);
         MessageBubbleContinueButton.SetActive(true);
+        MessageBubbleDeleteConfirmButton.SetActive(false);
 
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
 
     public void UI_Back()
     {
-        Validate();
+        if (!_validationDirty && !_saveDirty)
+        {
+            UI_BackConfirmed();
+            return;
+        }
+
+        var errors = Validate();
 
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
-        BackMessageText.text = CurrentUserLevel.Valid ? BackValidMessage : BackInvalidMessage;
+
+        if (CurrentUserLevel.Valid)
+        {
+            BackMessageText.text = BackValidMessage;
+        }
+        else
+        {
+            var errorsString = "\n";
+
+            foreach (var error in errors)
+            {
+                errorsString += "\n- " + error;
+            }
+
+            BackMessageText.text = BackInvalidMessage + errorsString;
+        }
 
         MessageBubbleConfirmButton.SetActive(true);
         MessageBubbleCancelButton.SetActive(true);
         MessageBubbleSaveAndQuitButton.SetActive(true);
         MessageBubbleContinueButton.SetActive(false);
+        MessageBubbleDeleteConfirmButton.SetActive(false);
 
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }

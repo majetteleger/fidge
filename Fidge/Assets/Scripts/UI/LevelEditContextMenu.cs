@@ -64,6 +64,22 @@ public class LevelEditContextMenu : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            foreach (var button in _buttons)
+            {
+                var buttonActive =
+                    button == CancelButton ||
+                    button == ClearButton;
+
+                button.SetActive(buttonActive);
+
+                if (buttonActive)
+                {
+                    activeButtons++;
+                }
+            }
+        }
 
         var top = Camera.main.ScreenToViewportPoint(cellClicked.transform.position).y < 0.5f;
         var right = Camera.main.ScreenToViewportPoint(cellClicked.transform.position).x < 0.5f;
@@ -92,8 +108,9 @@ public class LevelEditContextMenu : MonoBehaviour
             foreach (var button in _buttons)
             {
                 var buttonActive =
+                    button == CancelButton ||
                     button == ResetButton ||
-                    button == CenterButton ||
+                    //button == CenterButton ||
                     button == DeleteButton;
 
                 button.SetActive(buttonActive);
