@@ -13,7 +13,6 @@ public class LevelEditPanel : Panel
     public class UserLevel
     {
         public bool Valid;
-        public bool Uploaded;
         public string Guid;
         public string UserId;
         public int ExpectedTime;
@@ -597,21 +596,21 @@ public class LevelEditPanel : Panel
         {
             return;
         }
-
+        
         var output = MainManager.Instance.SaveLevelToDevice(CurrentUserLevel);
         
-        // Mark it as uploaded only if successful, since we'll need to prune it out if it is removed from the database offline OR keep it if not in the database but on device
-
-        MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).SetRawJsonValueAsync(output).ContinueWith(x => {
-            if (x.IsCompleted)
-            {
-                Debug.Log("level " + CurrentUserLevel.Guid + " uploaded");
-                CurrentUserLevel.Uploaded = true;
-                MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).Child("Uploaded").SetValueAsync(true);
-                MainManager.Instance.SaveLevelToDevice(CurrentUserLevel);
-            }
-        });
-
+        if (Application.internetReachability != NetworkReachability.NotReachable)
+        {
+            MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).SetRawJsonValueAsync(output).ContinueWith(x => {
+                if (x.IsCompleted)
+                {
+                    Debug.Log("level " + CurrentUserLevel.Guid + " uploaded");
+                    MainManager.Instance.DatabaseReference.Child(CurrentUserLevel.Guid).Child("Uploaded").SetValueAsync(true);
+                    MainManager.Instance.SaveLevelToDevice(CurrentUserLevel);
+                }
+            });
+        }
+        
         _saveDirty = false;
     }
 

@@ -12,6 +12,10 @@ public class LevelEditorMenuPanel : Panel
 {
     public Button EditButton;
     public Button PlayButton;
+    public GameObject Blocker;
+    public GameObject Spacer;
+    public GameObject MessageBubble;
+    public GameObject MessageBubbleBackground;
 
     void Start()
     {
@@ -46,24 +50,12 @@ public class LevelEditorMenuPanel : Panel
             var fileContent = File.ReadAllText(filePath);
             var level = JsonUtility.FromJson<LevelEditPanel.UserLevel>(fileContent);
 
-            if (level.Uploaded && MainManager.Instance.UserLevels.All(x => x.Guid != level.Guid))
+            if (MainManager.Instance.UserLevels.All(x => x.Guid != level.Guid))
             {
                 if (Directory.Exists(MainManager.Instance.UserLevelPath) && File.Exists(MainManager.Instance.UserLevelPath + "/" + level.Guid + ".json"))
                 {
                     File.Delete(MainManager.Instance.UserLevelPath + "/" + level.Guid + ".json");
                 }
-            }
-            else if (!level.Uploaded)
-            {
-                MainManager.Instance.DatabaseReference.Child(level.Guid).SetRawJsonValueAsync(fileContent).ContinueWith(x => {
-                    if (x.IsCompleted)
-                    {
-                        Debug.Log("level " + level.Guid + " uploaded");
-                        level.Uploaded = true;
-                        MainManager.Instance.DatabaseReference.Child(level.Guid).Child("Uploaded").SetValueAsync(true);
-                        MainManager.Instance.SaveLevelToDevice(level);
-                    }
-                });
             }
         }
 
@@ -82,7 +74,7 @@ public class LevelEditorMenuPanel : Panel
         EditButton.interactable = MainManager.Instance.UserLevels.Any(x => x.UserId == MainManager.Instance.UserId);
         PlayButton.interactable = MainManager.Instance.UserLevels.Any(x => x.Valid);
     }
-
+    
     public void UI_New()
     {
         UIManager.Instance.LevelEditPanel.Show();
@@ -98,8 +90,20 @@ public class LevelEditorMenuPanel : Panel
         UIManager.Instance.UserLevelsPanel.ShowWithActivity(UserLevelsPanel.UserActivity.Play, this);
     }
 
+    public void UI_Info()
+    {
+        MessageBubble.SetActive(true);
+        MessageBubbleBackground.SetActive(true);
+    }
+
     public void UI_Back()
     {
         UIManager.Instance.MainMenuPanel.Show();
+    }
+    
+    public void UI_ClosePopup()
+    {
+        MessageBubble.SetActive(false);
+        MessageBubbleBackground.SetActive(false);
     }
 }

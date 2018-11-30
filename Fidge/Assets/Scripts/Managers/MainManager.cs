@@ -67,12 +67,12 @@ public class MainManager : MonoBehaviour
         {
             userId = PlayerPrefs.GetString("UserId");
 
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
             {
                 userId = Guid.NewGuid().ToString();
                 PlayerPrefs.SetString("UserId", userId);
             }
-
+            
             return userId;
         }
     }
@@ -261,30 +261,14 @@ public class MainManager : MonoBehaviour
 
         // FIREBASE
 
-        Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
-            var dependencyStatus = task.Result;
-            if (dependencyStatus == Firebase.DependencyStatus.Available)
-            {
-                Debug.Log("Database loaded successfully");
-
-                Firebase.FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://fidge-219217.firebaseio.com/");
-                
-                DatabaseReference = FirebaseDatabase.DefaultInstance.RootReference;
-                
-                DatabaseReference.ChildAdded += HandleChildAdded;
-                DatabaseReference.ChildChanged += HandleChildAdded;
-                DatabaseReference.ChildRemoved += HandleChildRemoved;
-            }
-            else
-            {
-                Debug.Log("Can't access database, loading from device snapshot");
-
-                foreach (var userLevel in _userLevelsOnDevice)
-                {
-                    UserLevels.Add(userLevel);
-                }
-            }
-        });
+        if (Application.internetReachability != NetworkReachability.NotReachable)
+        {
+            LoadOnlineLevels();
+        }
+        else
+        {
+            LoadOfflineLevels();
+        }
         
         // Load levels
 
@@ -323,7 +307,59 @@ public class MainManager : MonoBehaviour
 
         DirtyMedals = true;
     }
-    
+
+    private void LoadOnlineLevels()
+    {
+        Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+        {
+            if (!task.IsCompleted || task.IsCanceled || task.IsFaulted)
+            {
+                LoadOfflineLevels();
+
+                return;
+            }
+
+            var dependencyStatus = task.Result;
+
+            if (dependencyStatus == Firebase.DependencyStatus.Available)
+            {
+                Debug.Log("Database loaded successfully");
+
+                Firebase.FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://fidge-219217.firebaseio.com/");
+
+                DatabaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+
+                DatabaseReference.ChildAdded += HandleChildAdded;
+                DatabaseReference.ChildChanged += HandleChildAdded;
+                DatabaseReference.ChildRemoved += HandleChildRemoved;
+            }
+            else
+            {
+                LoadOfflineLevels();
+            }
+        });
+
+        UIManager.Instance.LevelEditorMenuPanel.Blocker.SetActive(false);
+        UIManager.Instance.LevelEditorMenuPanel.Spacer.SetActive(false);
+    }
+
+    private void LoadOfflineLevels()
+    {
+        Debug.Log("Can't access database, loading from device snapshot");
+
+        UserLevels.Clear();
+
+        foreach (var userLevel in _userLevelsOnDevice)
+        {
+            UserLevels.Add(userLevel);
+        }
+
+        UIManager.Instance.MainMenuPanel.OpenPopup();
+
+        UIManager.Instance.LevelEditorMenuPanel.Blocker.SetActive(true);
+        UIManager.Instance.LevelEditorMenuPanel.Spacer.SetActive(true);
+    }
+
     public string SaveLevelToDevice(LevelEditPanel.UserLevel level)
     {
         var output = JsonUtility.ToJson(level);

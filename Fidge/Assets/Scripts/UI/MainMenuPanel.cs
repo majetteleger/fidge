@@ -7,7 +7,9 @@ using UnityEngine.UI;
 public class MainMenuPanel : Panel
 {
     public EditableLevel HowToLevel;
-    
+    public GameObject MessageBubble;
+    public GameObject MessageBubbleBackground;
+
     void Start()
     {
         SetupSounds();
@@ -19,6 +21,12 @@ public class MainMenuPanel : Panel
         {
             UIManager.Instance.LevelSelectionPanel.Show();
         }
+    }
+
+    public void OpenPopup()
+    {
+        MessageBubble.SetActive(true);
+        MessageBubbleBackground.SetActive(true);
     }
 
     public void UI_LevelSelection()
@@ -44,5 +52,11 @@ public class MainMenuPanel : Panel
     public void UI_Editor()
     {
         UIManager.Instance.LevelEditorMenuPanel.Show();
+    }
+
+    public void UI_ClosePopup()
+    {
+        MessageBubble.SetActive(false);
+        MessageBubbleBackground.SetActive(false);
     }
 }

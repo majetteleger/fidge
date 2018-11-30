@@ -67,13 +67,6 @@ public class OptionsPanel : Panel
             {
                 PlayerPrefs.SetString(userLevel.Guid, "000");
             }
-
-            // TEMP
-
-            if (Directory.Exists(MainManager.Instance.UserLevelPath) && File.Exists(MainManager.Instance.UserLevelPath + "/" + userLevel.Guid + ".json"))
-            {
-                File.Delete(MainManager.Instance.UserLevelPath + "/" + userLevel.Guid + ".json");
-            }
         }
 
         PlayerPrefs.Save();
