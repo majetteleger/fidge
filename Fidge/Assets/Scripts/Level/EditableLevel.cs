@@ -36,6 +36,7 @@ public class EditableLevel : ScriptableObject
 
     public static readonly string[] Collectables = {KKey, KFlag, KLink};
     public static readonly string[] Obstacles = {KLock, KWall, KCrack , KSlide};
+    public static readonly string[] CollectablesAndObstacles = { KFlag, KSlide, KCrack, KWall, KKey, KLock, KLink };
     public static readonly string[] LevelElements = {KNode, KPath, KVertical, KHorizontal};
     public static readonly string[] Colors = {KColorRed, KColorGreen, KColorBlue, KColorOrange, KColorPurple};
     public static readonly string[] Directions = {KDirectionUp, KDirectionRight, KDirectionDown, KDirectionLeft};

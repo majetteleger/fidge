@@ -174,13 +174,13 @@ public class LevelCell : MonoBehaviour
             return;
         }
 
-        if (EditableLevel.Collectables.Contains(selectedExtra) && !Content.Contains(EditableLevel.KNode))
+        if (EditableLevel.Collectables.Contains(selectedExtra) && (Content == null || !Content.Contains(EditableLevel.KNode)))
         {
             Debug.Log("Can only place this extra on a node");
             return;   
         }
 
-        if (EditableLevel.Obstacles.Contains(selectedExtra) && !Content.Contains(EditableLevel.KPath))
+        if (EditableLevel.Obstacles.Contains(selectedExtra) && (Content == null || !Content.Contains(EditableLevel.KPath)))
         {
             Debug.Log("Can only place this extra on a path");
             return;

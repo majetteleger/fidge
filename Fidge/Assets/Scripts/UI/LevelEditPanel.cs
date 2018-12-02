@@ -317,6 +317,8 @@ public class LevelEditPanel : Panel
     
     public GameObject LevelCellPrefab;
     public Transform LevelCellContainer;
+    public Sprite ToggleHighlightSprite;
+    public Sprite ToggleNormalSprite;
     public Button ToggleElementButton;
     public Image ToggleElementButtonImage;
     public Button ToggleExtraButton;
@@ -327,6 +329,8 @@ public class LevelEditPanel : Panel
     public LevelEditContextMenu ContextMenu;
     public GameObject MessageBubble;
     public GameObject MessageBubbleBackground;
+    public GameObject MessageBubbleButtonGroup;
+    public GameObject MessageBubbleOverlayButton;
     public GameObject MessageBubbleConfirmButton;
     public GameObject MessageBubbleCancelButton;
     public GameObject MessageBubbleContinueButton;
@@ -334,6 +338,7 @@ public class LevelEditPanel : Panel
     public GameObject MessageBubbleDeleteConfirmButton;
     public Text BackMessageText;
     public float LongPressTime;
+    public float BriefMessageTime;
     [TextArea] public string BackValidMessage;
     [TextArea] public string BackInvalidMessage;
     [TextArea] public string SaveValidMessage;
@@ -342,6 +347,7 @@ public class LevelEditPanel : Panel
 
     [Header("Sprites")]
     public Sprite NodeSprite;
+    public Sprite NodeAndPathSprite;
     public Sprite StartNodeSprite;
     public Sprite EndNodeSprite;
     public Sprite VerticalPathSprite;
@@ -376,7 +382,7 @@ public class LevelEditPanel : Panel
         _longPressTimer = LongPressTime;
         _clickType = UserClickType.NONE;
         _toggledBase = KBase;
-        _toggledExtra = EditableLevel.KKey;
+        _toggledExtra = EditableLevel.KFlag;
         _toggledTraversalModifier = EditableLevel.KTraversalStateCovered;
 
         var levelCellList = new List<LevelCell>();
@@ -828,7 +834,7 @@ public class LevelEditPanel : Panel
 
         var baseSprites = new[]
         {
-            StartNodeSprite,
+            NodeAndPathSprite,
             DeleteSprite
         };
         
@@ -854,20 +860,19 @@ public class LevelEditPanel : Panel
     {
         var newIndex = 0;
 
-        var extraToCycleThrough = new string[EditableLevel.Collectables.Length + EditableLevel.Obstacles.Length + 1];
-        EditableLevel.Collectables.CopyTo(extraToCycleThrough, 0);
-        EditableLevel.Obstacles.CopyTo(extraToCycleThrough, EditableLevel.Collectables.Length);
-        extraToCycleThrough[EditableLevel.Collectables.Length + EditableLevel.Obstacles.Length] = KDelete;
+        var extraToCycleThrough = new string[EditableLevel.CollectablesAndObstacles.Length + 1];
+        EditableLevel.CollectablesAndObstacles.CopyTo(extraToCycleThrough, 0);
+        extraToCycleThrough[EditableLevel.CollectablesAndObstacles.Length] = KDelete;
 
         var extraSprites = new[]
         {
-            KeySprite,
             FlagSprite,
-            LinkSprite,
-            LockSprite,
-            WallSprite,
-            CrackSprite,
             SlideSprite,
+            CrackSprite,
+            WallSprite,
+            KeySprite,
+            LockSprite,
+            LinkSprite,
             DeleteSprite
         };
 
@@ -915,7 +920,72 @@ public class LevelEditPanel : Panel
         _toggledTraversalModifier = traversalModifierToCycleThrough[newIndex];
         ToggleTraversalModifierButtonImage.sprite = traversalModifierSprites[newIndex];
     }
-    
+
+    private void ShowMessageBreifly(string codedText, float time)
+    {
+        var decodedText = string.Empty;
+
+        switch (codedText)
+        {
+            case KBase:
+                decodedText = "Placing nodes and paths";
+                break;
+            case KDelete:
+                switch (_clickType)
+                {
+                    case UserClickType.Base:
+                        decodedText = "Removing nodes and paths";
+                        break;
+                    case UserClickType.Extra:
+                        decodedText = "Removing collectables and obstacles";
+                        break;
+                    case UserClickType.TraversalModifier:
+                        decodedText = "Removing traversal modifiers";
+                        break;
+                }
+                break;
+            case EditableLevel.KKey:
+                decodedText = "Placing keys";
+                break;
+            case EditableLevel.KFlag:
+                decodedText = "Placing stars";
+                break;
+            case EditableLevel.KLink:
+                decodedText = "Placing links";
+                break;
+            case EditableLevel.KLock:
+                decodedText = "Placing locks";
+                break;
+            case EditableLevel.KWall:
+                decodedText = "Placing walls";
+                break;
+            case EditableLevel.KCrack:
+                decodedText = "Placing cracks";
+                break;
+            case EditableLevel.KSlide:
+                decodedText = "Placing slides";
+                break;
+            case EditableLevel.KTraversalStateCovered:
+                decodedText = "Placing \"Covered\" modifiers";
+                break;
+            case EditableLevel.KTraversalStateRevealed:
+                decodedText = "Placing \"Revealed\" modifiers";
+                break;
+        }
+
+        CancelInvoke();
+
+        MessageBubble.SetActive(true);
+        BackMessageText.text = decodedText;
+
+        MessageBubbleButtonGroup.SetActive(false);
+        MessageBubbleOverlayButton.SetActive(true);
+        
+        ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
+
+        Invoke("UI_BackCanceled", time);
+    }
+
     public void UI_Reset()
     {
         foreach (var levelCell in _levelCells)
@@ -926,26 +996,20 @@ public class LevelEditPanel : Panel
         _validationDirty = true;
         _saveDirty = true;
     }
-
-    public void UI_Center()
-    {
-        // center the level according to the area occupied by its current elements
-
-        _validationDirty = true;
-        _saveDirty = true;
-    }
-
+    
     public void UI_TryDelete()
     {
         MessageBubble.SetActive(true);
         MessageBubbleBackground.SetActive(true);
         BackMessageText.text = DeleteMessage;
 
+        MessageBubbleButtonGroup.SetActive(true);
         MessageBubbleConfirmButton.SetActive(false);
         MessageBubbleCancelButton.SetActive(true);
         MessageBubbleSaveAndQuitButton.SetActive(false);
         MessageBubbleContinueButton.SetActive(false);
         MessageBubbleDeleteConfirmButton.SetActive(true);
+        MessageBubbleOverlayButton.SetActive(false);
 
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
@@ -1033,6 +1097,8 @@ public class LevelEditPanel : Panel
 
     public void UI_Info()
     {
+        CancelInvoke();
+
         var errors = Validate();
 
         MessageBubble.SetActive(true);
@@ -1060,17 +1126,21 @@ public class LevelEditPanel : Panel
             BackMessageText.text = "Your level is invalid\n" + errorsString;
         }
 
+        MessageBubbleButtonGroup.SetActive(true);
         MessageBubbleConfirmButton.SetActive(false);
         MessageBubbleCancelButton.SetActive(false);
         MessageBubbleSaveAndQuitButton.SetActive(false);
         MessageBubbleContinueButton.SetActive(true);
         MessageBubbleDeleteConfirmButton.SetActive(false);
+        MessageBubbleOverlayButton.SetActive(false);
 
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
 
     public void UI_Save()
     {
+        CancelInvoke();
+
         var errors = Validate();
 
         SaveLevel();
@@ -1094,17 +1164,21 @@ public class LevelEditPanel : Panel
             BackMessageText.text = SaveInvalidMessage + errorsString;
         }
 
+        MessageBubbleButtonGroup.SetActive(true);
         MessageBubbleConfirmButton.SetActive(false);
         MessageBubbleCancelButton.SetActive(false);
         MessageBubbleSaveAndQuitButton.SetActive(false);
         MessageBubbleContinueButton.SetActive(true);
         MessageBubbleDeleteConfirmButton.SetActive(false);
+        MessageBubbleOverlayButton.SetActive(false);
 
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
 
     public void UI_Back()
     {
+        CancelInvoke();
+
         if (!_validationDirty && !_saveDirty)
         {
             UI_BackConfirmed();
@@ -1132,11 +1206,13 @@ public class LevelEditPanel : Panel
             BackMessageText.text = BackInvalidMessage + errorsString;
         }
 
+        MessageBubbleButtonGroup.SetActive(true);
         MessageBubbleConfirmButton.SetActive(true);
         MessageBubbleCancelButton.SetActive(true);
         MessageBubbleSaveAndQuitButton.SetActive(true);
         MessageBubbleContinueButton.SetActive(false);
         MessageBubbleDeleteConfirmButton.SetActive(false);
+        MessageBubbleOverlayButton.SetActive(false);
 
         ForceLayoutRebuilding(MessageBubble.GetComponent<RectTransform>());
     }
@@ -1162,6 +1238,8 @@ public class LevelEditPanel : Panel
     {
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
+        MessageBubbleOverlayButton.SetActive(false);
+        CancelInvoke();
     }
     
     public void UI_ToggleElement()
@@ -1174,13 +1252,20 @@ public class LevelEditPanel : Panel
         if (_clickType == UserClickType.Base)
         {
             CycleThroughBase(start);
+            ShowMessageBreifly(_toggledBase, BriefMessageTime);
             return;
         }
 
         _clickType = UserClickType.Base;
-        ToggleElementButton.GetComponent<Image>().color = Color.gray;
-        ToggleExtraButton.GetComponent<Image>().color = Color.white;
-        ToggleTraversalModifierButton.GetComponent<Image>().color = Color.white;
+        ToggleElementButton.GetComponent<Image>().sprite = ToggleHighlightSprite;
+        ToggleExtraButton.GetComponent<Image>().sprite = ToggleNormalSprite;
+        ToggleTraversalModifierButton.GetComponent<Image>().sprite = ToggleNormalSprite;
+
+        if (!start)
+        {
+            ShowMessageBreifly(_toggledBase, BriefMessageTime);
+        }
+        
     }
 
     public void UI_ToggleExtra()
@@ -1188,13 +1273,16 @@ public class LevelEditPanel : Panel
         if (_clickType == UserClickType.Extra)
         {
             CycleThroughExtra();
+            ShowMessageBreifly(_toggledExtra, BriefMessageTime);
             return;
         }
 
         _clickType = UserClickType.Extra;
-        ToggleElementButton.GetComponent<Image>().color = Color.white;
-        ToggleExtraButton.GetComponent<Image>().color = Color.gray;
-        ToggleTraversalModifierButton.GetComponent<Image>().color = Color.white;
+        ToggleElementButton.GetComponent<Image>().sprite = ToggleNormalSprite;
+        ToggleExtraButton.GetComponent<Image>().sprite = ToggleHighlightSprite;
+        ToggleTraversalModifierButton.GetComponent<Image>().sprite = ToggleNormalSprite;
+
+        ShowMessageBreifly(_toggledExtra, BriefMessageTime);
     }
 
     public void UI_ToggleTraversalModifier()
@@ -1202,17 +1290,25 @@ public class LevelEditPanel : Panel
         if (_clickType == UserClickType.TraversalModifier)
         {
             CycleThroughTraversalModifier();
+            ShowMessageBreifly(_toggledTraversalModifier, BriefMessageTime);
             return;
         }
 
         _clickType = UserClickType.TraversalModifier;
-        ToggleElementButton.GetComponent<Image>().color = Color.white;
-        ToggleExtraButton.GetComponent<Image>().color = Color.white;
-        ToggleTraversalModifierButton.GetComponent<Image>().color = Color.gray;
+        ToggleElementButton.GetComponent<Image>().sprite = ToggleNormalSprite;
+        ToggleExtraButton.GetComponent<Image>().sprite = ToggleNormalSprite;
+        ToggleTraversalModifierButton.GetComponent<Image>().sprite = ToggleHighlightSprite;
+
+        ShowMessageBreifly(_toggledTraversalModifier, BriefMessageTime);
     }
 
     public void UI_OtherOptions()
     {
+        CancelInvoke();
+        MessageBubble.SetActive(false);
+        MessageBubbleBackground.SetActive(false);
+        MessageBubbleOverlayButton.SetActive(false);
+
         ContextMenu.Activate(OtherOptionsButton);
     }
 }

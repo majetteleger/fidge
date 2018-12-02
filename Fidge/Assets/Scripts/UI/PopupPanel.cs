@@ -12,6 +12,7 @@ public class PopupPanel : Panel
     public Button NextButton;
     public Button ConfirmButton;
     public Button PlayButton;
+    public Button EditButton;
     public GameObject MedalsParent;
     public RectTransform MedalsAndTextContainer;
     public CanvasGroup[] Medals;
@@ -225,9 +226,10 @@ public class PopupPanel : Panel
         RetryButton.gameObject.SetActive(false);
         ReplayButton.gameObject.SetActive(false);
         NextButton.gameObject.SetActive(false);
-        ConfirmButton.gameObject.SetActive(true);
+        ConfirmButton.gameObject.SetActive(activity == UserLevelsPanel.UserActivity.Play);
         PlayButton.gameObject.SetActive(false);
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
+        EditButton.gameObject.SetActive(activity == UserLevelsPanel.UserActivity.Edit);
 
         PreviewContainer.SetActive(true);
         StatsContainer.SetActive(level.Valid);
@@ -353,6 +355,7 @@ public class PopupPanel : Panel
         ReplayButton.gameObject.SetActive(scripted);
         ConfirmButton.gameObject.SetActive(false);
         PlayButton.gameObject.SetActive(false);
+        EditButton.gameObject.SetActive(false);
 
         MedalsObtainedText.transform.parent.gameObject.SetActive(true);
         MedalsObtainedText.text = MainManager.Instance.Medals.ToString();
@@ -391,6 +394,7 @@ public class PopupPanel : Panel
         ReplayButton.gameObject.SetActive(false);
         ConfirmButton.gameObject.SetActive(false);
         PlayButton.gameObject.SetActive(false);
+        EditButton.gameObject.SetActive(false);
 
         MedalsObtainedText.transform.parent.gameObject.SetActive(false);
 
