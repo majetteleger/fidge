@@ -336,6 +336,12 @@ public class LevelEditPanel : Panel
     public GameObject MessageBubbleContinueButton;
     public GameObject MessageBubbleSaveAndQuitButton;
     public GameObject MessageBubbleDeleteConfirmButton;
+    public GameObject MessageBubbleStatSpacer;
+    public GameObject MessageBubbleDifficultyStat;
+    public GameObject MessageBubbleLengthStat;
+    public Image[] MessageBubbleDifficultyImages;
+    public Image[] MessageBubbleLengthImages;
+    public float InactiveTickAlpha;
     public Text BackMessageText;
     public float LongPressTime;
     public float BriefMessageTime;
@@ -1106,13 +1112,30 @@ public class LevelEditPanel : Panel
 
         if (CurrentUserLevel.Valid)
         {
-            BackMessageText.text = string.Format(
-                "Your level is valid!\n\n" +
-                "Minimum moves : {0}\n" +
-                "Minimum time : {1}",
-                CurrentUserLevel.ExpectedMoves,
-                CurrentUserLevel.ExpectedTime
-            );
+            BackMessageText.text = "Your level is valid!";
+            MessageBubbleStatSpacer.SetActive(true);
+            MessageBubbleDifficultyStat.SetActive(true);
+            MessageBubbleLengthStat.SetActive(true);
+
+            for (var i = 0; i < MessageBubbleDifficultyImages.Length; i++)
+            {
+                var tickEnabled = (float)CurrentUserLevel.Difficulty / (float)MainManager.Instance.MaxUserLevelDifficulty > i / 3f;
+                
+                var newColor = MessageBubbleDifficultyImages[i].color;
+                newColor.a = tickEnabled ? 1f : InactiveTickAlpha;
+
+                MessageBubbleDifficultyImages[i].color = newColor;
+            }
+
+            for (var i = 0; i < MessageBubbleLengthImages.Length; i++)
+            {
+                var tickEnabled = (float)CurrentUserLevel.MinimumMovesWithFlag / (float)MainManager.Instance.MaxUserLevelLength > i / 3f;
+
+                var newColor = MessageBubbleLengthImages[i].color;
+                newColor.a = tickEnabled ? 1f : InactiveTickAlpha;
+
+                MessageBubbleLengthImages[i].color = newColor;
+            }
         }
         else
         {
@@ -1236,6 +1259,10 @@ public class LevelEditPanel : Panel
 
     public void UI_BackCanceled()
     {
+        MessageBubbleStatSpacer.SetActive(false);
+        MessageBubbleDifficultyStat.SetActive(false);
+        MessageBubbleLengthStat.SetActive(false);
+
         MessageBubble.SetActive(false);
         MessageBubbleBackground.SetActive(false);
         MessageBubbleOverlayButton.SetActive(false);
