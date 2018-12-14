@@ -231,6 +231,11 @@ public class MainManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+#if UNITY_STANDALONE_WIN
+        Screen.SetResolution(450, 800, false);
+        Screen.fullScreen = false;
+#endif
+
 #if UNITY_EDITOR
         UserLevelPath = Application.dataPath + "/UserLevels";
 #else

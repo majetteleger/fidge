@@ -100,12 +100,12 @@ public class UserLevelsPanel : Panel
         {
             var level = MainManager.Instance.UserLevels[i];
 
-            if (_activity == UserActivity.Play && !level.Valid)
+            if ((_activity == UserActivity.Play && !level.Valid) || (_activity == UserActivity.Edit && level.UserId != MainManager.Instance.UserId))
             {
                 continue;
             }
             
-            if (i % ButtonsPerRow == 0 || row == null)
+            if (_buttons.Count % ButtonsPerRow == 0 || row == null)
             {
                 row = Instantiate(LevelButtonRowPrefab, LevelSection).transform;
             }
